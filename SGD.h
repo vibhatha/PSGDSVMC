@@ -12,12 +12,17 @@ private:
     double** X;
     double* y;
     double* w;
+    double* wInit;
     double alpha;
     int iterations;
+    int features;
+    int trainingSamples;
+    int testingSamples;
 
 public:
 
     SGD(double** X, double* y, double alpha, int iterations);
+    SGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
     void sgd();
 
 };

@@ -47,7 +47,7 @@ void Test::test2() {
     int trainingSamples = 32561;
     int testingSamples = 16281;
 
-    DataSet dataset(sourceFile, datasourceBase, features, trainingSamples, testingSamples);
+    DataSet dataset(sourceFile, features, trainingSamples, testingSamples);
     dataset.load();
     double** Xtrain = dataset.getXtrain();
     Util util;
