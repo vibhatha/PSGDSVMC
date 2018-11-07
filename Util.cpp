@@ -11,16 +11,20 @@ Util::Util() {
 
 }
 
-void Util::printX(double** x, int column, int row) {
-
-
+void Util::print2DMatrix(double** x, int row, int column) {
     for (int i = 0; i < row; ++i) {
+        cout << i << " : ";
         for (int j = 0; j < column; ++j) {
-            printf("%f ",x[i][j]);
+            cout << x[i][j] << " ";
         }
-        printf("\n");
+        cout << "\n";
     }
+    cout << "\n";
+}
 
-
-
+void Util::print1DMatrix(double* x, int features) {
+    for (int i = 0; i < features; ++i) {
+        cout << x[i] << " ";
+    }
+    cout << "\n";
 }

@@ -8,6 +8,19 @@
 
 class Matrix {
 
+private:
+    int features;
+    int samples;
+
+public:
+    Matrix(int features_);
+    double* add(double* a, double* b);
+    double* subtract(double* a, double* b);
+    double dot(double* a, double* b);
+    double* scalarMultiply(double* a, double c);
+    double* inner(double* a, double* b);
+
+
 };
 
 

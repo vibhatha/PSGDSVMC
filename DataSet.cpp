@@ -11,7 +11,6 @@ using namespace std;
 
 DataSet::DataSet(string sourceFile_, int features_, int trainingSamples_, int testingSamples_) {
     sourceFile = sourceFile_;
-
     features = features_;
     trainingSamples = trainingSamples_;
     testingSamples = testingSamples_;
@@ -40,8 +39,8 @@ void DataSet::load() {
 
     Xtrain = new double*[trainingSamples];
     ytrain = new double[trainingSamples];
-    ifstream file("/home/vibhatha/data/svm/a9a/training.csv");
-    printf("Loading File ...\n");
+    ifstream file(sourceFile);
+    cout << "Loading File : " << sourceFile << endl;
     for(int row = 0; row < trainingSamples; row++)
     {
         Xtrain[row] = new double[features];
@@ -53,11 +52,11 @@ void DataSet::load() {
         }
 
         //cout << line << endl;
-        vector<int> vect;
+        vector<double> vect;
 
         std::stringstream ss(line);
 
-        int i;
+        double i;
 
         while (ss >> i)
         {
@@ -69,9 +68,8 @@ void DataSet::load() {
         ytrain[row] = vect.at(0);
 
         for (int j=1; j< vect.size(); j++){
-            Xtrain[row][j-1] = vect.at(i);
+            Xtrain[row][j-1] = vect.at(j);
         }
-
     }
 }
 

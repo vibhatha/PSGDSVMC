@@ -33,7 +33,7 @@ void Test::test1() {
     }
 
     Util util;
-    util.printX(a,10,10);
+    util.print2DMatrix(a, 10, 10);
 }
 
 void Test::test2() {
@@ -51,6 +51,6 @@ void Test::test2() {
     dataset.load();
     double** Xtrain = dataset.getXtrain();
     Util util;
-    util.printX(Xtrain, trainingSamples, features);
+    util.print2DMatrix(Xtrain, trainingSamples, features);
 
 }

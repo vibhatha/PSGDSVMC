@@ -9,7 +9,8 @@
 class Util {
 public:
     Util();
-    void printX(double** x, int row, int column);
+    void print2DMatrix(double** x, int row, int column);
+    void print1DMatrix(double* x, int features);
 
 };
 
