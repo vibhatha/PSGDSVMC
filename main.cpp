@@ -3,6 +3,7 @@
 #include "DataSet.h"
 #include "Util.h"
 #include "SGD.h"
+#include "ArgReader.h"
 #include <ctime>
 
 using namespace std;
@@ -12,10 +13,13 @@ void test2();
 void sgd();
 
 
-int main() {
+int main(int argc, char** argv) {
     std::cout << "Hello, World!" << std::endl;
 
-    sgd();
+    ArgReader argReader(argc, argv);
+    OptArgs optArgs = argReader.getParams();
+    optArgs.toString();
+    //sgd();
 
     return 0;
 }

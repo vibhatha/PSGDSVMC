@@ -40,7 +40,7 @@ void SGD::sgd() {
             double* xi = X[j];
             double yi = y[j];
             double yixiw = matrix.dot(xi, w) * yi;
-            cout << i << ", " << yixiw << endl;
+            //cout << i << ", " << yixiw << endl;
             if(yixiw<1) {
                 double* xiyia = matrix.scalarMultiply(matrix.subtract(w,matrix.scalarMultiply(xi, yi)), alpha);
                 w = matrix.subtract(w, xiyia);
