@@ -25,6 +25,8 @@ public:
     SGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
     void sgd();
 
+    double *getW() const;
+
 };
 
 

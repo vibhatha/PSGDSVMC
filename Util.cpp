@@ -24,7 +24,7 @@ void Util::print2DMatrix(double** x, int row, int column) {
 
 void Util::print1DMatrix(double* x, int features) {
     for (int i = 0; i < features; ++i) {
-        cout << x[i] << " ";
+        cout  << x[i] << " ";
     }
     cout << "\n";
 }

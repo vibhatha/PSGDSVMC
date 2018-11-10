@@ -55,3 +55,7 @@ void SGD::sgd() {
     printf("Final Weight\n");
 
 }
+
+double* SGD::getW() const {
+    return w;
+}
