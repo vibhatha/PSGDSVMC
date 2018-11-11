@@ -6,7 +6,9 @@
 #include "ArgReader.h"
 #include "Predict.h"
 #include "ResourceManager.h"
+#include "PSGD.h"
 #include <ctime>
+#include <mpi.h>
 
 using namespace std;
 
@@ -14,8 +16,11 @@ void test1();
 void test2();
 void test3();
 void test4();
+void test5();
+void test6();
 void sgd();
 void train(OptArgs optArgs);
+void parallel(OptArgs optArgs);
 
 
 int main(int argc, char** argv) {
@@ -23,11 +28,113 @@ int main(int argc, char** argv) {
 
     ArgReader argReader(argc, argv);
     OptArgs optArgs = argReader.getParams();
-    train(optArgs);
+    //train(optArgs);
     //sgd();
     //test4();
+    //test5();
+    parallel(optArgs);
 
     return 0;
+}
+
+void parallel(OptArgs optArgs) {
+    MPI_Init(NULL, NULL);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    optArgs.toString();
+    ResourceManager resourceManager;
+    resourceManager.loadDataSourcePath();
+    if(optArgs.isIsSplit()){
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        double ratio = optArgs.getRatio();
+        DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
+        dataSet.load();
+
+        double** Xtrain = dataSet.getXtrain();
+        double* ytrain = dataSet.getYtrain();
+
+        double** Xtest = dataSet.getXtest();
+        double* ytest = dataSet.getYtest();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        Util util;
+        //util.print2DMatrix(Xtrain, trainSet, features);
+        printf("\n----------------------------------------\n");
+        //util.print2DMatrix(Xtest, testSet, features);
+        clock_t begin = clock();
+        PSGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
+        PSGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        sgd2.adamSGD();
+        //sgd1.sgd();
+        clock_t end = clock();
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainSet);
+        printf("Testing Samples : % d \n", testSet);
+        printf("Training time %f s \n", elapsed_secs);
+
+
+
+    }else{
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFilePath;
+        trainFilePath.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFilePath;
+        testFilePath.append(datasourceBase).append(datasource).append(testFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+
+        DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
+        dataset.load();
+        double** Xtrain = dataset.getXtrain();
+        double* ytrain = dataset.getYtrain();
+
+        double** Xtest = dataset.getXtest();
+        double* ytest = dataset.getYtest();
+
+//        if(world_rank==0) {
+//            Util util;
+//            util.print2DMatrix(Xtrain, trainingSamples, features);
+//            printf("\n----------------------------------------\n");
+//            util.print2DMatrix(Xtest, testingSamples, features);
+//        }
+
+//        clock_t begin = clock();
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        sgd1.adamSGD();
+        double endTime = MPI_Wtime();
+        if(world_rank ==0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+        }
+
+//        //sgd1.sgd();
+//        clock_t end = clock();
+//        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+//        printf("Training Samples : % d \n", trainingSamples);
+//        printf("Testing Samples : % d \n", testingSamples);
+//        printf("Training time %f s \n", elapsed_secs);
+//        double* wFinal = sgd1.getWFinal();
+//        util.print1DMatrix(wFinal, features);
+//        Predict predict(Xtest, ytest, wFinal , testingSamples, features);
+//        double acc = predict.predict();
+//        cout << "Testing Accuracy : " << acc << "%" << endl;
+    }
+    MPI_Finalize();
 }
 
 void train(OptArgs optArgs) {
@@ -209,4 +316,15 @@ void test3() {
 void test4() {
     Test test;
     test.test4();
+}
+
+void test5() {
+    Test test;
+    test.test5();
+}
+
+
+void test6() {
+    Test test;
+    test.test6();
 }

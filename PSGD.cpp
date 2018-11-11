@@ -1,24 +1,25 @@
 //
-// Created by vibhatha on 11/5/18.
+// Created by vibhatha on 11/11/18.
 //
 
+#include "PSGD.h"
 #include <iostream>
-#include "SGD.h"
 #include "Initializer.h"
 #include "Util.h"
 #include "Matrix.h"
 #include <math.h>
+#include <mpi.h>
 
 using namespace std;
 
-SGD::SGD(double **Xn, double* yn, double alphan, int itrN) {
+PSGD::PSGD(double **Xn, double* yn, double alphan, int itrN) {
     X = Xn;
     y = yn;
     alpha = alphan;
     iterations = itrN;
 }
 
-SGD::SGD(double **Xn, double *yn, double alphan, int itrN, int features_, int trainingSamples_, int testingSamples_) {
+PSGD::PSGD(double **Xn, double *yn, double alphan, int itrN, int features_, int trainingSamples_, int testingSamples_) {
     X = Xn;
     y = yn;
     alpha = alphan;
@@ -28,7 +29,7 @@ SGD::SGD(double **Xn, double *yn, double alphan, int itrN, int features_, int tr
     testingSamples = testingSamples_;
 }
 
-void SGD::sgd() {
+void PSGD::sgd() {
     Initializer initializer;
     wInit = initializer.initialWeights(features);
     Util util;
@@ -61,9 +62,13 @@ void SGD::sgd() {
     printf("Final Weight\n");
 }
 
-void SGD::adamSGD() {
+void PSGD::adamSGD() {
+    int totalSamples = trainingSamples;
+    int dataPerMachine = totalSamples /  world_size;
+    int start = world_rank * dataPerMachine;
+    int end = start + dataPerMachine;
+    int totalVisibleSamples = dataPerMachine * world_size;
     Initializer initializer;
-
     wInit = initializer.zeroWeights(features);
     double* v = initializer.zeroWeights(features);
     double* r = initializer.zeroWeights(features);
@@ -73,28 +78,33 @@ void SGD::adamSGD() {
     double* r2 = initializer.zeroWeights(features);
     double* w1 = initializer.zeroWeights(features);
     double* w2 = initializer.zeroWeights(features);
+    double* wglobal = initializer.zeroWeights(features);
     double* v_hat = initializer.zeroWeights(features);
     double* r_hat = initializer.zeroWeights(features);
     double* grad_mul = initializer.zeroWeights(features);
     double* gradient = initializer.zeroWeights(features);
     double epsilon = 0.00000001;
     Util util;
-    cout << "Training Samples : " << trainingSamples << endl;
+    cout << "Training Samples : " << totalVisibleSamples << ", Data Per Machine : " << dataPerMachine << ", Start : " << start << ", End : " << end << ", World Size : " << world_size << ", World Rank : " << world_rank << endl;
     cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
     //util.print1DMatrix(wInit, features);
     //util.print1DMatrix(v, features);
     //util.print1DMatrix(r, features);
 
+
     Matrix matrix(features);
     w = wInit;
     for (int i = 1; i < iterations; ++i) {
-        if(i % 10 == 0) {
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //util.print1DMatrix(w, features);
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
+        if(world_rank==0){
+            if(i % 10 == 0) {
+                //cout << "+++++++++++++++++++++++++++++++++" << endl;
+                //util.print1DMatrix(w, features);
+                //cout << "+++++++++++++++++++++++++++++++++" << endl;
+                cout << "Iteration " << i << "/" << iterations << endl;
+            }
         }
-        for (int j = 0; j < trainingSamples; ++j) {
+
+        for (int j = start; j < end; ++j) {
             double* xi = X[j];
             double yi = y[j];
             double yixiw = matrix.dot(xi, w) * yi;
@@ -120,34 +130,57 @@ void SGD::adamSGD() {
             w1 = matrix.divide(v_hat, matrix.scalarAddition(matrix.sqrt(r_hat),epsilon));
             w2 = matrix.scalarMultiply(w1, alpha);
             w = matrix.subtract(w,w2);
+            MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                          MPI_COMM_WORLD);
+            w = matrix.scalarMultiply(wglobal, 1.0 / (double)world_size);
+//            if(world_rank==0) {
+//                //util.print1DMatrix(w, features);
+//            }
 
             //delete [] xi;
         }
     }
+    if(world_rank==0) {
+        cout << "============================================" << endl;
+        printf("Final Weight\n");
+        util.print1DMatrix(w,features);
+        this->setWFinal(w);
+        cout << "============================================" << endl;
+    }
 
-    cout << "============================================" << endl;
-    printf("Final Weight\n");
-    util.print1DMatrix(w,features);
-    this->setWFinal(w);
-    cout << "============================================" << endl;
 }
 
-double* SGD::getW() const {
+double* PSGD::getW() const {
     return w;
 }
 
-SGD::SGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
+PSGD::PSGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
          int trainingSamples) : beta1(beta1), beta2(beta2), X(X), y(y), alpha(alpha), iterations(iterations),
                                 features(features), trainingSamples(trainingSamples) {}
 
-double *SGD::getWFinal() const {
+double *PSGD::getWFinal() const {
     return wFinal;
 }
 
-void SGD::setWFinal(double *wFinal) {
-    SGD::wFinal = wFinal;
+void PSGD::setWFinal(double *wFinal) {
+    PSGD::wFinal = wFinal;
 }
 
-SGD::SGD(double beta1, double beta2, double alpha, int iterations, int features, int trainingSamples,
+PSGD::PSGD(double beta1, double beta2, double alpha, int iterations, int features, int trainingSamples,
          int testingSamples) : beta1(beta1), beta2(beta2), alpha(alpha), iterations(iterations), features(features),
                                trainingSamples(trainingSamples), testingSamples(testingSamples) {}
+
+PSGD::PSGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
+           int world_size, int world_rank) : beta1(beta1), beta2(beta2), X(X), y(y), alpha(alpha),
+                                             iterations(iterations), features(features), world_size(world_size),
+                                             world_rank(world_rank) {}
+
+PSGD::PSGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
+           int trainingSamples, int testingSamples, int world_size, int world_rank) : beta1(beta1), beta2(beta2), X(X),
+                                                                                      y(y), alpha(alpha),
+                                                                                      iterations(iterations),
+                                                                                      features(features),
+                                                                                      trainingSamples(trainingSamples),
+                                                                                      testingSamples(testingSamples),
+                                                                                      world_size(world_size),
+                                                                                      world_rank(world_rank) {}

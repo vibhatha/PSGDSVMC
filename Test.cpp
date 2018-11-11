@@ -7,6 +7,12 @@
 #include "Util.h"
 #include "DataSet.h"
 #include "ResourceManager.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+#include <assert.h>
+#include <time.h>
+#include "Initializer.h"
 
 using namespace std;
 
@@ -66,5 +72,37 @@ void Test::test4() {
     ResourceManager resourceManager;
     resourceManager.loadDataSourcePath();
     cout << resourceManager.getDataSourceBasePath() << endl;
+
+}
+
+void Test::test5() {
+    MPI_Init(NULL, NULL);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    Initializer initializer;
+    double* localsum = initializer.zeroWeights(2);
+    double* globalsum = initializer.zeroWeights(2);
+
+
+    if(world_rank % 2 == 1)
+    {
+        localsum[0] += 5;
+    }
+    else if( world_rank > 0 && (world_rank % 2 == 0))
+    {
+        localsum[1] += 10;
+    }
+
+    MPI_Allreduce(localsum, globalsum, 2, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    cout << "World Size : " << world_size << ", World Rank : " << world_rank << endl;
+    Util util;
+    util.print1DMatrix(globalsum,2);
+    MPI_Finalize();
+}
+
+void Test::test6() {
 
 }
