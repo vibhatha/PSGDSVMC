@@ -35,6 +35,67 @@ DataSet::DataSet(string sourceFile_, int features_, int trainingSamples_, bool i
     ratio = ratio_;
 }
 
+void DataSet::distributedLoad() {
+    if(isSplit== false){
+
+    }
+
+    if(isSplit == true) {
+        printf("Splitting data ... \n");
+        int totalSamples = trainingSamples;
+        int trainingSet = trainingSamples * ratio;
+        int testingSet = totalSamples - trainingSet;
+        int dataPerMachine = trainingSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+        int start = world_rank * dataPerMachine;
+        int end = start + dataPerMachine;
+        this->setDataPerMachine(dataPerMachine);
+
+        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
+        this->setTestingSamples(testingSet);
+        this->setTrainingSamples(dataPerMachine);
+        Xtrain = new double*[dataPerMachine];
+        ytrain = new double[dataPerMachine];
+
+        ifstream file(trainFile);
+        cout << "Loading File : " << trainFile << endl;
+        int rowTest = 0;
+        for(int row = 0; row < totalVisibleSamples; row++)
+        {
+
+
+                string line;
+                getline(file, line);
+                if ( !file.good() ){
+                    printf("File is not readable \n");
+                    break;
+                }
+
+                if(row>=start and row<end) {
+                    Xtrain[row-start] = new double[features];
+                    vector<double> vect;
+
+                    std::stringstream ss(line);
+
+                    double i;
+
+                    while (ss >> i)
+                    {
+                        vect.push_back(i);
+
+                        if (ss.peek() == ',')
+                            ss.ignore();
+                    }
+                    ytrain[row-start] = vect.at(0);
+
+                    for (int j=1; j< vect.size(); j++){
+                        Xtrain[row-start][j-1] = vect.at(j);
+                    }
+                }
+
+        }
+    }
+}
 
 
 void DataSet::load() {
@@ -230,5 +291,27 @@ int DataSet::getTestingSamples() const {
 
 void DataSet::setTestingSamples(int testingSamples) {
     DataSet::testingSamples = testingSamples;
+}
+
+DataSet::DataSet(int features, bool isSplit, double ratio, const string &trainFile, const string &testFile,
+                 int world_size, int world_rank) : features(features), isSplit(isSplit), ratio(ratio),
+                                                   trainFile(trainFile), testFile(testFile), world_size(world_size),
+                                                   world_rank(world_rank) {}
+
+DataSet::DataSet(int features, int trainingSamples, int testingSamples, bool isSplit, double ratio,
+                 const string &trainFile, int world_size, int world_rank) : features(features),
+                                                                            trainingSamples(trainingSamples),
+                                                                            testingSamples(testingSamples),
+                                                                            isSplit(isSplit), ratio(ratio),
+                                                                            trainFile(trainFile),
+                                                                            world_size(world_size),
+                                                                            world_rank(world_rank) {}
+
+int DataSet::getDataPerMachine() const {
+    return dataPerMachine;
+}
+
+void DataSet::setDataPerMachine(int dataPerMachine) {
+    DataSet::dataPerMachine = dataPerMachine;
 }
 

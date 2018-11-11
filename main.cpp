@@ -21,6 +21,7 @@ void test6();
 void sgd();
 void train(OptArgs optArgs);
 void parallel(OptArgs optArgs);
+void parallelLoad(OptArgs optArgs);
 
 
 int main(int argc, char** argv) {
@@ -32,10 +33,55 @@ int main(int argc, char** argv) {
     //sgd();
     //test4();
     //test5();
-    parallel(optArgs);
+    parallelLoad(optArgs);
 
     return 0;
 }
+
+void parallelLoad(OptArgs optArgs) {
+    MPI_Init(NULL, NULL);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    optArgs.toString();
+    ResourceManager resourceManager;
+    resourceManager.loadDataSourcePath();
+    if(optArgs.isIsSplit()) {
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        cout << "SourceFile : " << sourceFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile, world_size, world_rank);
+        dataSet.distributedLoad();
+        int dataPerMachine = dataSet.getDataPerMachine();
+        double** Xtrain = dataSet.getXtrain();
+        double* ytrain = dataSet.getYtrain();
+//        if(world_rank==0) {
+//            Util util;
+//            util.print2DMatrix(Xtrain, dataPerMachine, features);
+//            printf("\n----------------------------------------\n");
+//        }
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        sgd1.adamSGD();
+        double endTime = MPI_Wtime();
+        if(world_rank ==0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+        }
+
+
+    }
+    MPI_Finalize();
+}
+
 
 void parallel(OptArgs optArgs) {
     MPI_Init(NULL, NULL);

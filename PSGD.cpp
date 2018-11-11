@@ -64,10 +64,6 @@ void PSGD::sgd() {
 
 void PSGD::adamSGD() {
     int totalSamples = trainingSamples;
-    int dataPerMachine = totalSamples /  world_size;
-    int start = world_rank * dataPerMachine;
-    int end = start + dataPerMachine;
-    int totalVisibleSamples = dataPerMachine * world_size;
     Initializer initializer;
     wInit = initializer.zeroWeights(features);
     double* v = initializer.zeroWeights(features);
@@ -85,7 +81,6 @@ void PSGD::adamSGD() {
     double* gradient = initializer.zeroWeights(features);
     double epsilon = 0.00000001;
     Util util;
-    cout << "Training Samples : " << totalVisibleSamples << ", Data Per Machine : " << dataPerMachine << ", Start : " << start << ", End : " << end << ", World Size : " << world_size << ", World Rank : " << world_rank << endl;
     cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
     //util.print1DMatrix(wInit, features);
     //util.print1DMatrix(v, features);
@@ -104,7 +99,7 @@ void PSGD::adamSGD() {
             }
         }
 
-        for (int j = start; j < end; ++j) {
+        for (int j = 0; j < trainingSamples; ++j) {
             double* xi = X[j];
             double yi = y[j];
             double yixiw = matrix.dot(xi, w) * yi;
