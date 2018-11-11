@@ -55,6 +55,7 @@ void parallel(OptArgs optArgs) {
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
         double ratio = optArgs.getRatio();
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load();
@@ -71,16 +72,13 @@ void parallel(OptArgs optArgs) {
         //util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
-        clock_t begin = clock();
-        PSGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
-        PSGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd2.adamSGD();
-        //sgd1.sgd();
-        clock_t end = clock();
-        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
-        printf("Training Samples : % d \n", trainSet);
-        printf("Testing Samples : % d \n", testSet);
-        printf("Training time %f s \n", elapsed_secs);
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        sgd1.adamSGD();
+        double endTime = MPI_Wtime();
+        if(world_rank ==0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+        }
 
 
 
