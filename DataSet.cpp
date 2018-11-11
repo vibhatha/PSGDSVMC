@@ -159,7 +159,7 @@ void DataSet::load() {
             }
 
             if(row>=trainSet and rowTest <= testSet){
-                cout << "Row : " << row << ", Row Test Id  : " << rowTest << endl;
+                //cout << "Row : " << row << ", Row Test Id  : " << rowTest << endl;
                 Xtest[rowTest] = new double[features];
                 string line;
                 getline(file, line);
@@ -214,7 +214,7 @@ double* DataSet::getYtrain() {
 
 DataSet::DataSet(int features, int trainingSamples, int testingSamples, const string &trainFile, const string &testFile)
         : features(features), trainingSamples(trainingSamples), testingSamples(testingSamples), trainFile(trainFile),
-          testFile(testFile) {}
+          testFile(testFile), isSplit(false) {}
 
 int DataSet::getTrainingSamples() const {
     return trainingSamples;

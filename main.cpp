@@ -5,12 +5,15 @@
 #include "SGD.h"
 #include "ArgReader.h"
 #include "Predict.h"
+#include "ResourceManager.h"
 #include <ctime>
 
 using namespace std;
 
 void test1();
 void test2();
+void test3();
+void test4();
 void sgd();
 void train(OptArgs optArgs);
 
@@ -22,14 +25,17 @@ int main(int argc, char** argv) {
     OptArgs optArgs = argReader.getParams();
     train(optArgs);
     //sgd();
+    //test4();
 
     return 0;
 }
 
 void train(OptArgs optArgs) {
     optArgs.toString();
+    ResourceManager resourceManager;
+    resourceManager.loadDataSourcePath();
     if(optArgs.isIsSplit()){
-        string datasourceBase = "/home/vibhatha/data/svm/";
+        string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
         string testFileName = "/testing.csv";
@@ -50,26 +56,50 @@ void train(OptArgs optArgs) {
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
         Util util;
-        util.print2DMatrix(Xtrain, trainSet, features);
+        //util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
-        util.print2DMatrix(Xtest, testSet, features);
+        //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
-        SGD sgd1(Xtrain, ytrain, 0.01, 200, features, trainSet, testSet);
-        sgd1.sgd();
+        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        sgd2.adamSGD();
+        //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
         printf("Training Samples : % d \n", trainSet);
         printf("Testing Samples : % d \n", testSet);
         printf("Training time %f s \n", elapsed_secs);
-        double* wFinal = sgd1.getW();
-        util.print1DMatrix(wFinal, features);
-        Predict predict(Xtest, ytest, wFinal , testSet, features);
-        double acc = predict.predict();
-        printf("Testing Accuracy %f % \n", acc);
+        //double* wFinal = sgd2.getWFinal();
+        //util.print1DMatrix(wFinal, features);
+//        double  wFinalTest [22] = {1.058225086609490377e-02,
+//                2.280953604657339449e-03,
+//                -1.943556791991714111e-05,
+//                -1.077843995538567932e-02,
+//                -8.031186202692977907e-03,
+//                5.604057416423767826e-04,
+//                -3.297580529278739542e-02,
+//                -7.734271973922541600e-04,
+//                -5.926790741002434248e-03,
+//                -7.005303267160217610e-03,
+//                5.329900037406029023e-01,
+//                -5.146574347588905418e+00,
+//                1.647242436140160526e-01,
+//                8.668693932380384937e-02,
+//                6.062124153509106800e-02,
+//                8.558154902527673191e-02,
+//                -2.200800258968939604e-01,
+//                -3.348020131636486596e-01,
+//                -1.974553008397789966e-01,
+//                1.495450499343256301e-01,
+//                1.682656341270570011e-01,
+//                1.148141532462719216e-01};
+//        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
+//        double acc = predict.predict();
+//        cout << "Testing Accuracy : " << acc << "%" << endl;
 
 
     }else{
-        string datasourceBase = "/home/vibhatha/data/svm/";
+        string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
         string testFileName = "/testing.csv";
@@ -88,20 +118,47 @@ void train(OptArgs optArgs) {
 
         double** Xtest = dataset.getXtest();
         double* ytest = dataset.getYtest();
-//        Util util;
+        Util util;
 //        util.print2DMatrix(Xtrain, trainingSamples, features);
-//        printf("\n----------------------------------------\n");
+        printf("\n----------------------------------------\n");
 //        util.print2DMatrix(Xtest, testingSamples, features);
-
         clock_t begin = clock();
-        SGD sgd1(Xtrain, ytrain, 0.01, 200, features, trainingSamples, testingSamples);
-        sgd1.sgd();
+        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
+        sgd2.adamSGD();
+        //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainingSamples);
+        printf("Testing Samples : % d \n", testingSamples);
         printf("Training time %f s \n", elapsed_secs);
-        Predict predict(Xtest, ytest, sgd1.getW(), testingSamples, features);
+        double* wFinal = sgd2.getWFinal();
+        util.print1DMatrix(wFinal, features);
+//        double  wFinalTest [22] = {1.058225086609490377e-02,
+//                                   2.280953604657339449e-03,
+//                                   -1.943556791991714111e-05,
+//                                   -1.077843995538567932e-02,
+//                                   -8.031186202692977907e-03,
+//                                   5.604057416423767826e-04,
+//                                   -3.297580529278739542e-02,
+//                                   -7.734271973922541600e-04,
+//                                   -5.926790741002434248e-03,
+//                                   -7.005303267160217610e-03,
+//                                   5.329900037406029023e-01,
+//                                   -5.146574347588905418e+00,
+//                                   1.647242436140160526e-01,
+//                                   8.668693932380384937e-02,
+//                                   6.062124153509106800e-02,
+//                                   8.558154902527673191e-02,
+//                                   -2.200800258968939604e-01,
+//                                   -3.348020131636486596e-01,
+//                                   -1.974553008397789966e-01,
+//                                   1.495450499343256301e-01,
+//                                   1.682656341270570011e-01,
+//                                   1.148141532462719216e-01};
+        Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         double acc = predict.predict();
-        printf("Testing Accuracy %f % \n", acc);
+        cout << "Testing Accuracy : " << acc << "%" << endl;
     }
 }
 
@@ -142,4 +199,14 @@ void test1(){
 void test2() {
     Test test;
     test.test2();
+}
+
+void test3() {
+    Test test;
+    test.test3();
+}
+
+void test4() {
+    Test test;
+    test.test4();
 }

@@ -23,3 +23,12 @@ double* Initializer::initialWeights(int features) {
     }
     return wInit;
 }
+
+double* Initializer::zeroWeights(int features) {
+    wInit = new double[features];
+    for (int i = 0; i < features; ++i) {
+        wInit[i] = 0.0;
+    }
+    return wInit;
+}
+

@@ -12,6 +12,7 @@ private:
 
 public:
     double* initialWeights(int features);
+    double* zeroWeights(int features);
 };
 
 

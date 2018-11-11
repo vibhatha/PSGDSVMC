@@ -18,7 +18,11 @@ public:
     double* subtract(double* a, double* b);
     double dot(double* a, double* b);
     double* scalarMultiply(double* a, double c);
+    double* scalarAddition(double* a, double c);
     double* inner(double* a, double* b);
+    double* divide(double* a, double* b);
+    double* sqrt(double* a);
+    double* put(double* a, double* b);
 
 
 };

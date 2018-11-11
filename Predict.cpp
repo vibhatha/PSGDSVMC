@@ -16,15 +16,18 @@ double Predict::predict() {
     for (int i = 0; i < testingSamples; ++i) {
         double pred = 0;
         double d = matrix.dot(w, X[i]);
-        if(d>=0) {
-            pred = 1;
+        if(d>=0.0) {
+            pred = 1.0;
         }
-        if(d<0) {
-            pred = -1;
+        if(d<0.0) {
+            pred = -1.0;
         }
         if(y[i] == pred) {
             totalCorrect++;
         }
+
+
+
         //cout << i << " : " << pred << "/" << y[i] << endl;
 
     }
