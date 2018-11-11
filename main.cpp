@@ -69,16 +69,16 @@ void parallel(OptArgs optArgs) {
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
         Util util;
-        //util.print2DMatrix(Xtrain, trainSet, features);
+        util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
-        //util.print2DMatrix(Xtest, testSet, features);
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples, world_size, world_rank);
-        double startTime = MPI_Wtime();
-        sgd1.adamSGD();
-        double endTime = MPI_Wtime();
-        if(world_rank ==0) {
-            cout << "Training Time : " << (endTime - startTime) << endl;
-        }
+        util.print2DMatrix(Xtest, testSet, features);
+        //PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples, world_size, world_rank);
+        //double startTime = MPI_Wtime();
+        //sgd1.adamSGD();
+        //double endTime = MPI_Wtime();
+//        if(world_rank ==0) {
+//            cout << "Training Time : " << (endTime - startTime) << endl;
+//        }
 
 
 
