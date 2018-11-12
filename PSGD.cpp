@@ -35,11 +35,11 @@ void PSGD::sgd() {
     double* wglobal = initializer.zeroWeights(features);
     Util util;
     cout << "Training Samples : " << trainingSamples << endl;
-    util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(wInit, features);
     Matrix matrix(features);
     w = wInit;
     for (int i = 0; i < iterations; ++i) {
-        if(i%10 == 0) {
+        if(i%10 == 0 and world_rank==0) {
             cout << "Iteration " << i << "/" << iterations << endl;
         }
         for (int j = 0; j < trainingSamples; ++j) {
@@ -62,8 +62,8 @@ void PSGD::sgd() {
         }
     }
     this->setWFinal(w);
-    util.print1DMatrix(w,features);
-    printf("Final Weight\n");
+    //util.print1DMatrix(w,features);
+    //printf("Final Weight\n");
 }
 
 void PSGD::adamSGD() {
