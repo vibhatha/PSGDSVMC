@@ -30,10 +30,10 @@ int main(int argc, char** argv) {
     ArgReader argReader(argc, argv);
     OptArgs optArgs = argReader.getParams();
     //train(optArgs);
-    sgd();
+    //sgd();
     //test4();
     //test5();
-    //parallelLoad(optArgs);
+    parallelLoad(optArgs);
 
     return 0;
 }
