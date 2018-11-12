@@ -32,6 +32,7 @@ PSGD::PSGD(double **Xn, double *yn, double alphan, int itrN, int features_, int 
 void PSGD::sgd() {
     Initializer initializer;
     wInit = initializer.initialWeights(features);
+    double* wglobal = initializer.zeroWeights(features);
     Util util;
     cout << "Training Samples : " << trainingSamples << endl;
     util.print1DMatrix(wInit, features);
@@ -54,6 +55,9 @@ void PSGD::sgd() {
                 double* wa = matrix.scalarMultiply(w,alpha);
                 w = matrix.subtract(w,wa);
             }
+            MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                          MPI_COMM_WORLD);
+            w = matrix.scalarMultiply(wglobal, 1.0 / double(world_size));
             //util.print1DMatrix(w,features);
         }
     }

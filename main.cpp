@@ -71,7 +71,7 @@ void parallelLoad(OptArgs optArgs) {
 //        }
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        sgd1.adamSGD();
+        sgd1.sgd();
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
