@@ -141,6 +141,7 @@ void PSGD::adamSGD() {
         this->setWFinal(w);
         cout << "============================================" << endl;
     }
+    delete [] v ;delete [] r ;delete [] v1 ;delete [] v2 ;delete [] r1 ;delete [] r2 ;delete [] w1 ;delete [] w2 ;delete [] wglobal ;delete [] v_hat ;delete [] r_hat ;delete [] grad_mul ;delete [] gradient;
 
 }
 
