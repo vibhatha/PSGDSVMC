@@ -34,7 +34,7 @@ void PSGD::sgd() {
     wInit = initializer.initialWeights(features);
     double* wglobal = initializer.zeroWeights(features);
     Util util;
-    cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Training Samples : " << trainingSamples << endl;
     //util.print1DMatrix(wInit, features);
     Matrix matrix(features);
     w = wInit;
