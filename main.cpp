@@ -30,10 +30,10 @@ int main(int argc, char** argv) {
     ArgReader argReader(argc, argv);
     OptArgs optArgs = argReader.getParams();
     //train(optArgs);
-    //sgd();
+    sgd();
     //test4();
     //test5();
-    parallelLoad(optArgs);
+    //parallelLoad(optArgs);
 
     return 0;
 }
@@ -212,8 +212,8 @@ void train(OptArgs optArgs) {
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
         SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
-        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd2.adamSGD();
+        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        sgd1.sgd();
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -275,16 +275,16 @@ void train(OptArgs optArgs) {
 //        util.print2DMatrix(Xtest, testingSamples, features);
         clock_t begin = clock();
         SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
-        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
-        sgd2.adamSGD();
-        //sgd1.sgd();
+        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
+        //sgd2.adamSGD();
+        sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
         printf("Training Samples : % d \n", trainingSamples);
         printf("Testing Samples : % d \n", testingSamples);
         printf("Training time %f s \n", elapsed_secs);
-        double* wFinal = sgd2.getWFinal();
-        util.print1DMatrix(wFinal, features);
+        //double* wFinal = sgd2.getWFinal();
+        //util.print1DMatrix(wFinal, features);
 //        double  wFinalTest [22] = {1.058225086609490377e-02,
 //                                   2.280953604657339449e-03,
 //                                   -1.943556791991714111e-05,
@@ -307,9 +307,9 @@ void train(OptArgs optArgs) {
 //                                   1.495450499343256301e-01,
 //                                   1.682656341270570011e-01,
 //                                   1.148141532462719216e-01};
-        Predict predict(Xtest, ytest, wFinal , testingSamples, features);
-        double acc = predict.predict();
-        cout << "Testing Accuracy : " << acc << "%" << endl;
+        //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
+        //double acc = predict.predict();
+        //cout << "Testing Accuracy : " << acc << "%" << endl;
     }
 }
 
