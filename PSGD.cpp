@@ -100,14 +100,13 @@ void PSGD::adamSGD() {
         }
 
         for (int j = 0; j < trainingSamples; ++j) {
-            double* xi = X[j];
-            double yi = y[j];
-            double yixiw = matrix.dot(xi, w) * yi;
+
+            double yixiw = matrix.dot(X[j], w) * y[j];
             //cout << i << ", " << yixiw << endl;
             alpha = 1.0 / (1.0 + double(i));
             double coefficient = 1.0 /(1.0 + double(i));
             if(yixiw<1) {
-                gradient = matrix.scalarMultiply(matrix.subtract(matrix.scalarMultiply(w, coefficient),matrix.scalarMultiply(xi, yi)), alpha);
+                gradient = matrix.scalarMultiply(matrix.subtract(matrix.scalarMultiply(w, coefficient),matrix.scalarMultiply(X[j], y[j])), alpha);
 
             } else {
                 gradient = matrix.scalarMultiply(matrix.scalarMultiply(w, coefficient), alpha);
