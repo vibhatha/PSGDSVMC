@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
     //sgd();
     //test4();
     //test5();
-    //parallelLoad(optArgs);
-    trainSequential(optArgs);
+    parallelLoad(optArgs);
+    //trainSequential(optArgs);
 
     return 0;
 }
