@@ -22,7 +22,7 @@ void sgd();
 void train(OptArgs optArgs);
 void parallel(OptArgs optArgs);
 void parallelLoad(OptArgs optArgs);
-
+void trainSequential(OptArgs optArgs);
 
 int main(int argc, char** argv) {
     std::cout << "Hello, World!" << std::endl;
@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
     //sgd();
     //test4();
     //test5();
-    parallelLoad(optArgs);
+    //parallelLoad(optArgs);
+    trainSequential(optArgs);
 
     return 0;
 }
@@ -71,7 +72,7 @@ void parallelLoad(OptArgs optArgs) {
 //        }
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        sgd1.sgd();
+        sgd1.adamSGD();
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
@@ -307,6 +308,93 @@ void train(OptArgs optArgs) {
 //                                   1.495450499343256301e-01,
 //                                   1.682656341270570011e-01,
 //                                   1.148141532462719216e-01};
+        //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
+        //double acc = predict.predict();
+        //cout << "Testing Accuracy : " << acc << "%" << endl;
+    }
+}
+
+
+void trainSequential(OptArgs optArgs) {
+    optArgs.toString();
+    ResourceManager resourceManager;
+    resourceManager.loadDataSourcePath();
+    if(optArgs.isIsSplit()){
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        double ratio = optArgs.getRatio();
+        DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
+        dataSet.load();
+
+        double** Xtrain = dataSet.getXtrain();
+        double* ytrain = dataSet.getYtrain();
+
+        double** Xtest = dataSet.getXtest();
+        double* ytest = dataSet.getYtest();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        Util util;
+        //util.print2DMatrix(Xtrain, trainSet, features);
+        printf("\n----------------------------------------\n");
+        //util.print2DMatrix(Xtest, testSet, features);
+        clock_t begin = clock();
+        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
+        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        sgd1.sgd();
+        //sgd1.sgd();
+        clock_t end = clock();
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainSet);
+        printf("Testing Samples : % d \n", testSet);
+        printf("Training time %f s \n", elapsed_secs);
+
+//        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
+//        double acc = predict.predict();
+//        cout << "Testing Accuracy : " << acc << "%" << endl;
+
+
+    }else{
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFilePath;
+        trainFilePath.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFilePath;
+        testFilePath.append(datasourceBase).append(datasource).append(testFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+
+        DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
+        dataset.load();
+        double** Xtrain = dataset.getXtrain();
+        double* ytrain = dataset.getYtrain();
+
+        double** Xtest = dataset.getXtest();
+        double* ytest = dataset.getYtest();
+        Util util;
+//        util.print2DMatrix(Xtrain, trainingSamples, features);
+        printf("\n----------------------------------------\n");
+//        util.print2DMatrix(Xtest, testingSamples, features);
+        clock_t begin = clock();
+        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
+        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
+        //sgd2.adamSGD();
+        sgd1.sgd();
+        clock_t end = clock();
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainingSamples);
+        printf("Testing Samples : % d \n", testingSamples);
+        printf("Training time %f s \n", elapsed_secs);
+
         //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         //double acc = predict.predict();
         //cout << "Testing Accuracy : " << acc << "%" << endl;
