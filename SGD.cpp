@@ -41,13 +41,10 @@ void SGD::sgd() {
             cout << "Iteration " << i << "/" << iterations << endl;
         }
         for (int j = 0; j < trainingSamples; ++j) {
-            double* xi = X[j];
-            double yi = y[j];
-            double yixiw = matrix.dot(xi, w) * yi;
-            alpha = 1.0 / (1.0 + i);
+            double yixiw = matrix.dot(X[j], w) * y[j];
             //cout << i << ", " << yixiw << endl;
             if(yixiw<1) {
-                double* xiyia = matrix.scalarMultiply(matrix.subtract(w,matrix.scalarMultiply(xi, yi)), alpha);
+                double* xiyia = matrix.scalarMultiply(matrix.subtract(w,matrix.scalarMultiply(X[j], y[j])), alpha);
                 w = matrix.subtract(w, xiyia);
             } else {
                 double* wa = matrix.scalarMultiply(w,alpha);
@@ -57,8 +54,9 @@ void SGD::sgd() {
         }
     }
     this->setWFinal(w);
-    util.print1DMatrix(w,features);
-    printf("Final Weight\n");
+    //util.print1DMatrix(w,features);
+
+    //printf("Final Weight\n");
 }
 
 void SGD::adamSGD() {

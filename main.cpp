@@ -355,6 +355,11 @@ void trainSequential(OptArgs optArgs) {
         printf("Testing Samples : % d \n", testSet);
         printf("Training time %f s \n", elapsed_secs);
 
+        delete Xtrain;
+        delete Xtest;
+        delete ytest;
+        delete ytrain;
+
 //        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
 //        double acc = predict.predict();
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
