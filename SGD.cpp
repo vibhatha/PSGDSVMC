@@ -220,7 +220,7 @@ void SGD::adamSGD(double* w) {
 
     initializer.initializeWeightsWithArray(features, w);
 
-    for (int i = 0; i < iterations; ++i) {
+    for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
@@ -260,9 +260,8 @@ void SGD::adamSGD(double* w) {
             matrix.scalarAddition(sq_r_hat, epsilon, w1d);
             matrix.divide(v_hat, w1d, w1);
             matrix.scalarMultiply(w1, alpha, aw1);
-            matrix.subtract(w, aw1, w2);
-            w = w2;
-            //util.print1DMatrix(w, features);
+            matrix.subtract(w, aw1, w);
+            util.print1DMatrix(w, features);
             //delete [] xi;
         }
     }
@@ -290,7 +289,6 @@ void SGD::adamSGD(double* w) {
     delete [] aw1;
     delete [] xiyi;
     delete [] w1d;
-    delete [] wInit;
 }
 
 double *SGD::getW() const {
