@@ -154,7 +154,7 @@ void SGD::adamSGD() {
             matrix.scalarMultiply(w1, alpha, aw1);
             matrix.subtract(w, aw1, w2);
             w = w2;
-            util.print1DMatrix(w, features);
+            //util.print1DMatrix(w, features);
             //delete [] xi;
         }
     }
