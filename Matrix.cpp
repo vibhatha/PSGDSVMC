@@ -5,12 +5,7 @@
 using namespace std;
 
 
-Matrix::Matrix(int features_) {
-    features = features_;
-}
-
 double* Matrix::add(double* a, double *b) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] + b[i];
     }
@@ -18,7 +13,6 @@ double* Matrix::add(double* a, double *b) {
 }
 
 double* Matrix::subtract(double* a, double *b) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] - b[i];
     }
@@ -26,7 +20,6 @@ double* Matrix::subtract(double* a, double *b) {
 }
 
 double* Matrix::scalarMultiply(double* a, double c) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *c;
     }
@@ -42,7 +35,6 @@ double Matrix::dot(double* a, double* b) {
 }
 
 double* Matrix::inner(double* a, double* b) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *b[i];
     }
@@ -50,7 +42,6 @@ double* Matrix::inner(double* a, double* b) {
 }
 
 double* Matrix::divide(double *a, double *b) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] / b[i];
     }
@@ -58,7 +49,6 @@ double* Matrix::divide(double *a, double *b) {
 }
 
 double* Matrix::sqrt(double* a) {
-    double* res = new double[features];
     for (int i = 0; i < features; ++i) {
         double d = a[i];
         res[i] = std::sqrt(d);
@@ -79,4 +69,12 @@ double* Matrix::put(double *a, double *b) {
         a[i] = b[i] ;
     }
     return a;
+}
+
+const double *Matrix::getRes() const {
+    return res;
+}
+
+Matrix::Matrix(const int features) : features(features) {
+    res = new double[features];
 }
