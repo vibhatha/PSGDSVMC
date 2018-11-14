@@ -336,29 +336,34 @@ void trainSequential(OptArgs optArgs) {
         int testSet = totalSamples - trainSet;
         Initializer initializer;
 
-        double** Xtrain;
 
-        double* ytrain = new double[trainSet];
+
+        double ytrain [trainSet];
         initializer.initializeWeightsWithArray(trainSet, ytrain);
-        double** Xtest;
 
-        double* ytest = new double[testSet];
+
+        double ytest [testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double** Xtrain;
+        double** Xtest;
         Xtrain = new double*[trainSet];
         for (int i = 0; i < trainSet; ++i) {
             Xtrain[i] = new double[features];
         }
+
         Xtest = new double*[testSet];
         for (int i = 0; i < testSet; ++i) {
             Xtest[i] = new double[features];
         }
+
 
         Util util;
 
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
 
-        util.print2DMatrix(Xtrain, trainSet, features);
+        //util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
@@ -378,7 +383,16 @@ void trainSequential(OptArgs optArgs) {
 //        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
 //        double acc = predict.predict();
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
-        delete [] Xtrain, Xtest, ytrain, ytest, w;
+        for (int i = 0; i < trainSet; ++i) {
+           delete[] Xtrain[i];
+        }
+        for (int i = 0; i < testSet; ++i) {
+            delete[] Xtest[i];
+        }
+        delete [] Xtrain;
+        delete [] Xtest;
+        delete [] w;
+
 
     }else{
         string datasourceBase = resourceManager.getDataSourceBasePath();

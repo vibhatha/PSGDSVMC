@@ -257,6 +257,8 @@ void DataSet::load() {
 
 }
 
+
+
 void DataSet::load(double** Xtrain, double* ytrain, double** Xtest, double* ytest) {
 
     if(isSplit== false){

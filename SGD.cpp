@@ -30,33 +30,33 @@ SGD::SGD(double **Xn, double *yn, double alphan, int itrN, int features_, int tr
 }
 
 void SGD::sgd() {
-    Initializer initializer;
-    wInit = initializer.initialWeights(features);
-    Util util;
-    cout << "Training Samples : " << trainingSamples << endl;
-    util.print1DMatrix(wInit, features);
-    Matrix matrix(features);
-    w = wInit;
-    double *res = new double[features];
-    for (int i = 0; i < iterations; ++i) {
-        if (i % 10 == 0) {
-            cout << "Iteration " << i << "/" << iterations << endl;
-        }
-        for (int j = 0; j < trainingSamples; ++j) {
-            double yixiw = matrix.dot(X[j], w) * y[j];
-            //cout << i << ", " << yixiw << endl;
-            if (yixiw < 1) {
-                double *xiyia = matrix.scalarMultiply(matrix.subtract(w, matrix.scalarMultiply(X[j], y[j], res), res),
-                                                      alpha, res);
-                w = matrix.subtract(w, xiyia, res);
-            } else {
-                double *wa = matrix.scalarMultiply(w, alpha, res);
-                w = matrix.subtract(w, wa, res);
-            }
-            //util.print1DMatrix(w,features);
-        }
-    }
-    this->setWFinal(w);
+//    Initializer initializer;
+//    wInit = initializer.initialWeights(features);
+//    Util util;
+//    cout << "Training Samples : " << trainingSamples << endl;
+//    util.print1DMatrix(wInit, features);
+//    Matrix matrix(features);
+//    w = wInit;
+//    double *res = new double[features];
+//    for (int i = 0; i < iterations; ++i) {
+//        if (i % 10 == 0) {
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+//        for (int j = 0; j < trainingSamples; ++j) {
+//            double yixiw = matrix.dot(X[j], w) * y[j];
+//            //cout << i << ", " << yixiw << endl;
+//            if (yixiw < 1) {
+//                double *xiyia = matrix.scalarMultiply(matrix.subtract(w, matrix.scalarMultiply(X[j], y[j], res), res),
+//                                                      alpha, res);
+//                w = matrix.subtract(w, xiyia, res);
+//            } else {
+//                double *wa = matrix.scalarMultiply(w, alpha, res);
+//                w = matrix.subtract(w, wa, res);
+//            }
+//            //util.print1DMatrix(w,features);
+//        }
+//    }
+//    this->setWFinal(w);
     //util.print1DMatrix(w,features);
 
     //printf("Final Weight\n");
@@ -64,7 +64,8 @@ void SGD::sgd() {
 
 void SGD::adamSGD() {
     Initializer initializer;
-    wInit = new double[features];
+    double* w = new double[features];
+    initializer.initializeWeightsWithArray(features, w);
     double *v = new double[features];
     initializer.initializeWeightsWithArray(features, wInit);
     initializer.initializeWeightsWithArray(features, v);
@@ -112,7 +113,7 @@ void SGD::adamSGD() {
 
     Matrix1 matrix(features);
 
-    w = wInit;
+
     for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -170,9 +171,8 @@ void SGD::adamSGD() {
 
 void SGD::adamSGD(double* w) {
     Initializer initializer;
-    wInit = new double[features];
+
     double *v = new double[features];
-    initializer.initializeWeightsWithArray(features, wInit);
     initializer.initializeWeightsWithArray(features, v);
     double *r = new double[features];
     initializer.initializeWeightsWithArray(features, r);
@@ -218,7 +218,7 @@ void SGD::adamSGD(double* w) {
 
     Matrix1 matrix(features);
 
-    w = wInit;
+    initializer.initializeWeightsWithArray(features, w);
     for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -271,7 +271,25 @@ void SGD::adamSGD(double* w) {
     util.print1DMatrix(w, features);
 
     cout << "============================================" << endl;
-    delete [] v, v1, v2, r, r1, r2, v_hat, r_hat, w1, w2, grad_mul, sq_r_hat, gradient, w_xiyi, aw_axiyi, aw1, xiyi, w1d, wInit;
+    delete [] v;
+    delete [] v1;
+    delete [] v2;
+    delete [] r;
+    delete [] r1;
+    delete [] r2;
+    delete [] v_hat;
+    delete [] r_hat;
+    delete [] w1;
+    delete [] w2;
+    delete [] grad_mul;
+    delete [] sq_r_hat;
+    delete [] gradient;
+    delete [] w_xiyi;
+    delete [] aw_axiyi;
+    delete [] aw1;
+    delete [] xiyi;
+    delete [] w1d;
+    delete [] wInit;
 }
 
 double *SGD::getW() const {
