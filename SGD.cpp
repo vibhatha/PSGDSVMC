@@ -219,7 +219,9 @@ void SGD::adamSGD(double* w) {
     Matrix1 matrix(features);
 
     initializer.initializeWeightsWithArray(features, w);
-    for (int i = 1; i < iterations; ++i) {
+    double coefficient = 0;
+    double yixiw = 0;
+    for (int i = 0; i < iterations; ++i) {
         if (i % 10 == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
@@ -228,10 +230,10 @@ void SGD::adamSGD(double* w) {
         }
         for (int j = 0; j < trainingSamples; ++j) {
 
-            double yixiw = matrix.dot(X[j], w);
+            yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
 
-            double coefficient = 1.0 / (1.0 + double(i));
+            coefficient = 1.0 / (1.0 + double(i));
 
             if (yixiw < 1) {
                 matrix.scalarAddition(X[j], y[j], xiyi);
