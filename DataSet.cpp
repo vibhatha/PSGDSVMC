@@ -257,6 +257,159 @@ void DataSet::load() {
 
 }
 
+void DataSet::load(double** Xtrain, double* ytrain, double** Xtest, double* ytest) {
+
+    if(isSplit== false){
+        ifstream file(trainFile);
+        cout << "Loading File : " << trainFile << endl;
+        for(int row = 0; row < trainingSamples; row++)
+        {
+
+            string line;
+            getline(file, line);
+            if ( !file.good() ){
+                printf("File is not readable \n");
+                break;
+            }
+
+            //cout << line << endl;
+            vector<double> vect;
+
+            std::stringstream ss(line);
+
+            double i;
+
+            while (ss >> i)
+            {
+                vect.push_back(i);
+
+                if (ss.peek() == ',')
+                    ss.ignore();
+            }
+            ytrain[row] = vect.at(0);
+
+            for (int j=1; j< vect.size(); j++){
+                Xtrain[row][j-1] = vect.at(j);
+            }
+        }
+
+
+        ifstream fileTest(testFile);
+        cout << "Loading File : " << testFile << endl;
+        for(int row = 0; row < testingSamples; row++)
+        {
+
+            string line;
+            getline(fileTest, line);
+            if ( !fileTest.good() ){
+                printf("File is not readable \n");
+                break;
+            }
+
+            //cout << line << endl;
+            vector<double> vect;
+
+            std::stringstream ss(line);
+
+            double i;
+
+            while (ss >> i)
+            {
+                vect.push_back(i);
+
+                if (ss.peek() == ',')
+                    ss.ignore();
+            }
+            ytest[row] = vect.at(0);
+
+            for (int j=1; j< vect.size(); j++){
+                Xtest[row][j-1] = vect.at(j);
+            }
+        }
+    }
+
+    if(isSplit == true) {
+        printf("Splitting data ... \n");
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        printf("Train and Test %d, %d \n", trainSet, testSet);
+        this->setTestingSamples(testSet);
+        this->setTrainingSamples(trainSet);
+
+        ifstream file(sourceFile);
+        cout << "Loading File : " << sourceFile << endl;
+        int rowTest = 0;
+        for(int row = 0; row < totalSamples; row++)
+        {
+            if(row<trainSet){
+
+                string line;
+                getline(file, line);
+                if ( !file.good() ){
+                    printf("File is not readable \n");
+                    break;
+                }
+
+                //cout << line << endl;
+                vector<double> vect;
+
+                std::stringstream ss(line);
+
+                double i;
+
+                while (ss >> i)
+                {
+                    vect.push_back(i);
+
+                    if (ss.peek() == ',')
+                        ss.ignore();
+                }
+                ytrain[row] = vect.at(0);
+
+                for (int j=1; j< vect.size(); j++){
+                    Xtrain[row][j-1] = vect.at(j);
+                }
+            }
+
+            if(row>=trainSet and rowTest <= testSet){
+                //cout << "Row : " << row << ", Row Test Id  : " << rowTest << endl;
+
+                string line;
+                getline(file, line);
+                if ( !file.good() ){
+                    printf("File is not readable \n");
+                    break;
+                }
+
+                //cout << line << endl;
+                vector<double> vect;
+
+                std::stringstream ss(line);
+
+                double i;
+
+                while (ss >> i)
+                {
+                    vect.push_back(i);
+
+                    if (ss.peek() == ',')
+                        ss.ignore();
+                }
+                ytest[rowTest] = vect.at(0);
+
+                for (int j=1; j< vect.size(); j++){
+                    Xtest[rowTest][j-1] = vect.at(j);
+                }
+                rowTest++;
+            }
+
+        }
+    }
+
+
+}
+
 double** DataSet::getXtest() {
     return Xtest;
 }

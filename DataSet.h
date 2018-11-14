@@ -38,6 +38,7 @@ public:
             int world_size, int world_rank);
 
     void load();
+    void load(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
     void distributedLoad();
     double** getXtrain();
     double** getXtest();
