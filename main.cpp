@@ -358,13 +358,6 @@ void trainSequential(OptArgs optArgs) {
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
 
-        Xtrain = dataSet.getXtrain();
-        ytrain = dataSet.getYtrain();
-
-        Xtest = dataSet.getXtest();
-        ytest = dataSet.getYtest();
-
-
         util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
