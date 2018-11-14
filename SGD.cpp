@@ -117,7 +117,7 @@ void SGD::adamSGD() {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //cout << "Iteration " << i << "/" << iterations << endl;
+            cout << "Iteration " << i << "/" << iterations << endl;
         }
         for (int j = 0; j < trainingSamples; ++j) {
 
