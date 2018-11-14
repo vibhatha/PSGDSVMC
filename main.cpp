@@ -342,9 +342,17 @@ void trainSequential(OptArgs optArgs) {
         initializer.initializeWeightsWithArray(trainSet, ytrain);
         double** Xtest;
         initializer.initalizeMatrix(testSet, features, Xtest);
-        double* ytest;
-        ytest = new double[testSet];
+        double* ytest = new double[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
+
+        Util util;
+        cout << "Xtrain : " << endl;
+        util.print2DMatrix(Xtrain, trainSet, features);
+
+        cout << "ytrain : " << endl;
+        util.print1DMatrix(ytrain, trainSet);
+
+
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
 
@@ -354,7 +362,7 @@ void trainSequential(OptArgs optArgs) {
         Xtest = dataSet.getXtest();
         ytest = dataSet.getYtest();
 
-        Util util;
+
         util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
