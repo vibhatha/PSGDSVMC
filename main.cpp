@@ -33,8 +33,9 @@ int main(int argc, char** argv) {
     //sgd();
     //test4();
     //test5();
-    parallelLoad(optArgs);
-    //trainSequential(optArgs);
+    //parallelLoad(optArgs);
+    trainSequential(optArgs);
+    //test6();
 
     return 0;
 }
@@ -347,7 +348,7 @@ void trainSequential(OptArgs optArgs) {
         clock_t begin = clock();
         SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd1.sgd();
+        sgd1.adamSGD();
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -393,7 +394,7 @@ void trainSequential(OptArgs optArgs) {
         SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
         //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
         //sgd2.adamSGD();
-        sgd1.sgd();
+        sgd1.adamSGD();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
         printf("Training Samples : % d \n", trainingSamples);

@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <time.h>
 #include "Initializer.h"
+#include "Matrix.h"
 
 using namespace std;
 
@@ -104,5 +105,17 @@ void Test::test5() {
 }
 
 void Test::test6() {
+    Util util;
+    int f = 3;
+    double* a = new double[f];
+    double* b = new double[f];
+    a[0] = 1.0;
+    b[0]=2.0;
+    a[1] = 2.0;
+    b[1]=3.0;
+    a[2] = 4.0;
+    b[2]=5.0;
+    Matrix matrix(f);
+
 
 }

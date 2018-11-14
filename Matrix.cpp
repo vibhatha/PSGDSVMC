@@ -1,7 +1,3 @@
-//
-// Created by vibhatha on 11/5/18.
-//
-
 #include "Matrix.h"
 #include <cmath>
 #include <iostream>
@@ -18,9 +14,7 @@ double* Matrix::add(double* a, double *b) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] + b[i];
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::subtract(double* a, double *b) {
@@ -28,9 +22,7 @@ double* Matrix::subtract(double* a, double *b) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] - b[i];
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::scalarMultiply(double* a, double c) {
@@ -54,9 +46,7 @@ double* Matrix::inner(double* a, double* b) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *b[i];
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::divide(double *a, double *b) {
@@ -64,9 +54,7 @@ double* Matrix::divide(double *a, double *b) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] / b[i];
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::sqrt(double* a) {
@@ -75,9 +63,7 @@ double* Matrix::sqrt(double* a) {
         double d = a[i];
         res[i] = std::sqrt(d);
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::scalarAddition(double *a, double c) {
@@ -85,9 +71,7 @@ double* Matrix::scalarAddition(double *a, double c) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] + c;
     }
-    a = res;
-    delete [] res;
-    return a;
+    return res;
 }
 
 double* Matrix::put(double *a, double *b) {

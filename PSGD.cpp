@@ -55,6 +55,7 @@ void PSGD::sgd() {
                 double* wa = matrix.scalarMultiply(w,alpha);
                 w = matrix.subtract(w,wa);
             }
+
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
             w = matrix.scalarMultiply(wglobal, 1.0 / double(world_size));
@@ -67,6 +68,7 @@ void PSGD::sgd() {
 }
 
 void PSGD::adamSGD() {
+
     int totalSamples = trainingSamples;
     Initializer initializer;
     wInit = initializer.zeroWeights(features);
@@ -78,14 +80,14 @@ void PSGD::adamSGD() {
     double* r2 = initializer.zeroWeights(features);
     double* w1 = initializer.zeroWeights(features);
     double* w2 = initializer.zeroWeights(features);
-    double* wglobal = initializer.zeroWeights(features);
+    double wglobal [features];
     double* v_hat = initializer.zeroWeights(features);
     double* r_hat = initializer.zeroWeights(features);
     double* grad_mul = initializer.zeroWeights(features);
     double* gradient = initializer.zeroWeights(features);
-    double epsilon = 0.00000001;
+    double epsilon = 0.1;
     Util util;
-    cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
     //util.print1DMatrix(wInit, features);
     //util.print1DMatrix(v, features);
     //util.print1DMatrix(r, features);
@@ -107,7 +109,6 @@ void PSGD::adamSGD() {
 
             double yixiw = matrix.dot(X[j], w) * y[j];
             //cout << i << ", " << yixiw << endl;
-            alpha = 1.0 / (1.0 + double(i));
             double coefficient = 1.0 /(1.0 + double(i));
             if(yixiw<1) {
                 gradient = matrix.scalarMultiply(matrix.subtract(matrix.scalarMultiply(w, coefficient),matrix.scalarMultiply(X[j], y[j])), alpha);
@@ -136,6 +137,7 @@ void PSGD::adamSGD() {
 //            }
 
             //delete [] xi;
+            //delete [] v ;delete [] r ;delete [] v1 ;delete [] v2 ;delete [] r1 ;delete [] r2 ;delete [] w1 ;delete [] w2 ;delete [] wglobal ;delete [] v_hat ;delete [] r_hat ;delete [] grad_mul ;delete [] gradient;
         }
     }
     if(world_rank==0) {
@@ -145,7 +147,7 @@ void PSGD::adamSGD() {
         this->setWFinal(w);
         cout << "============================================" << endl;
     }
-    delete [] v ;delete [] r ;delete [] v1 ;delete [] v2 ;delete [] r1 ;delete [] r2 ;delete [] w1 ;delete [] w2 ;delete [] wglobal ;delete [] v_hat ;delete [] r_hat ;delete [] grad_mul ;delete [] gradient;
+
 
 }
 
