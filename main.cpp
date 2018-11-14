@@ -362,9 +362,10 @@ void trainSequential(OptArgs optArgs) {
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
+        double* w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd2.adamSGD();
+        sgd2.adamSGD(w);
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -377,7 +378,7 @@ void trainSequential(OptArgs optArgs) {
 //        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
 //        double acc = predict.predict();
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
-    delete [] Xtrain, Xtest, ytrain, ytest;
+        delete [] Xtrain, Xtest, ytrain, ytest, w;
 
     }else{
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -404,9 +405,10 @@ void trainSequential(OptArgs optArgs) {
         printf("\n----------------------------------------\n");
 //        util.print2DMatrix(Xtest, testingSamples, features);
         clock_t begin = clock();
+        double* w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
-        sgd2.adamSGD();
+        sgd2.adamSGD(w);
         //sgd1.adamSGD();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -417,7 +419,9 @@ void trainSequential(OptArgs optArgs) {
         //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         //double acc = predict.predict();
         //cout << "Testing Accuracy : " << acc << "%" << endl;
+        delete [] Xtrain, Xtest, ytrain, ytest, w;
     }
+
 }
 
 void sgd() {
