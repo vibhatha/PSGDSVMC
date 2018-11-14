@@ -13,7 +13,7 @@ private:
 public:
     double* initialWeights(int features);
     double* zeroWeights(int features);
-    double initializeWeightsWithArray(int features, double a []);
+    double* initializeWeightsWithArray(int features, double a []);
 };
 
 

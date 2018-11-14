@@ -32,5 +32,12 @@ double* Initializer::zeroWeights(int features) {
     return wInit;
 }
 
+double* Initializer::initializeWeightsWithArray(int features, double *a) {
+    for (int i = 0; i < features; ++i) {
+        a[i] = 0.0;
+    }
+    return a;
+}
+
 
 
