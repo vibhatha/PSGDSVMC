@@ -336,11 +336,11 @@ void trainSequential(OptArgs optArgs) {
         int testSet = totalSamples - trainSet;
         Initializer initializer;
 
-        double** Xtrain = (double **) new double[trainSet][features];
+        double** Xtrain;
         initializer.initalizeMatrix(trainSet, features, Xtrain);
         double* ytrain;
         initializer.initializeWeightsWithArray(trainSet, ytrain);
-        double** Xtest = (double **) new double[testSet][features]; ;
+        double** Xtest;
         initializer.initalizeMatrix(testSet, features, Xtest);
         double* ytest;
         initializer.initializeWeightsWithArray(testSet, ytest);
