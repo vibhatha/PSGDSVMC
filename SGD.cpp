@@ -165,7 +165,7 @@ void SGD::adamSGD() {
     util.print1DMatrix(w, features);
     this->setWFinal(w);
     cout << "============================================" << endl;
-    delete [] v, v1, v2, r, r1, r2, v_hat, r_hat, w1, w2, grad_mul, sq_r_hat, gradient, w_xiyi, aw_axiyi, aw1, xiyi, w1d;
+    delete [] v, v1, v2, r, r1, r2, v_hat, r_hat, w1, w2, grad_mul, sq_r_hat, gradient, w_xiyi, aw_axiyi, aw1, xiyi, w1d, wInit;
 }
 
 double *SGD::getW() const {
