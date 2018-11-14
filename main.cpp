@@ -337,13 +337,22 @@ void trainSequential(OptArgs optArgs) {
         Initializer initializer;
 
         double** Xtrain;
-        initializer.initalizeMatrix(trainSet, features, Xtrain);
+
         double* ytrain = new double[trainSet];
         initializer.initializeWeightsWithArray(trainSet, ytrain);
         double** Xtest;
-        initializer.initalizeMatrix(testSet, features, Xtest);
+
         double* ytest = new double[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
+        Xtrain = new double*[trainSet];
+        for (int i = 0; i < trainSet; ++i) {
+            Xtrain[i] = new double[features];
+        }
+        Xtest = new double*[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
 
         Util util;
         cout << "Xtrain : " << endl;
