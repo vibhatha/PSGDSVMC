@@ -338,11 +338,12 @@ void trainSequential(OptArgs optArgs) {
 
         double** Xtrain;
         initializer.initalizeMatrix(trainSet, features, Xtrain);
-        double* ytrain;
+        double* ytrain = new double[trainSet];
         initializer.initializeWeightsWithArray(trainSet, ytrain);
         double** Xtest;
         initializer.initalizeMatrix(testSet, features, Xtest);
         double* ytest;
+        ytest = new double[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
