@@ -353,14 +353,7 @@ void trainSequential(OptArgs optArgs) {
             Xtest[i] = new double[features];
         }
 
-
         Util util;
-        cout << "Xtrain : " << endl;
-        util.print2DMatrix(Xtrain, trainSet, features);
-
-        cout << "ytrain : " << endl;
-        util.print1DMatrix(ytrain, trainSet);
-
 
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
