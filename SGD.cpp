@@ -110,7 +110,7 @@ void SGD::adamSGD() {
     //util.print1DMatrix(r, features);
 
     Matrix1 matrix(features);
-    double *res = new double[features];
+
     w = wInit;
     for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0) {
@@ -164,6 +164,7 @@ void SGD::adamSGD() {
     util.print1DMatrix(w, features);
     this->setWFinal(w);
     cout << "============================================" << endl;
+    delete [] v, v1, v2, r, r1, r2, v_hat, r_hat, w1, w2, grad_mul, sq_r_hat, gradient, w_xiyi, aw_axiyi, aw1, xiyi, w1d;
 }
 
 double *SGD::getW() const {
