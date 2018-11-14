@@ -346,9 +346,9 @@ void trainSequential(OptArgs optArgs) {
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
-        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
-        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd1.adamSGD();
+        //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        sgd2.adamSGD();
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -356,10 +356,7 @@ void trainSequential(OptArgs optArgs) {
         printf("Testing Samples : % d \n", testSet);
         printf("Training time %f s \n", elapsed_secs);
 
-        delete Xtrain;
-        delete Xtest;
-        delete ytest;
-        delete ytrain;
+
 
 //        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
 //        double acc = predict.predict();
@@ -391,10 +388,10 @@ void trainSequential(OptArgs optArgs) {
         printf("\n----------------------------------------\n");
 //        util.print2DMatrix(Xtest, testingSamples, features);
         clock_t begin = clock();
-        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
-        //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
-        //sgd2.adamSGD();
-        sgd1.adamSGD();
+        //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
+        sgd2.adamSGD();
+        //sgd1.adamSGD();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
         printf("Training Samples : % d \n", trainingSamples);

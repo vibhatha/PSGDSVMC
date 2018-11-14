@@ -6,27 +6,29 @@
 #define PSGDC_MATRIX_H
 
 
+#include "Util.h"
+
 class Matrix {
 
 private:
     int features;
-    int samples;
-    double* res;
+
+    Util util;
 
 public:
-    Matrix(const int features);
+    Matrix(int features);
 
-    double* add(double* a, double* b);
-    double* subtract(double* a, double* b);
+    double* add(double* a, double* b, double* res);
+    double* subtract(double* a, double* b, double* res);
     double dot(double* a, double* b);
-    double* scalarMultiply(double* a, double c);
-    double* scalarAddition(double* a, double c);
-    double* inner(double* a, double* b);
-    double* divide(double* a, double* b);
-    double* sqrt(double* a);
-    double* put(double* a, double* b);
+    double* scalarMultiply(double* a, double c, double* res);
+    double* scalarAddition(double* a, double c, double* res);
+    double* inner(double* a, double* b, double* res);
+    double* divide(double* a, double* b, double* res);
+    double* sqrt(double* a, double* res);
+    double* put(double* a, double* b, double* res);
 
-    const double *getRes() const;
+
 
 };
 

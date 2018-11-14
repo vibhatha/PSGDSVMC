@@ -5,21 +5,25 @@
 using namespace std;
 
 
-double* Matrix::add(double* a, double *b) {
+Matrix::Matrix(int features_) {
+    features = features_;
+}
+
+double* Matrix::add(double* a, double *b, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] + b[i];
     }
     return res;
 }
 
-double* Matrix::subtract(double* a, double *b) {
+double* Matrix::subtract(double* a, double *b, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] - b[i];
     }
     return res;
 }
 
-double* Matrix::scalarMultiply(double* a, double c) {
+double* Matrix::scalarMultiply(double* a, double c, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *c;
     }
@@ -34,21 +38,21 @@ double Matrix::dot(double* a, double* b) {
     return res;
 }
 
-double* Matrix::inner(double* a, double* b) {
+double* Matrix::inner(double* a, double* b, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *b[i];
     }
     return res;
 }
 
-double* Matrix::divide(double *a, double *b) {
+double* Matrix::divide(double *a, double *b, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] / b[i];
     }
     return res;
 }
 
-double* Matrix::sqrt(double* a) {
+double* Matrix::sqrt(double* a, double* res) {
     for (int i = 0; i < features; ++i) {
         double d = a[i];
         res[i] = std::sqrt(d);
@@ -56,25 +60,16 @@ double* Matrix::sqrt(double* a) {
     return res;
 }
 
-double* Matrix::scalarAddition(double *a, double c) {
-    double* res = new double[features];
+double* Matrix::scalarAddition(double *a, double c, double* res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] + c;
     }
     return res;
 }
 
-double* Matrix::put(double *a, double *b) {
+double* Matrix::put(double *a, double *b, double* res) {
     for (int i = 0; i < features; ++i) {
         a[i] = b[i] ;
     }
     return a;
-}
-
-const double *Matrix::getRes() const {
-    return res;
-}
-
-Matrix::Matrix(const int features) : features(features) {
-    res = new double[features];
 }

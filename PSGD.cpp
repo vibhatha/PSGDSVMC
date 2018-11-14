@@ -37,6 +37,7 @@ void PSGD::sgd() {
     //cout << "Training Samples : " << trainingSamples << endl;
     //util.print1DMatrix(wInit, features);
     Matrix matrix(features);
+    double* res = new double[features];
     w = wInit;
     for (int i = 0; i < iterations; ++i) {
         if(i%10 == 0 and world_rank==0) {
@@ -49,16 +50,16 @@ void PSGD::sgd() {
             alpha = 1.0 / (1.0 + i);
             //cout << i << ", " << yixiw << endl;
             if(yixiw<1) {
-                double* xiyia = matrix.scalarMultiply(matrix.subtract(w,matrix.scalarMultiply(xi, yi)), alpha);
-                w = matrix.subtract(w, xiyia);
+                double* xiyia = matrix.scalarMultiply(matrix.subtract(w,matrix.scalarMultiply(xi, yi, res), res), alpha, res);
+                w = matrix.subtract(w, xiyia, res);
             } else {
-                double* wa = matrix.scalarMultiply(w,alpha);
-                w = matrix.subtract(w,wa);
+                double* wa = matrix.scalarMultiply(w,alpha, res);
+                w = matrix.subtract(w,wa, res);
             }
 
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
-            w = matrix.scalarMultiply(wglobal, 1.0 / double(world_size));
+            w = matrix.scalarMultiply(wglobal, 1.0 / double(world_size), res);
             //util.print1DMatrix(w,features);
         }
     }
@@ -80,7 +81,7 @@ void PSGD::adamSGD() {
     double* r2 = initializer.zeroWeights(features);
     double* w1 = initializer.zeroWeights(features);
     double* w2 = initializer.zeroWeights(features);
-    double wglobal [features];
+    double* wglobal = initializer.zeroWeights(features);
     double* v_hat = initializer.zeroWeights(features);
     double* r_hat = initializer.zeroWeights(features);
     double* grad_mul = initializer.zeroWeights(features);
@@ -92,7 +93,7 @@ void PSGD::adamSGD() {
     //util.print1DMatrix(v, features);
     //util.print1DMatrix(r, features);
 
-
+    double* res = new double[features];
     Matrix matrix(features);
     w = wInit;
     for (int i = 1; i < iterations; ++i) {
@@ -110,28 +111,29 @@ void PSGD::adamSGD() {
             double yixiw = matrix.dot(X[j], w) * y[j];
             //cout << i << ", " << yixiw << endl;
             double coefficient = 1.0 /(1.0 + double(i));
+
             if(yixiw<1) {
-                gradient = matrix.scalarMultiply(matrix.subtract(matrix.scalarMultiply(w, coefficient),matrix.scalarMultiply(X[j], y[j])), alpha);
+                gradient = matrix.scalarMultiply(matrix.subtract(matrix.scalarMultiply(w, coefficient, res),matrix.scalarMultiply(X[j], y[j], res), res), alpha, res);
 
             } else {
-                gradient = matrix.scalarMultiply(matrix.scalarMultiply(w, coefficient), alpha);
+                gradient = matrix.scalarMultiply(matrix.scalarMultiply(w, coefficient, res), alpha, res);
             }
 
-            v1 = matrix.scalarMultiply(v, beta1);
-            v2 = matrix.scalarMultiply(gradient, (1-beta1));
-            v = matrix.add(v1, v2);
-            v_hat = matrix.scalarMultiply(v, (1.0 /(1.0-(pow(beta1,(double)i)))));
-            grad_mul = matrix.inner(gradient, gradient);
-            r1 = matrix.scalarMultiply(r, beta2);
-            r2 = matrix.scalarMultiply(grad_mul, (1-beta2));
-            r = matrix.add(r1, r2);
-            r_hat = matrix.scalarMultiply(r, (1.0/(1.0-(pow(beta2,(double)i)))));
-            w1 = matrix.divide(v_hat, matrix.scalarAddition(matrix.sqrt(r_hat),epsilon));
-            w2 = matrix.scalarMultiply(w1, alpha);
-            w = matrix.subtract(w,w2);
+            v1 = matrix.scalarMultiply(v, beta1, res);
+            v2 = matrix.scalarMultiply(gradient, (1-beta1), res);
+            v = matrix.add(v1, v2, res);
+            v_hat = matrix.scalarMultiply(v, (1.0 /(1.0-(pow(beta1,(double)i)))), res);
+            grad_mul = matrix.inner(gradient, gradient, res);
+            r1 = matrix.scalarMultiply(r, beta2, res);
+            r2 = matrix.scalarMultiply(grad_mul, (1-beta2), res);
+            r = matrix.add(r1, r2, res);
+            r_hat = matrix.scalarMultiply(r, (1.0/(1.0-(pow(beta2,(double)i)))), res);
+            w1 = matrix.divide(v_hat, matrix.scalarAddition(matrix.sqrt(r_hat, res),epsilon, res), res);
+            w2 = matrix.scalarMultiply(w1, alpha, res);
+            w = matrix.subtract(w,w2, res);
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
-            w = matrix.scalarMultiply(wglobal, 1.0 / (double)world_size);
+            w = matrix.scalarMultiply(wglobal, 1.0 / (double)world_size, res);
 //            if(world_rank==0) {
 //                //util.print1DMatrix(w, features);
 //            }

@@ -116,6 +116,10 @@ void Test::test6() {
     a[2] = 4.0;
     b[2]=5.0;
     Matrix matrix(f);
+    double* res = new double[f];
+    for (int i = 0; i < 10 ; ++i) {
+        res = matrix.subtract(matrix.scalarMultiply(b,0.01, res ), b, res);
+        util.print1DMatrix(res, f);
 
-
+    }
 }

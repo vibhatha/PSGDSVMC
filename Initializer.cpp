@@ -32,3 +32,5 @@ double* Initializer::zeroWeights(int features) {
     return wInit;
 }
 
+
+
