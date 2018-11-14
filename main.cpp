@@ -7,6 +7,7 @@
 #include "Predict.h"
 #include "ResourceManager.h"
 #include "PSGD.h"
+#include "Initializer.h"
 #include <ctime>
 #include <mpi.h>
 
@@ -330,19 +331,30 @@ void trainSequential(OptArgs optArgs) {
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         double ratio = optArgs.getRatio();
-        DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
-        dataSet.load();
-
-        double** Xtrain = dataSet.getXtrain();
-        double* ytrain = dataSet.getYtrain();
-
-        double** Xtest = dataSet.getXtest();
-        double* ytest = dataSet.getYtest();
         int totalSamples = trainingSamples;
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
+        Initializer initializer;
+
+        double** Xtrain;
+        initializer.initalizeMatrix(trainSet, features, Xtrain);
+        double* ytrain;
+        initializer.initializeWeightsWithArray(trainSet, ytrain);
+        double** Xtest;
+        initializer.initalizeMatrix(testSet, features, Xtest);
+        double* ytest;
+        initializer.initializeWeightsWithArray(testSet, ytest);
+        DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
+        dataSet.load(Xtrain, ytrain, Xtest, ytest);
+
+        Xtrain = dataSet.getXtrain();
+        ytrain = dataSet.getYtrain();
+
+        Xtest = dataSet.getXtest();
+        ytest = dataSet.getYtest();
+
         Util util;
-        //util.print2DMatrix(Xtrain, trainSet, features);
+        util.print2DMatrix(Xtrain, trainSet, features);
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();

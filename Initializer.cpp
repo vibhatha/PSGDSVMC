@@ -40,4 +40,12 @@ double* Initializer::initializeWeightsWithArray(int features, double *a) {
 }
 
 
+double** Initializer::initalizeMatrix(int rows, int columns, double **b) {
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < columns; ++j) {
+            b[i][j] = 0;
+        }
+    }
+}
+
 
