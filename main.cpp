@@ -382,7 +382,7 @@ void trainSequential(OptArgs optArgs) {
 //        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
 //        double acc = predict.predict();
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
-
+    delete [] Xtrain, Xtest, ytrain, ytest;
 
     }else{
         string datasourceBase = resourceManager.getDataSourceBasePath();
