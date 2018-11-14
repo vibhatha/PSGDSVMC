@@ -11,9 +11,11 @@ class Matrix {
 private:
     int features;
     int samples;
+    double* res;
 
 public:
-    Matrix(int features_);
+    Matrix(const int features);
+
     double* add(double* a, double* b);
     double* subtract(double* a, double* b);
     double dot(double* a, double* b);
@@ -24,6 +26,7 @@ public:
     double* sqrt(double* a);
     double* put(double* a, double* b);
 
+    const double *getRes() const;
 
 };
 
