@@ -65,7 +65,7 @@ void SGD::sgd() {
 void SGD::adamSGD() {
     Initializer initializer;
     double *v = new double[features];
-    wInit = initializer.initialWeights(features);
+    initializer.initializeWeightsWithArray(features, wInit);
     initializer.initializeWeightsWithArray(features, v);
     double *r = new double[features];
     initializer.initializeWeightsWithArray(features, r);
