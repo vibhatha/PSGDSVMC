@@ -100,7 +100,7 @@ void parallelLoad(OptArgs optArgs) {
         if(world_rank==0) {
             cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
             Util util;
-            util.print2DMatrix(Xtrain, dataPerMachine, features);
+            util.print2DMatrix(Xtrain, 10, features);
             printf("\n----------------------------------------\n");
         }
 
