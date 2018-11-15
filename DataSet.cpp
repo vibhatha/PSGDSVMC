@@ -122,7 +122,7 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
         ifstream file(trainFile);
         cout << "Loading File : " << trainFile << endl;
         int rowTest = 0;
-        for(int row = 0; row < totalVisibleSamples; row++)
+        for(int row = 0; row < totalSamples; row++)
         {
             //cout << "Rank : " << world_rank << ", row : " << row << endl;
             string line;
@@ -132,7 +132,7 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
                 break;
             }
 
-            if(row>=start and row<end) {
+            if(row>=start and row<end and row < totalVisibleSamples) {
                 //cout << "start : " << (row-start) << " End : " << end << endl;
                 vector<double> vect;
 
@@ -154,8 +154,31 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
                 }
             }
 
+            else if(row>trainingSet) {
+                //cout << line << endl;
+                vector<double> vect;
+
+                std::stringstream ss(line);
+
+                double i;
+
+                while (ss >> i)
+                {
+                    vect.push_back(i);
+
+                    if (ss.peek() == ',')
+                        ss.ignore();
+                }
+                ytest[row-trainingSet] = vect.at(0);
+
+                for (int j=1; j< vect.size(); j++){
+                    Xtest[row-trainingSet][j-1] = vect.at(j);
+                }
+            }
 
         }
+
+
     }
 }
 

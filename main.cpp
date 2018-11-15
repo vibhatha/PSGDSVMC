@@ -24,9 +24,10 @@ void train(OptArgs optArgs);
 void parallel(OptArgs optArgs);
 void parallelLoad(OptArgs optArgs);
 void trainSequential(OptArgs optArgs);
+void mpiTest();
 
 int main(int argc, char** argv) {
-    std::cout << "Hello, World!" << std::endl;
+    //std::cout << "Hello, World!" << std::endl;
 
     ArgReader argReader(argc, argv);
     OptArgs optArgs = argReader.getParams();
@@ -37,8 +38,19 @@ int main(int argc, char** argv) {
     parallelLoad(optArgs);
     //trainSequential(optArgs);
     //test6();
+    //mpiTest();
 
     return 0;
+}
+
+void mpiTest() {
+    MPI_Init(NULL, NULL);
+//    int world_rank;
+//    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+//    int world_size;
+//    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+//    cout << "World Rank : " << world_rank << ", World Size : " << world_size << endl;
+    MPI_Finalize();
 }
 
 void parallelLoad(OptArgs optArgs) {
@@ -97,12 +109,12 @@ void parallelLoad(OptArgs optArgs) {
 
 
 
-        if(world_rank==0) {
-            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
-            Util util;
-            util.print2DMatrix(Xtrain, 10, features);
-            printf("\n----------------------------------------\n");
-        }
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
 
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
@@ -110,6 +122,9 @@ void parallelLoad(OptArgs optArgs) {
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
+            Predict predict(Xtest, ytest, w , testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
