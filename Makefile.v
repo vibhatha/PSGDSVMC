@@ -8,11 +8,12 @@ CC = mpic++ -std=c++11
 LFLAG =
 CFLAG = -c
 OFLAG = -o
+GFLAG = -g
 
 all: $(PROG)
 
 $(PROG) : $(OBJ)
-	$(CC) $(OFLAG) $(PROG) $(OBJ) $(LFLAG)
+	$(CC) $(GFLAG) $(OFLAG) $(PROG) $(OBJ) $(LFLAG)
 %.o : %.cpp
 	$(CC) -c $(CFLAG) $< -o $@
 

@@ -40,6 +40,7 @@ public:
 
     void sgd();
     void adamSGD();
+    void adamSGD(double* w);
 
     double *getW() const;
 

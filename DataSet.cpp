@@ -51,11 +51,12 @@ void DataSet::distributedLoad() {
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
 
-        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
+        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end  << ",Data per Rank : " << dataPerMachine << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
         Xtrain = new double*[dataPerMachine];
         ytrain = new double[dataPerMachine];
+
 
         ifstream file(trainFile);
         cout << "Loading File : " << trainFile << endl;
@@ -92,6 +93,67 @@ void DataSet::distributedLoad() {
                         Xtrain[row-start][j-1] = vect.at(j);
                     }
                 }
+
+        }
+    }
+}
+
+
+void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, double *ytest) {
+    if(isSplit== false){
+
+    }
+
+    if(isSplit == true) {
+        printf("Splitting data ... \n");
+        int totalSamples = trainingSamples;
+        int trainingSet = trainingSamples * ratio;
+        int testingSet = totalSamples - trainingSet;
+        int dataPerMachine = trainingSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+        int start = world_rank * dataPerMachine;
+        int end = start + dataPerMachine;
+        this->setDataPerMachine(dataPerMachine);
+
+        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
+        this->setTestingSamples(testingSet);
+        this->setTrainingSamples(dataPerMachine);
+
+        ifstream file(trainFile);
+        cout << "Loading File : " << trainFile << endl;
+        int rowTest = 0;
+        for(int row = 0; row < totalVisibleSamples; row++)
+        {
+            //cout << "Rank : " << world_rank << ", row : " << row << endl;
+            string line;
+            getline(file, line);
+            if ( !file.good() ){
+                printf("File is not readable \n");
+                break;
+            }
+
+            if(row>=start and row<end) {
+                //cout << "start : " << (row-start) << " End : " << end << endl;
+                vector<double> vect;
+
+                std::stringstream ss(line);
+
+                double i;
+
+                while (ss >> i)
+                {
+                    vect.push_back(i);
+
+                    if (ss.peek() == ',')
+                        ss.ignore();
+                }
+                ytrain[row-start] = vect.at(0);
+
+                for (int j=1; j< vect.size(); j++){
+                    Xtrain[row-start][j-1] = vect.at(j);
+                }
+            }
+
 
         }
     }

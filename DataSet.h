@@ -40,6 +40,7 @@ public:
     void load();
     void load(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
     void distributedLoad();
+    void distributedLoad(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
     double** getXtrain();
     double** getXtest();
     double* getYtrain();

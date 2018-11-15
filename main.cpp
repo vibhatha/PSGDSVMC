@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
     //sgd();
     //test4();
     //test5();
-    //parallelLoad(optArgs);
-    trainSequential(optArgs);
+    parallelLoad(optArgs);
+    //trainSequential(optArgs);
     //test6();
 
     return 0;
@@ -49,6 +49,7 @@ void parallelLoad(OptArgs optArgs) {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     optArgs.toString();
     ResourceManager resourceManager;
+    Initializer initializer;
     resourceManager.loadDataSourcePath();
     if(optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -62,25 +63,64 @@ void parallelLoad(OptArgs optArgs) {
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();
         double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double* w = new double[features];
+
+        double ytrain [dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest [testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double** Xtrain;
+        double** Xtest;
+        Xtrain = new double*[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double*[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
         DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile, world_size, world_rank);
-        dataSet.distributedLoad();
-        int dataPerMachine = dataSet.getDataPerMachine();
-        double** Xtrain = dataSet.getXtrain();
-        double* ytrain = dataSet.getYtrain();
-//        if(world_rank==0) {
-//            Util util;
-//            util.print2DMatrix(Xtrain, dataPerMachine, features);
-//            printf("\n----------------------------------------\n");
-//        }
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+
+
+
+        if(world_rank==0) {
+            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+            Util util;
+            util.print2DMatrix(Xtrain, dataPerMachine, features);
+            printf("\n----------------------------------------\n");
+        }
+
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        sgd1.adamSGD();
+        sgd1.adamSGD(w);
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
         }
 
-
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete [] Xtrain;
+        delete [] Xtest;
+        delete [] w;
     }
     MPI_Finalize();
 }
