@@ -106,9 +106,6 @@ void parallelLoad(OptArgs optArgs) {
         DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile, world_size, world_rank);
         dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
 //        dataPerMachine = dataSet.getDataPerMachine();
-
-
-
 //        if(world_rank==0) {
 //            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
 //            Util util;
@@ -125,6 +122,7 @@ void parallelLoad(OptArgs optArgs) {
             Predict predict(Xtest, ytest, w , testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
+
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {

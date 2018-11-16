@@ -5,6 +5,10 @@
 #ifndef PSGDC_PSGD_H
 #define PSGDC_PSGD_H
 
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 class PSGD {
 private:
@@ -22,6 +26,10 @@ private:
     double* wFinal;
     int world_size;
     int world_rank;
+    double compute_time=0;
+    double communication_time=0;
+    vector<double> compute_time_of_ranks;
+    vector<double> communication_time_of_ranks;
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
     PSGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
@@ -47,6 +55,18 @@ public:
     double *getWFinal() const;
 
     void setWFinal(double *wFinal);
+
+    double getCompute_time() const;
+
+    void setCompute_time(double compute_time);
+
+    double getCommunication_time() const;
+
+    void setCommunication_time(double communication_time);
+
+    const vector<double> &getCompute_time_of_ranks() const;
+
+    const vector<double> &getCommunication_time_of_ranks() const;
 
 };
 

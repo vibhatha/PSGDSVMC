@@ -97,6 +97,9 @@ void PSGD::adamSGD() {
     double* res = new double[features];
     Matrix matrix(features);
     w = wInit;
+    compute_time = 0;
+    communication_time = 0;
+
     for (int i = 1; i < iterations; ++i) {
         if(world_rank==0){
             if(i % 10 == 0) {
@@ -108,7 +111,7 @@ void PSGD::adamSGD() {
         }
 
         for (int j = 0; j < trainingSamples; ++j) {
-
+            double start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w) * y[j];
             //cout << i << ", " << yixiw << endl;
             double coefficient = 1.0 /(1.0 + double(i));
@@ -132,9 +135,17 @@ void PSGD::adamSGD() {
             w1 = matrix.divide(v_hat, matrix.scalarAddition(matrix.sqrt(r_hat, res),epsilon, res), res);
             w2 = matrix.scalarMultiply(w1, alpha, res);
             w = matrix.subtract(w,w2, res);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute-compute_time);
+            double start_communication = MPI_Wtime();
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
+            double end_communication = MPI_Wtime();
+            communication_time += (end_communication-start_communication);
+            start_compute = MPI_Wtime();
             w = matrix.scalarMultiply(wglobal, 1.0 / (double)world_size, res);
+            end_compute = MPI_Wtime();
+            compute_time += (end_compute-compute_time);
 //            if(world_rank==0) {
 //                //util.print1DMatrix(w, features);
 //            }
@@ -206,7 +217,8 @@ void PSGD::adamSGD(double *w) {
     Matrix1 matrix(features);
 
     initializer.initializeWeightsWithArray(features, w);
-
+    compute_time = 0;
+    communication_time = 0;
     for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0 and world_rank==0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -215,7 +227,7 @@ void PSGD::adamSGD(double *w) {
             cout << "Iteration " << i << "/" << iterations << endl;
         }
         for (int j = 0; j < trainingSamples; ++j) {
-
+            double start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
 
@@ -248,9 +260,17 @@ void PSGD::adamSGD(double *w) {
             matrix.divide(v_hat, w1d, w1);
             matrix.scalarMultiply(w1, alpha, aw1);
             matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute-compute_time);
+            double start_communication = MPI_Wtime();
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
+            double end_communication = MPI_Wtime();
+            communication_time += (end_communication-start_communication);
+            start_compute = MPI_Wtime();
             matrix.scalarMultiply(wglobal, 1.0 / (double)world_size, w);
+            end_compute = MPI_Wtime();
+            compute_time += (end_compute-compute_time);
             //util.print1DMatrix(w, features);
             //delete [] xi;
         }
@@ -262,6 +282,8 @@ void PSGD::adamSGD(double *w) {
 
         cout << "============================================" << endl;
     }
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
 
     delete [] v;
     delete [] v1;
@@ -317,3 +339,29 @@ PSGD::PSGD(double beta1, double beta2, double **X, double *y, double alpha, int 
                                                                                       testingSamples(testingSamples),
                                                                                       world_size(world_size),
                                                                                       world_rank(world_rank) {}
+
+double PSGD::getCompute_time() const {
+    return compute_time;
+}
+
+void PSGD::setCompute_time(double compute_time) {
+    PSGD::compute_time = compute_time;
+}
+
+double PSGD::getCommunication_time() const {
+    return communication_time;
+}
+
+void PSGD::setCommunication_time(double communication_time) {
+    PSGD::communication_time = communication_time;
+}
+
+const vector<double> &PSGD::getCompute_time_of_ranks() const {
+    return compute_time_of_ranks;
+}
+
+const vector<double> &PSGD::getCommunication_time_of_ranks() const {
+    return communication_time_of_ranks;
+}
+
+
