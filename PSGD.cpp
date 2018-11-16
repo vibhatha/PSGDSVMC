@@ -270,7 +270,7 @@ void PSGD::adamSGD(double *w) {
             start_compute = MPI_Wtime();
             matrix.scalarMultiply(wglobal, 1.0 / (double)world_size, w);
             end_compute = MPI_Wtime();
-            compute_time += (end_compute-compute_time);
+            compute_time += (end_compute-start_compute);
             //util.print1DMatrix(w, features);
             //delete [] xi;
         }
