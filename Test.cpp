@@ -12,6 +12,7 @@
 #include <mpi.h>
 #include <assert.h>
 #include <time.h>
+#include <ctime>
 #include "Initializer.h"
 #include "Matrix.h"
 
@@ -123,3 +124,20 @@ void Test::test6() {
 
     }
 }
+
+void Test::test7() {
+    std::time_t t = std::time(0);   // get time now
+    std::tm* now = std::localtime(&t);
+    std::cout << (now->tm_year + 1900) << '-'
+              << (now->tm_mon + 1) << '-'
+              <<  now->tm_mday
+              << "\n";
+
+
+
+}
+
+void Test::test8() {
+
+}
+
