@@ -21,6 +21,8 @@ private:
     int threads = 1;
     int workers = 1;
     int iterations;
+    bool isEpochTime = false;
+    bool isNormalTime = false;
 
 public:
 
@@ -31,6 +33,10 @@ public:
 
     OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
             double ratio, int threads, int workers, int iterations);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime);
+
 
     const string &getDataset() const;
 
@@ -73,6 +79,14 @@ public:
     void setIterations(int iterations);
 
     void toString();
+
+    bool isIsEpochTime() const;
+
+    void setIsEpochTime(bool isEpochTime);
+
+    bool isIsNormalTime() const;
+
+    void setIsNormalTime(bool isNormalTime);
 
 
 };

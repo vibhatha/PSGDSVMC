@@ -63,8 +63,11 @@ void parallelLoad(OptArgs optArgs) {
     ResourceManager resourceManager;
     Initializer initializer;
     resourceManager.loadDataSourcePath();
+    resourceManager.loadLogSourcePath();
+    string logfile = "";
     if(optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
         string testFileName = "/testing.csv";
@@ -112,16 +115,25 @@ void parallelLoad(OptArgs optArgs) {
 //            util.print2DMatrix(Xtest, 20, features);
 //            printf("\n----------------------------------------\n");
 //        }
-
+        logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("_").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+        cout << "Log File : " << logfile << endl;
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        sgd1.adamSGD(w);
+        if(optArgs.isIsNormalTime()){
+            sgd1.adamSGD(w);
+        }
+
+        if(optArgs.isIsEpochTime()) {
+            sgd1.adamSGD(w, logfile);
+        }
+
+
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
-            Predict predict(Xtest, ytest, w , testSet, features);
-            double acc = predict.predict();
-            cout << "Testing Accuracy : " << acc << "%" << endl;
+            //Predict predict(Xtest, ytest, w , testSet, features);
+            //double acc = predict.predict();
+            //cout << "Testing Accuracy : " << acc << "%" << endl;
 
         }
 

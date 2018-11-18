@@ -84,6 +84,16 @@ OptArgs ArgReader::getParams() {
             optArgs.setWorkers(x);
         }
 
+        comp = "-et";
+        if(comp.compare(argv[i])==0){
+            optArgs.setIsEpochTime(true);
+        }
+
+        comp = "-nt";
+        if(comp.compare(argv[i])==0){
+            optArgs.setIsNormalTime(true);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

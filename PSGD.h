@@ -49,6 +49,8 @@ public:
     void sgd();
     void adamSGD();
     void adamSGD(double* w);
+    void adamSGD(double* w, string logfile);
+    void writeLog(string logfile, int iterations, int samples, double** compt, double** commt);
 
     double *getW() const;
 

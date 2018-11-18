@@ -34,3 +34,26 @@ void ResourceManager::loadDataSourcePath() {
     this->setDataSourceBasePath(token);
 
 }
+
+void ResourceManager::loadLogSourcePath() {
+    string resourceFile = "logsource.yaml";
+    std::ifstream file(resourceFile);
+    std::string str;
+    string line;
+    while (std::getline(file, str))
+    {
+        line = str;
+    }
+
+    string delimiter = ": ";
+    std::string token = line.substr(line.find(delimiter) + delimiter.length(),line.length());
+    this->setLogSourceBasePath(token);
+}
+
+const string &ResourceManager::getLogSourceBasePath() const {
+    return logSourceBasePath;
+}
+
+void ResourceManager::setLogSourceBasePath(const string &logSourceBasePath) {
+    ResourceManager::logSourceBasePath = logSourceBasePath;
+}

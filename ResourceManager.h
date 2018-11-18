@@ -13,15 +13,22 @@ using namespace std;
 class ResourceManager {
 private:
     string dataSourceBasePath;
+    string logSourceBasePath;
 
 public:
     ResourceManager();
 
     void loadDataSourcePath();
 
+    void loadLogSourcePath();
+
     void setDataSourceBasePath(const string &dataSourceBasePath);
 
     const string &getDataSourceBasePath() const;
+
+    const string &getLogSourceBasePath() const;
+
+    void setLogSourceBasePath(const string &logSourceBasePath);
 
 };
 

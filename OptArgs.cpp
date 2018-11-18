@@ -116,5 +116,30 @@ void OptArgs::toString() {
     cout << "Ratio : " << this->getRatio() << endl;
     cout << "threads : " << this->getThreads() << endl;
     cout << "workers : " << this->getWorkers() << endl;
+    cout << "Normal Timing " << this->isIsNormalTime();
+    cout << "Epoch Timing " << this->isIsEpochTime();
 
+}
+
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime) : dataset(dataset), features(features), trainingSamples(trainingSamples),
+                                      testingSamples(testingSamples), alpha(alpha), isSplit(isSplit), ratio(ratio),
+                                      threads(threads), workers(workers), iterations(iterations),
+                                      isEpochTime(isEpochTime), isNormalTime(isNormalTime) {}
+
+bool OptArgs::isIsEpochTime() const {
+    return isEpochTime;
+}
+
+void OptArgs::setIsEpochTime(bool isEpochTime) {
+    OptArgs::isEpochTime = isEpochTime;
+}
+
+bool OptArgs::isIsNormalTime() const {
+    return isNormalTime;
+}
+
+void OptArgs::setIsNormalTime(bool isNormalTime) {
+    OptArgs::isNormalTime = isNormalTime;
 }
