@@ -10,6 +10,7 @@
 #include "Initializer.h"
 #include <ctime>
 #include <mpi.h>
+#include <ctime>
 
 using namespace std;
 
@@ -19,12 +20,15 @@ void test3();
 void test4();
 void test5();
 void test6();
+void test7();
+void test8();
 void sgd();
 void train(OptArgs optArgs);
 void parallel(OptArgs optArgs);
 void parallelLoad(OptArgs optArgs);
 void trainSequential(OptArgs optArgs);
 void mpiTest();
+string getTimeStamp();
 
 int main(int argc, char** argv) {
     //std::cout << "Hello, World!" << std::endl;
@@ -37,7 +41,7 @@ int main(int argc, char** argv) {
     //test5();
     parallelLoad(optArgs);
     //trainSequential(optArgs);
-    //test6();
+    //test7();
     //mpiTest();
 
     return 0;
@@ -124,7 +128,9 @@ void parallelLoad(OptArgs optArgs) {
         }
 
         if(optArgs.isIsEpochTime()) {
-            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("_").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
             sgd1.adamSGD(w, logfile);
         }
 
@@ -562,4 +568,26 @@ void test5() {
 void test6() {
     Test test;
     test.test6();
+}
+
+void test7() {
+    Test test;
+    test.test7();
+}
+
+void test8() {
+    Test test;
+    test.test8();
+}
+
+string getTimeStamp(){
+    string string1;
+    time_t t = time(0);   // get time now
+    tm* now = localtime(&t);
+    string datestring;
+    datestring.append(to_string(now->tm_year + 1900)).append("-").append(to_string((now->tm_mon + 1))).append("-").append(to_string(now->tm_mday));
+    string timestring;
+    timestring.append(to_string(now->tm_hour)).append(":").append(to_string(now->tm_min)).append(":").append(to_string(now->tm_sec));
+    string1.append(datestring).append("__").append(timestring);
+    return string1;
 }
