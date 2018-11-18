@@ -115,8 +115,8 @@ void parallelLoad(OptArgs optArgs) {
 //            util.print2DMatrix(Xtest, 20, features);
 //            printf("\n----------------------------------------\n");
 //        }
-        logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("_").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
-        cout << "Log File : " << logfile << endl;
+
+
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if(optArgs.isIsNormalTime()){
@@ -124,6 +124,7 @@ void parallelLoad(OptArgs optArgs) {
         }
 
         if(optArgs.isIsEpochTime()) {
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("_").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
             sgd1.adamSGD(w, logfile);
         }
 
