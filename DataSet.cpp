@@ -109,7 +109,7 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
 
-        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
+        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << ", M : " << dataPerMachine << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
 

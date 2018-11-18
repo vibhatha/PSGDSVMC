@@ -13,7 +13,7 @@ private:
     int features;
     int trainingSamples;
     int testingSamples;
-    bool isSplit;
+    bool isSplit=false;
     double ratio;
     double** Xtrain;
     double* ytrain;

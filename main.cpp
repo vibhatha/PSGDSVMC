@@ -138,9 +138,9 @@ void parallelLoad(OptArgs optArgs) {
         double endTime = MPI_Wtime();
         if(world_rank ==0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
-            //Predict predict(Xtest, ytest, w , testSet, features);
-            //double acc = predict.predict();
-            //cout << "Testing Accuracy : " << acc << "%" << endl;
+            Predict predict(Xtest, ytest, w , testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
 
         }
 
