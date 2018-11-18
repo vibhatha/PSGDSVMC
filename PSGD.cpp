@@ -266,7 +266,7 @@ void PSGD::adamSGD(double *w) {
             matrix.scalarMultiply(w1, alpha, aw1);
             matrix.subtract(w, aw1, w);
             double end_compute = MPI_Wtime();
-            compute_time += (end_compute - end_compute);
+            compute_time += (end_compute-start_compute);
             double start_communication = MPI_Wtime();
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
