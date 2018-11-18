@@ -153,6 +153,94 @@ void parallelLoad(OptArgs optArgs) {
         delete [] Xtrain;
         delete [] Xtest;
         delete [] w;
+    } else {
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFile;
+        trainFile.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFile;
+        testFile.append(datasourceBase).append(datasource).append(testFileName);
+        cout << "Train File : " << trainFile << endl;
+        cout << "Test File : " << testFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples;
+        int testSet = testingSamples;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double* w = new double[features];
+
+        double ytrain [dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest [testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double** Xtrain;
+        double** Xtest;
+        Xtrain = new double*[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double*[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+
+        DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank);
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
+
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        if(optArgs.isIsNormalTime()){
+            sgd1.adamSGD(w);
+        }
+
+        if(optArgs.isIsEpochTime()) {
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
+            sgd1.adamSGD(w, logfile);
+        }
+
+
+        double endTime = MPI_Wtime();
+        if(world_rank ==0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+            Predict predict(Xtest, ytest, w , testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+
+        }
+
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete [] Xtrain;
+        delete [] Xtest;
+        delete [] w;
     }
     MPI_Finalize();
 }

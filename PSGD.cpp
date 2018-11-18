@@ -266,7 +266,7 @@ void PSGD::adamSGD(double *w) {
             matrix.scalarMultiply(w1, alpha, aw1);
             matrix.subtract(w, aw1, w);
             double end_compute = MPI_Wtime();
-            compute_time += (end_compute-start_compute);
+            compute_time += (end_compute - end_compute);
             double start_communication = MPI_Wtime();
             MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                           MPI_COMM_WORLD);
@@ -287,8 +287,9 @@ void PSGD::adamSGD(double *w) {
 
         cout << "============================================" << endl;
     }*/
-    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
-    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+
+    //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
 
     delete[] v;
     delete[] v1;
@@ -491,7 +492,6 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
             }
             cout <<i<<","<<per_itr_comp<<","<<per_itr_comm<< "\n";
             myfile<<i<<","<<per_itr_comp<<","<<per_itr_comm<< "\n" ;
-
         }
         myfile.close();
     }

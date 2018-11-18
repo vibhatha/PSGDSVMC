@@ -37,6 +37,9 @@ public:
     DataSet(int features, int trainingSamples, int testingSamples, bool isSplit, double ratio, const string &trainFile,
             int world_size, int world_rank);
 
+    DataSet(int features, int trainingSamples, int testingSamples, const string &trainFile, const string &testFile,
+            int world_size, int world_rank);
+
     void load();
     void load(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
     void distributedLoad();
