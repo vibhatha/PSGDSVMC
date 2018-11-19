@@ -47,6 +47,8 @@ public:
          int trainingSamples, int testingSamples, int world_size, int world_rank);
 
     void sgd();
+    void adamSGDSeq(double* w);
+    void adamSGDSeq(double* w, string logfile);
     void adamSGD();
     void adamSGD(double* w);
     void adamSGD(double* w, string logfile);
