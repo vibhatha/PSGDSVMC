@@ -259,7 +259,7 @@ void parallelLoad(OptArgs optArgs) {
 
         double endTime = MPI_Wtime();
         if (world_rank == 0) {
-            cout << "Training Time : " << (endTime - startTime) << endl;
+
             double acc = 0;
             if(!optArgs.isBulk()){
                 Predict predict(Xtest, ytest, w, testSet, features);
@@ -290,11 +290,12 @@ void parallelLoad(OptArgs optArgs) {
                     dataSet1.loadTestData(Xtest, ytest);
                     Predict predict(Xtest, ytest, w, testSet, features);
                     acc = predict.predict();
+                    cout << "Test " << i << ", Accuracy : " << acc << endl;
                     cum_acc += acc;
                 }
                 acc = cum_acc / double(files.size());
             }
-
+            cout << "Training Time : " << (endTime - startTime) << endl;
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
         }
