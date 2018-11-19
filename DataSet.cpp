@@ -183,8 +183,10 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
             }
 
         }
-
-        if(isBulk==false) {
+        if(this->isBulk==true) {
+            cout << "Bulk Files are being used ..." << endl;
+        }
+        if(this->isBulk==false) {
             ifstream file2(testFile);
             cout << "Loading File : " << testFile << endl;
 

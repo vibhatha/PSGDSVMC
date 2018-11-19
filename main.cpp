@@ -229,7 +229,7 @@ void parallelLoad(OptArgs optArgs) {
         }
 
 
-        DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank);
+        DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank, optArgs.isBulk());
         dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
 //        dataPerMachine = dataSet.getDataPerMachine();
 //        if(world_rank==0) {
