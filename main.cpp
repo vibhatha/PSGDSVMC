@@ -11,26 +11,43 @@
 #include <ctime>
 #include <mpi.h>
 #include <ctime>
+#include <fstream>
 
 using namespace std;
 
 void test1();
+
 void test2();
+
 void test3();
+
 void test4();
+
 void test5();
+
 void test6();
+
 void test7();
+
 void test8();
+
 void sgd();
+
 void train(OptArgs optArgs);
+
 void parallel(OptArgs optArgs);
+
 void parallelLoad(OptArgs optArgs);
+
 void trainSequential(OptArgs optArgs);
+
 void mpiTest();
+
 string getTimeStamp();
 
-int main(int argc, char** argv) {
+void summary(string logfile, int world_size, double acc, double time, string datasource);
+
+int main(int argc, char **argv) {
     //std::cout << "Hello, World!" << std::endl;
 
     ArgReader argReader(argc, argv);
@@ -68,8 +85,11 @@ void parallelLoad(OptArgs optArgs) {
     Initializer initializer;
     resourceManager.loadDataSourcePath();
     resourceManager.loadLogSourcePath();
+    resourceManager.loadSummaryPath();
+    string summarylogfile ="";
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
     string logfile = "";
-    if(optArgs.isIsSplit()) {
+    if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string logsourceBase = resourceManager.getLogSourceBasePath();
         string datasource = optArgs.getDataset();
@@ -88,29 +108,30 @@ void parallelLoad(OptArgs optArgs) {
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
 
-        double* w = new double[features];
+        double *w = new double[features];
 
-        double ytrain [dataPerMachine];
+        double ytrain[dataPerMachine];
         initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
 
 
-        double ytest [testSet];
+        double ytest[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
 
-        double** Xtrain;
-        double** Xtest;
-        Xtrain = new double*[dataPerMachine];
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
         for (int i = 0; i < dataPerMachine; ++i) {
             Xtrain[i] = new double[features];
         }
 
-        Xtest = new double*[testSet];
+        Xtest = new double *[testSet];
         for (int i = 0; i < testSet; ++i) {
             Xtest[i] = new double[features];
         }
 
 
-        DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile, world_size, world_rank);
+        DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile,
+                        world_size, world_rank);
         dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
 //        dataPerMachine = dataSet.getDataPerMachine();
 //        if(world_rank==0) {
@@ -121,26 +142,30 @@ void parallelLoad(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        if(optArgs.isIsNormalTime()){
+        if (optArgs.isIsNormalTime()) {
             sgd1.adamSGD(w);
         }
 
-        if(optArgs.isIsEpochTime()) {
+        if (optArgs.isIsEpochTime()) {
             string suffix = getTimeStamp();
-            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
             sgd1.adamSGD(w, logfile);
         }
 
 
         double endTime = MPI_Wtime();
-        if(world_rank ==0) {
+        if (world_rank == 0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
-            Predict predict(Xtest, ytest, w , testSet, features);
+            Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
 
         }
 
@@ -150,9 +175,9 @@ void parallelLoad(OptArgs optArgs) {
         for (int i = 0; i < dataPerMachine; ++i) {
             delete[] Xtest[i];
         }
-        delete [] Xtrain;
-        delete [] Xtest;
-        delete [] w;
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
     } else {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string logsourceBase = resourceManager.getLogSourceBasePath();
@@ -175,27 +200,26 @@ void parallelLoad(OptArgs optArgs) {
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
 
-        double* w = new double[features];
+        double *w = new double[features];
 
-        double ytrain [dataPerMachine];
+        double ytrain[dataPerMachine];
         initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
 
 
-        double ytest [testSet];
+        double ytest[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
 
-        double** Xtrain;
-        double** Xtest;
-        Xtrain = new double*[dataPerMachine];
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
         for (int i = 0; i < dataPerMachine; ++i) {
             Xtrain[i] = new double[features];
         }
 
-        Xtest = new double*[testSet];
+        Xtest = new double *[testSet];
         for (int i = 0; i < testSet; ++i) {
             Xtest[i] = new double[features];
         }
-
 
 
         DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank);
@@ -209,27 +233,30 @@ void parallelLoad(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine, testingSamples, world_size, world_rank);
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
-        if(optArgs.isIsNormalTime()){
+        if (optArgs.isIsNormalTime()) {
             sgd1.adamSGD(w);
         }
 
-        if(optArgs.isIsEpochTime()) {
+        if (optArgs.isIsEpochTime()) {
             string suffix = getTimeStamp();
-            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append("world_size=").append(to_string(world_size)).append("_iterations=").append(to_string(optArgs.getIterations()));
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
             sgd1.adamSGD(w, logfile);
         }
 
 
         double endTime = MPI_Wtime();
-        if(world_rank ==0) {
+        if (world_rank == 0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
-            Predict predict(Xtest, ytest, w , testSet, features);
+            Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
@@ -238,9 +265,9 @@ void parallelLoad(OptArgs optArgs) {
         for (int i = 0; i < dataPerMachine; ++i) {
             delete[] Xtest[i];
         }
-        delete [] Xtrain;
-        delete [] Xtest;
-        delete [] w;
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
     }
     MPI_Finalize();
 }
@@ -255,7 +282,7 @@ void parallel(OptArgs optArgs) {
     optArgs.toString();
     ResourceManager resourceManager;
     resourceManager.loadDataSourcePath();
-    if(optArgs.isIsSplit()){
+    if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -269,11 +296,11 @@ void parallel(OptArgs optArgs) {
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load();
 
-        double** Xtrain = dataSet.getXtrain();
-        double* ytrain = dataSet.getYtrain();
+        double **Xtrain = dataSet.getXtrain();
+        double *ytrain = dataSet.getYtrain();
 
-        double** Xtest = dataSet.getXtest();
-        double* ytest = dataSet.getYtest();
+        double **Xtest = dataSet.getXtest();
+        double *ytest = dataSet.getYtest();
         int totalSamples = trainingSamples;
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
@@ -291,7 +318,7 @@ void parallel(OptArgs optArgs) {
 
 
 
-    }else{
+    } else {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -306,11 +333,11 @@ void parallel(OptArgs optArgs) {
 
         DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
         dataset.load();
-        double** Xtrain = dataset.getXtrain();
-        double* ytrain = dataset.getYtrain();
+        double **Xtrain = dataset.getXtrain();
+        double *ytrain = dataset.getYtrain();
 
-        double** Xtest = dataset.getXtest();
-        double* ytest = dataset.getYtest();
+        double **Xtest = dataset.getXtest();
+        double *ytest = dataset.getYtest();
 
 //        if(world_rank==0) {
 //            Util util;
@@ -321,11 +348,12 @@ void parallel(OptArgs optArgs) {
 
 //        clock_t begin = clock();
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples, world_size, world_rank);
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples,
+                  testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         sgd1.adamSGD();
         double endTime = MPI_Wtime();
-        if(world_rank ==0) {
+        if (world_rank == 0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
         }
 
@@ -348,7 +376,7 @@ void train(OptArgs optArgs) {
     optArgs.toString();
     ResourceManager resourceManager;
     resourceManager.loadDataSourcePath();
-    if(optArgs.isIsSplit()){
+    if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -361,11 +389,11 @@ void train(OptArgs optArgs) {
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load();
 
-        double** Xtrain = dataSet.getXtrain();
-        double* ytrain = dataSet.getYtrain();
+        double **Xtrain = dataSet.getXtrain();
+        double *ytrain = dataSet.getYtrain();
 
-        double** Xtest = dataSet.getXtest();
-        double* ytest = dataSet.getYtest();
+        double **Xtest = dataSet.getXtest();
+        double *ytest = dataSet.getYtest();
         int totalSamples = trainingSamples;
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
@@ -412,7 +440,7 @@ void train(OptArgs optArgs) {
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
 
 
-    }else{
+    } else {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -427,17 +455,18 @@ void train(OptArgs optArgs) {
 
         DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
         dataset.load();
-        double** Xtrain = dataset.getXtrain();
-        double* ytrain = dataset.getYtrain();
+        double **Xtrain = dataset.getXtrain();
+        double *ytrain = dataset.getYtrain();
 
-        double** Xtest = dataset.getXtest();
-        double* ytest = dataset.getYtest();
+        double **Xtest = dataset.getXtest();
+        double *ytest = dataset.getYtest();
         Util util;
 //        util.print2DMatrix(Xtrain, trainingSamples, features);
         printf("\n----------------------------------------\n");
 //        util.print2DMatrix(Xtest, testingSamples, features);
         clock_t begin = clock();
-        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
+        SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples,
+                 testingSamples);
         //SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
         //sgd2.adamSGD();
         sgd1.sgd();
@@ -481,7 +510,7 @@ void trainSequential(OptArgs optArgs) {
     optArgs.toString();
     ResourceManager resourceManager;
     resourceManager.loadDataSourcePath();
-    if(optArgs.isIsSplit()){
+    if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -497,22 +526,21 @@ void trainSequential(OptArgs optArgs) {
         Initializer initializer;
 
 
-
-        double ytrain [trainSet];
+        double ytrain[trainSet];
         initializer.initializeWeightsWithArray(trainSet, ytrain);
 
 
-        double ytest [testSet];
+        double ytest[testSet];
         initializer.initializeWeightsWithArray(testSet, ytest);
 
-        double** Xtrain;
-        double** Xtest;
-        Xtrain = new double*[trainSet];
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[trainSet];
         for (int i = 0; i < trainSet; ++i) {
             Xtrain[i] = new double[features];
         }
 
-        Xtest = new double*[testSet];
+        Xtest = new double *[testSet];
         for (int i = 0; i < testSet; ++i) {
             Xtest[i] = new double[features];
         }
@@ -527,7 +555,7 @@ void trainSequential(OptArgs optArgs) {
         printf("\n----------------------------------------\n");
         //util.print2DMatrix(Xtest, testSet, features);
         clock_t begin = clock();
-        double* w = new double[features];
+        double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
         sgd2.adamSGD(w);
@@ -544,17 +572,17 @@ void trainSequential(OptArgs optArgs) {
 //        double acc = predict.predict();
 //        cout << "Testing Accuracy : " << acc << "%" << endl;
         for (int i = 0; i < trainSet; ++i) {
-           delete[] Xtrain[i];
+            delete[] Xtrain[i];
         }
         for (int i = 0; i < testSet; ++i) {
             delete[] Xtest[i];
         }
-        delete [] Xtrain;
-        delete [] Xtest;
-        delete [] w;
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
 
 
-    }else{
+    } else {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
         string trainFileName = "/training.csv";
@@ -569,17 +597,17 @@ void trainSequential(OptArgs optArgs) {
 
         DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
         dataset.load();
-        double** Xtrain = dataset.getXtrain();
-        double* ytrain = dataset.getYtrain();
+        double **Xtrain = dataset.getXtrain();
+        double *ytrain = dataset.getYtrain();
 
-        double** Xtest = dataset.getXtest();
-        double* ytest = dataset.getYtest();
+        double **Xtest = dataset.getXtest();
+        double *ytest = dataset.getYtest();
         Util util;
 //        util.print2DMatrix(Xtrain, trainingSamples, features);
         printf("\n----------------------------------------\n");
 //        util.print2DMatrix(Xtest, testingSamples, features);
         clock_t begin = clock();
-        double* w = new double[features];
+        double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
         sgd2.adamSGD(w);
@@ -593,7 +621,7 @@ void trainSequential(OptArgs optArgs) {
         //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         //double acc = predict.predict();
         //cout << "Testing Accuracy : " << acc << "%" << endl;
-        delete [] Xtrain, Xtest, ytrain, ytest, w;
+        delete[] Xtrain, Xtest, ytrain, ytest, w;
     }
 
 }
@@ -611,8 +639,8 @@ void sgd() {
 
     DataSet dataset(sourceFile, features, trainingSamples, testingSamples);
     dataset.load();
-    double** Xtrain = dataset.getXtrain();
-    double* ytrain = dataset.getYtrain();
+    double **Xtrain = dataset.getXtrain();
+    double *ytrain = dataset.getYtrain();
 
 
     Util util;
@@ -626,7 +654,7 @@ void sgd() {
 
 }
 
-void test1(){
+void test1() {
     Test test;
 
     test.test1();
@@ -668,14 +696,28 @@ void test8() {
     test.test8();
 }
 
-string getTimeStamp(){
+string getTimeStamp() {
     string string1;
     time_t t = time(0);   // get time now
-    tm* now = localtime(&t);
+    tm *now = localtime(&t);
     string datestring;
-    datestring.append(to_string(now->tm_year + 1900)).append("-").append(to_string((now->tm_mon + 1))).append("-").append(to_string(now->tm_mday));
+    datestring.append(to_string(now->tm_year + 1900)).append("-").append(to_string((now->tm_mon + 1))).append(
+            "-").append(to_string(now->tm_mday));
     string timestring;
-    timestring.append(to_string(now->tm_hour)).append(":").append(to_string(now->tm_min)).append(":").append(to_string(now->tm_sec));
+    timestring.append(to_string(now->tm_hour)).append(":").append(to_string(now->tm_min)).append(":").append(
+            to_string(now->tm_sec));
     string1.append(datestring).append("__").append(timestring);
     return string1;
+}
+
+void summary(string logfile, int world_size, double acc, double time, string datasource) {
+
+    ofstream myfile(logfile);
+    string timestamp = getTimeStamp();
+    if (myfile.is_open()) {
+
+        myfile << datasource << "," << world_size << "," << time << "," << acc << "," << timestamp << "\n";
+
+        myfile.close();
+    }
 }

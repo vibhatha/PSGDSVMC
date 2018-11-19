@@ -14,6 +14,7 @@ class ResourceManager {
 private:
     string dataSourceBasePath;
     string logSourceBasePath;
+    string logSummaryBasePath;
 
 public:
     ResourceManager();
@@ -22,6 +23,8 @@ public:
 
     void loadLogSourcePath();
 
+    void loadSummaryPath();
+
     void setDataSourceBasePath(const string &dataSourceBasePath);
 
     const string &getDataSourceBasePath() const;
@@ -29,6 +32,10 @@ public:
     const string &getLogSourceBasePath() const;
 
     void setLogSourceBasePath(const string &logSourceBasePath);
+
+    const string &getLogSummaryBasePath() const;
+
+    void setLogSummaryBasePath(const string &logSummaryBasePath);
 
 };
 
