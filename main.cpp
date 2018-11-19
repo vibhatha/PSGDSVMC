@@ -283,8 +283,10 @@ void parallelLoad(OptArgs optArgs) {
                 }
                 double cum_acc = 0;
                 for (unsigned int i = 0;i < files.size()-1;i++) {
+                    string file="";
+                    file.append(bulktestfile).append(files[i]);
                     cout << files[i] << endl;
-                    DataSet dataSet1(features, fixedTest,bulktestfile.append(files[i]));
+                    DataSet dataSet1(features, fixedTest,file);
                     dataSet1.loadTestData(Xtest, ytest);
                     Predict predict(Xtest, ytest, w, testSet, features);
                     acc = predict.predict();
