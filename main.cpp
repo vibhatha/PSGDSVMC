@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     //test5();
     //parallelLoad(optArgs);
     //parallelLoadBatchV1(optArgs);
-    trainSequential(optArgs);
+    //trainSequential(optArgs);
     sequentialLoad(optArgs);
     //test7();
     //mpiTest();
