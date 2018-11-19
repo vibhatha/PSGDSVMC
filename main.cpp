@@ -285,7 +285,7 @@ void parallelLoad(OptArgs optArgs) {
                 for (unsigned int i = 0;i < files.size()-1;i++) {
                     string file="";
                     file.append(bulktestfile).append(files[i]);
-                    cout << files[i] << endl;
+                    cout << file << endl;
                     DataSet dataSet1(features, fixedTest,file);
                     dataSet1.loadTestData(Xtest, ytest);
                     Predict predict(Xtest, ytest, w, testSet, features);

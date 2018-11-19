@@ -24,6 +24,7 @@ private:
     int world_size;
     int world_rank;
     int dataPerMachine;
+    bool isBulk = false;
 
 public:
     DataSet(int features, int testingSamples, const string &testFile);
@@ -41,6 +42,9 @@ public:
 
     DataSet(int features, int trainingSamples, int testingSamples, const string &trainFile, const string &testFile,
             int world_size, int world_rank);
+
+    DataSet(int features, int trainingSamples, int testingSamples, const string &trainFile, const string &testFile,
+            int world_size, int world_rank, bool isBulk);
 
     void load();
     void load(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
