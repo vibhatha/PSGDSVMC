@@ -26,6 +26,8 @@ private:
     int dataPerMachine;
 
 public:
+    DataSet(int features, int testingSamples, const string &testFile);
+
     DataSet(int features, int trainingSamples, int testingSamples, const string &trainFile, const string &testFile);
     DataSet(string sourceFile_, int features_, int trainingSamples_, int testingSamples_);
     DataSet(string sourceFile_,  int features_, int trainingSamples_, bool isSplit_, double ratio_);
@@ -42,6 +44,7 @@ public:
 
     void load();
     void load(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
+    void loadTestData(double** Xtest, double* ytest);
     void distributedLoad();
     void distributedLoad(double** Xtrain, double* ytrain, double** Xtest, double* ytest);
     double** getXtrain();

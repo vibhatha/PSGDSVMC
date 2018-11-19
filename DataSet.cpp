@@ -97,6 +97,42 @@ void DataSet::distributedLoad() {
     }
 }
 
+void DataSet::loadTestData(double **Xtest, double *ytest) {
+    ifstream file2(testFile);
+    cout << "Loading File : " << testFile << endl;
+
+    for (int row = 0; row < testingSamples; row++) {
+        //cout << "Rank : " << world_rank << ", row : " << row << endl;
+        string line;
+        getline(file2, line);
+        if (!file2.good()) {
+            printf("File is not readable \n");
+            break;
+        }
+
+        //cout << "start : " << (row-start) << " End : " << end << endl;
+        vector<double> vect;
+
+        std::stringstream ss(line);
+
+        double i;
+
+        while (ss >> i) {
+            vect.push_back(i);
+
+            if (ss.peek() == ',')
+                ss.ignore();
+        }
+        ytest[row] = vect.at(0);
+
+        for (int j = 1; j < vect.size(); j++) {
+            Xtest[row][j - 1] = vect.at(j);
+        }
+
+
+    }
+}
+
 
 void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, double *ytest) {
     if (isSplit == false) {
@@ -618,4 +654,8 @@ DataSet::DataSet(int features, int trainingSamples, int testingSamples, const st
                  int world_size, int world_rank) : features(features), trainingSamples(trainingSamples),
                                                    testingSamples(testingSamples), trainFile(trainFile),
                                                    testFile(testFile), world_size(world_size), world_rank(world_rank) {}
+
+DataSet::DataSet(int features, int testingSamples, const string &testFile) : features(features),
+                                                                             testingSamples(testingSamples),
+                                                                             testFile(testFile) {}
 

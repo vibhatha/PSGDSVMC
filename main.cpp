@@ -12,6 +12,11 @@
 #include <mpi.h>
 #include <ctime>
 #include <fstream>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <vector>
+
 
 using namespace std;
 
@@ -42,6 +47,8 @@ void parallelLoad(OptArgs optArgs);
 void trainSequential(OptArgs optArgs);
 
 void mpiTest();
+
+int getdir (string dir, vector<string> &files);
 
 string getTimeStamp();
 
@@ -253,8 +260,39 @@ void parallelLoad(OptArgs optArgs) {
         double endTime = MPI_Wtime();
         if (world_rank == 0) {
             cout << "Training Time : " << (endTime - startTime) << endl;
-            Predict predict(Xtest, ytest, w, testSet, features);
-            double acc = predict.predict();
+            double acc = 0;
+            if(!optArgs.isBulk()){
+                Predict predict(Xtest, ytest, w, testSet, features);
+                acc = predict.predict();
+            }else{
+                string bulktestfile;
+                bulktestfile.append(datasourceBase).append(datasource).append("/bulk/");
+                string dir = string(bulktestfile);
+                vector<string> files = vector<string>();
+
+                getdir(dir,files);
+                int fixedTest = 20000;
+                double ytest[fixedTest];
+                initializer.initializeWeightsWithArray(testSet, ytest);
+
+                double **Xtest;
+
+                Xtest = new double *[fixedTest];
+                for (int i = 0; i < fixedTest; ++i) {
+                    Xtest[i] = new double[features];
+                }
+                double cum_acc = 0;
+                for (unsigned int i = 0;i < files.size()-1;i++) {
+                    cout << files[i] << endl;
+                    DataSet dataSet1(features, fixedTest,bulktestfile.append(files[i]));
+                    dataSet1.loadTestData(Xtest, ytest);
+                    Predict predict(Xtest, ytest, w, testSet, features);
+                    acc = predict.predict();
+                    cum_acc += acc;
+                }
+                acc = cum_acc / double(files.size());
+            }
+
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
         }
@@ -720,4 +758,20 @@ void summary(string logfile, int world_size, double acc, double time, string dat
 
         myfile.close();
     }
+}
+
+int getdir (string dir, vector<string> &files)
+{
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(dir.c_str())) == NULL) {
+        cout << "Error(" << errno << ") opening " << dir << endl;
+        return errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+        files.push_back(string(dirp->d_name));
+    }
+    closedir(dp);
+    return 0;
 }

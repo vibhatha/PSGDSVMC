@@ -94,6 +94,10 @@ OptArgs ArgReader::getParams() {
             optArgs.setIsNormalTime(true);
         }
 
+        comp = "-bulk";
+        if(comp.compare(argv[i])==0){
+            optArgs.setBulk(true);
+        }
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

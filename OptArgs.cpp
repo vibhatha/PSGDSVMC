@@ -116,8 +116,9 @@ void OptArgs::toString() {
     cout << "Ratio : " << this->getRatio() << endl;
     cout << "threads : " << this->getThreads() << endl;
     cout << "workers : " << this->getWorkers() << endl;
-    cout << "Normal Timing " << this->isIsNormalTime();
-    cout << "Epoch Timing " << this->isIsEpochTime();
+    cout << "Normal Timing " << this->isIsNormalTime() << endl;
+    cout << "Epoch Timing " << this->isIsEpochTime() << endl;
+    cout << "Bulk : " << this->isBulk() << endl;
 
 }
 
@@ -142,4 +143,20 @@ bool OptArgs::isIsNormalTime() const {
 
 void OptArgs::setIsNormalTime(bool isNormalTime) {
     OptArgs::isNormalTime = isNormalTime;
+}
+
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime, bool bulk) : dataset(dataset), features(features), trainingSamples(trainingSamples),
+                                                 testingSamples(testingSamples), alpha(alpha), isSplit(isSplit),
+                                                 ratio(ratio), threads(threads), workers(workers),
+                                                 iterations(iterations), isEpochTime(isEpochTime),
+                                                 isNormalTime(isNormalTime), bulk(bulk) {}
+
+bool OptArgs::isBulk() const {
+    return bulk;
+}
+
+void OptArgs::setBulk(bool bulk) {
+    OptArgs::bulk = bulk;
 }
