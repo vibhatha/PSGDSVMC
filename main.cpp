@@ -388,7 +388,7 @@ void parallelLoadBatchV1(OptArgs optArgs) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGD(w);
+            sgd1.adamSGDBatchv1(w);
         }
 
         if (optArgs.isIsEpochTime()) {
