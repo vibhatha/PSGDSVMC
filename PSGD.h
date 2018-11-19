@@ -51,6 +51,7 @@ public:
     void adamSGD(double* w);
     void adamSGD(double* w, string logfile);
     void writeLog(string logfile, int iterations, int samples, double** compt, double** commt);
+    void adamSGDBatchv1(double* w);
 
     double *getW() const;
 

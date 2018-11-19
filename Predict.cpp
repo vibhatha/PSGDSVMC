@@ -5,14 +5,18 @@
 #include "Predict.h"
 #include "Matrix.h"
 #include <iostream>
+#include "Util.h"
 
 using namespace std;
 
 
 double Predict::predict() {
+    cout << "Testing Samples : " << testingSamples << endl;
     double accuracy = 0;
     double totalCorrect = 0;
     Matrix matrix(features);
+    //Util util;
+    //util.print2DMatrix(X, 10, features);
     for (int i = 0; i < testingSamples; ++i) {
         double pred = 0;
         double d = matrix.dot(w, X[i]);
