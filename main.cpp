@@ -828,7 +828,9 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
         comm_gap = optArgs.getBatch_per() * dataPerMachine;
-
+        if(world_rank==0) {
+            cout << "Comm Gap : " << comm_gap << endl;
+        }
         double *w = new double[features];
 
         double ytrain[dataPerMachine];
@@ -924,6 +926,9 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
         comm_gap = optArgs.getBatch_per() * dataPerMachine;
+        if(world_rank==0) {
+            cout << "Comm Gap : " << comm_gap << endl;
+        }
         double *w = new double[features];
 
         double ytrain[dataPerMachine];
@@ -961,7 +966,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGDBatchv1(w);
+            sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -970,7 +975,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                     "world_size=").append(to_string(world_size)).append("_iterations=").append(
                     to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
-            sgd1.adamSGD(w, logfile);
+            sgd1.adamSGDBatchv2(w, comm_gap, logfile);
         }
 
 

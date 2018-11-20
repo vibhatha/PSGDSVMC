@@ -50,9 +50,12 @@ void DataSet::distributedLoad() {
         int start = world_rank * dataPerMachine;
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
+        if(world_rank==0) {
+            cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end
+                 << ",Data per Rank : " << dataPerMachine << endl;
+            cout << "Loading File : " << trainFile << endl;
+        }
 
-        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end
-             << ",Data per Rank : " << dataPerMachine << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
         Xtrain = new double *[dataPerMachine];
@@ -60,7 +63,7 @@ void DataSet::distributedLoad() {
 
 
         ifstream file(trainFile);
-        cout << "Loading File : " << trainFile << endl;
+
         int rowTest = 0;
         for (int row = 0; row < totalVisibleSamples; row++) {
 
@@ -99,7 +102,10 @@ void DataSet::distributedLoad() {
 
 void DataSet::loadTestData(double **Xtest, double *ytest) {
     ifstream file2(testFile);
-    cout << "Loading File : " << testFile << endl;
+    if(world_rank==0) {
+        cout << "Loading File : " << testFile << endl;
+    }
+
 
     for (int row = 0; row < testingSamples; row++) {
         //cout << "Rank : " << world_rank << ", row : " << row << endl;
@@ -144,7 +150,6 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
         int start = world_rank * dataPerMachine;
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
-
         cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << ", M : " << dataPerMachine << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
