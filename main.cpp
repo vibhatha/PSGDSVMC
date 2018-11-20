@@ -388,7 +388,7 @@ void sequentialLoad(OptArgs optArgs) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGD(w);
+            sgd1.adamSGDSeq(w);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -397,7 +397,7 @@ void sequentialLoad(OptArgs optArgs) {
                     "world_size=").append(to_string(world_size)).append("_iterations=").append(
                     to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
-            sgd1.adamSGD(w, logfile);
+            sgd1.adamSGDSeq(w, logfile);
         }
 
 
