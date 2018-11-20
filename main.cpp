@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
     //parallelLoadBatchV1(optArgs);
     //trainSequential(optArgs);
     sequentialLoad(optArgs);
+    parallelLoadBatchV2(optArgs, 10);
     //test7();
     //mpiTest();
 
@@ -857,7 +858,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGDBatchv1(w);
+            sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -866,7 +867,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                     "world_size=").append(to_string(world_size)).append("_iterations=").append(
                     to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
-            sgd1.adamSGDBatchv1(w, logfile);
+            sgd1.adamSGDBatchv2(w, comm_gap, logfile);
         }
 
 

@@ -24,6 +24,8 @@ private:
     bool isEpochTime = false;
     bool isNormalTime = false;
     bool bulk = false;
+    bool batch = false;
+    double batch_per = 0.10;
 
 public:
 
@@ -40,6 +42,10 @@ public:
 
     OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
             double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per);
 
 
     const string &getDataset() const;
@@ -95,6 +101,14 @@ public:
     bool isBulk() const;
 
     void setBulk(bool bulk);
+
+    bool isBatch() const;
+
+    void setBatch(bool batch);
+
+    double getBatch_per() const;
+
+    void setBatch_per(double batch_per);
 
 
 };

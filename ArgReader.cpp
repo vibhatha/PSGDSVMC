@@ -98,6 +98,20 @@ OptArgs ArgReader::getParams() {
         if(comp.compare(argv[i])==0){
             optArgs.setBulk(true);
         }
+
+        comp = "-batch";
+        if(comp.compare(argv[i])==0){
+            optArgs.setBatch(true);
+        }
+
+        comp = "-batch_size";
+        if(comp.compare(argv[i])==0){
+            stringstream geek(argv[i+1]);
+            double x = 0;
+            geek >> x;
+            optArgs.setBatch_per(x);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 
