@@ -72,10 +72,18 @@ int main(int argc, char **argv) {
     //parallelLoad(optArgs);
     //parallelLoadBatchV1(optArgs);
     //trainSequential(optArgs);
-    sequentialLoad(optArgs);
-    parallelLoadBatchV2(optArgs, 10);
+    //sequentialLoad(optArgs);
+    if(optArgs.isBatch()) {
+        double per = optArgs.getBatch_per();
+        int sample_gap = per * optArgs.getTrainingSamples();
+        parallelLoadBatchV2(optArgs, sample_gap);
+    }else {
+        parallelLoadBatchV1(optArgs);
+    }
+
     //test7();
     //mpiTest();
+
 
     return 0;
 }
