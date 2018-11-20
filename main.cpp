@@ -827,6 +827,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
         int testSet = totalSamples - trainSet;
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
+        comm_gap = optArgs.getBatch_per() * dataPerMachine;
 
         double *w = new double[features];
 
@@ -922,7 +923,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
         int testSet = testingSamples;
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
-
+        comm_gap = optArgs.getBatch_per() * dataPerMachine;
         double *w = new double[features];
 
         double ytrain[dataPerMachine];
