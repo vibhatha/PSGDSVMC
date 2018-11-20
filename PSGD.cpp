@@ -1047,7 +1047,9 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap) {
     //util.print1DMatrix(wInit, features);
     //util.print1DMatrix(v, features);
     //util.print1DMatrix(r, features);
-
+    if(world_rank==0) {
+        cout << "Gap : " << comm_gap << ", Data Size : " << trainingSamples << endl;
+    }
     Matrix1 matrix(features);
 
     initializer.initializeWeightsWithArray(features, w);
