@@ -840,6 +840,482 @@ void PSGD::adamSGDBatchv1(double *w) {
 }
 
 
+void PSGD::adamSGDBatchv1(double *w, string logfile) {
+    Initializer initializer;
+    cout << "Start Training ..." << endl;
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+
+
+    double** comptimeA;
+    double* commtimeA;
+    comptimeA = new double*[iterations];
+    for (int i = 0; i < iterations; ++i) {
+        comptimeA[i] = new double[trainingSamples];
+    }
+
+    commtimeA = new double[iterations];
+
+
+    for (int i = 1; i < iterations; ++i) {
+        if (i % 10 == 0 and world_rank==0) {
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            //util.print1DMatrix(w, features);
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            cout << "Iteration " << i << "/" << iterations << endl;
+        }
+        comptimeA[i] = new double[trainingSamples];
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            double perDataPerItrCompt = 0;
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+
+            matrix.scalarMultiply(v, beta1, v1);
+            matrix.scalarMultiply(gradient, (1 - beta1), v2);
+            matrix.add(v1, v2, v);
+            matrix.scalarMultiply(v, (1.0 / (1.0 - (pow(beta1, (double) i)))), v_hat);
+            matrix.inner(gradient, gradient, grad_mul);
+            matrix.scalarMultiply(r, beta2, r1);
+            matrix.scalarMultiply(grad_mul, (1 - beta2), r2);
+            matrix.add(r1, r2, r);
+            matrix.scalarMultiply(r, (1.0 / (1.0 - (pow(beta2, (double) i)))), r_hat);
+            //w1 = matrix.sqrt(r_hat);
+            //w1 = matrix.scalarAddition(w1,epsilon);
+            //w1 = matrix.divide(v_hat,w1);
+            matrix.sqrt(r_hat, sq_r_hat);
+            matrix.scalarAddition(sq_r_hat, epsilon, w1d);
+            matrix.divide(v_hat, w1d, w1);
+            matrix.scalarMultiply(w1, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+            perDataPerItrCompt = (end_compute - start_compute);
+            comptimeA[i][j] = perDataPerItrCompt;
+        }
+        double start_communication = MPI_Wtime();
+        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        double end_communication = MPI_Wtime();
+        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+        communication_time += (end_communication - start_communication);
+        commtimeA[i] = end_communication - start_communication;
+    }
+    /*if(world_rank==0) {
+        cout << "============================================" << endl;
+        printf("Final Weight\n");
+        util.print1DMatrix(w, features);
+
+        cout << "============================================" << endl;
+    }*/
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA, commtimeA);
+
+
+
+    delete[] v;
+    delete[] v1;
+    delete[] v2;
+    delete[] r;
+    delete[] r1;
+    delete[] r2;
+    delete[] v_hat;
+    delete[] r_hat;
+    delete[] w1;
+    delete[] w2;
+    delete[] grad_mul;
+    delete[] sq_r_hat;
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw_axiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] w1d;
+    delete [] commtimeA;
+    delete [] comptimeA;
+}
+
+
+void PSGD::adamSGDBatchv2(double *w, int comm_gap) {
+    Initializer initializer;
+
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+    for (int i = 1; i < iterations; ++i) {
+        /*if (i % 10 == 0 and world_rank==0) {
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            //util.print1DMatrix(w, features);
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            cout << "Iteration " << i << "/" << iterations << endl;
+        }*/
+        for (int j = 0; j < trainingSamples; ++j) {
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+
+            matrix.scalarMultiply(v, beta1, v1);
+            matrix.scalarMultiply(gradient, (1 - beta1), v2);
+            matrix.add(v1, v2, v);
+            matrix.scalarMultiply(v, (1.0 / (1.0 - (pow(beta1, (double) i)))), v_hat);
+            matrix.inner(gradient, gradient, grad_mul);
+            matrix.scalarMultiply(r, beta2, r1);
+            matrix.scalarMultiply(grad_mul, (1 - beta2), r2);
+            matrix.add(r1, r2, r);
+            matrix.scalarMultiply(r, (1.0 / (1.0 - (pow(beta2, (double) i)))), r_hat);
+            //w1 = matrix.sqrt(r_hat);
+            //w1 = matrix.scalarAddition(w1,epsilon);
+            //w1 = matrix.divide(v_hat,w1);
+            matrix.sqrt(r_hat, sq_r_hat);
+            matrix.scalarAddition(sq_r_hat, epsilon, w1d);
+            matrix.divide(v_hat, w1d, w1);
+            matrix.scalarMultiply(w1, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - end_compute);
+            if(j%comm_gap==0) {
+                double start_communication = MPI_Wtime();
+                MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                              MPI_COMM_WORLD);
+                double end_communication = MPI_Wtime();
+                communication_time += (end_communication - start_communication);
+                start_compute = MPI_Wtime();
+                matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+                end_compute = MPI_Wtime();
+                compute_time += (end_compute - start_compute);
+            }
+
+            //util.print1DMatrix(w, features);
+            //delete [] xi;
+        }
+    }
+    /*if(world_rank==0) {
+        cout << "============================================" << endl;
+        printf("Final Weight\n");
+        util.print1DMatrix(w, features);
+
+        cout << "============================================" << endl;
+    }*/
+
+    //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+
+    delete[] v;
+    delete[] v1;
+    delete[] v2;
+    delete[] r;
+    delete[] r1;
+    delete[] r2;
+    delete[] v_hat;
+    delete[] r_hat;
+    delete[] w1;
+    delete[] w2;
+    delete[] grad_mul;
+    delete[] sq_r_hat;
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw_axiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] w1d;
+}
+
+
+void PSGD::adamSGDBatchv2(double *w,int comm_gap, string logfile) {
+    Initializer initializer;
+    cout << "Start Training ..." << endl;
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+
+
+    double** comptimeA;
+    double** commtimeA;
+    comptimeA = new double*[iterations];
+    for (int i = 0; i < iterations; ++i) {
+        comptimeA[i] = new double[trainingSamples];
+    }
+
+    commtimeA = new double*[iterations];
+    for (int i = 0; i < iterations; ++i) {
+        commtimeA[i] = new double[trainingSamples];
+    }
+
+    for (int i = 1; i < iterations; ++i) {
+        if (i % 10 == 0 and world_rank==0) {
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            //util.print1DMatrix(w, features);
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            cout << "Iteration " << i << "/" << iterations << endl;
+        }
+        commtimeA[i] = new double[trainingSamples];
+        comptimeA[i] = new double[trainingSamples];
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            double perDataPerItrCompt = 0;
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+
+            matrix.scalarMultiply(v, beta1, v1);
+            matrix.scalarMultiply(gradient, (1 - beta1), v2);
+            matrix.add(v1, v2, v);
+            matrix.scalarMultiply(v, (1.0 / (1.0 - (pow(beta1, (double) i)))), v_hat);
+            matrix.inner(gradient, gradient, grad_mul);
+            matrix.scalarMultiply(r, beta2, r1);
+            matrix.scalarMultiply(grad_mul, (1 - beta2), r2);
+            matrix.add(r1, r2, r);
+            matrix.scalarMultiply(r, (1.0 / (1.0 - (pow(beta2, (double) i)))), r_hat);
+            //w1 = matrix.sqrt(r_hat);
+            //w1 = matrix.scalarAddition(w1,epsilon);
+            //w1 = matrix.divide(v_hat,w1);
+            matrix.sqrt(r_hat, sq_r_hat);
+            matrix.scalarAddition(sq_r_hat, epsilon, w1d);
+            matrix.divide(v_hat, w1d, w1);
+            matrix.scalarMultiply(w1, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+            perDataPerItrCompt = (end_compute - start_compute);
+            if(j%comm_gap==0) {
+                double start_communication = MPI_Wtime();
+                MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                              MPI_COMM_WORLD);
+                double end_communication = MPI_Wtime();
+                communication_time += (end_communication - start_communication);
+                start_compute = MPI_Wtime();
+                matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+                end_compute = MPI_Wtime();
+                compute_time += (end_compute - start_compute);
+                perDataPerItrCompt += (end_compute - start_compute);
+                commtimeA[i][j] = end_communication - start_communication;
+            }
+            //util.print1DMatrix(w, features);
+            //delete [] xi;
+            commtimeA[i][j] = 0;
+            comptimeA[i][j] = perDataPerItrCompt;
+
+        }
+    }
+    /*if(world_rank==0) {
+        cout << "============================================" << endl;
+        printf("Final Weight\n");
+        util.print1DMatrix(w, features);
+
+        cout << "============================================" << endl;
+    }*/
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA, commtimeA);
+
+
+
+    delete[] v;
+    delete[] v1;
+    delete[] v2;
+    delete[] r;
+    delete[] r1;
+    delete[] r2;
+    delete[] v_hat;
+    delete[] r_hat;
+    delete[] w1;
+    delete[] w2;
+    delete[] grad_mul;
+    delete[] sq_r_hat;
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw_axiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] w1d;
+    delete [] commtimeA;
+    delete [] comptimeA;
+}
+
 void PSGD::writeLog(string logfile, int iterations, int samples, double **compt, double **commt) {
     cout << logfile << commt[0][0] << "," << compt[0][0] << endl;
     ofstream myfile(logfile);
@@ -849,6 +1325,25 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
             double per_itr_comm = 0;
             for (int j = 0; j < samples; ++j) {
                 per_itr_comm += commt[i][j];
+                per_itr_comp += compt[i][j];
+            }
+            cout <<i<<","<<per_itr_comp<<","<<per_itr_comm<< "\n";
+            myfile<<i<<","<<per_itr_comp<<","<<per_itr_comm<< "\n" ;
+        }
+        myfile.close();
+    }
+}
+
+void PSGD::writeLog(string logfile, int iterations, int samples, double **compt, double *commt) {
+    cout << logfile << commt[0] << "," << compt[0][0] << endl;
+    ofstream myfile(logfile);
+    if (myfile.is_open()) {
+        for (int i = 1; i < iterations; ++i) {
+            double per_itr_comp = 0;
+            double per_itr_comm = 0;
+            per_itr_comm += commt[i];
+            for (int j = 0; j < samples; ++j) {
+
                 per_itr_comp += compt[i][j];
             }
             cout <<i<<","<<per_itr_comp<<","<<per_itr_comm<< "\n";

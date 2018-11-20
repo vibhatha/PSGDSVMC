@@ -46,6 +46,8 @@ void parallelLoad(OptArgs optArgs);
 
 void parallelLoadBatchV1(OptArgs optArgs);
 
+void parallelLoadBatchV2(OptArgs optArgs, int comm_gap);
+
 void trainSequential(OptArgs optArgs);
 
 void sequentialLoad(OptArgs optArgs);
@@ -629,7 +631,7 @@ void parallelLoadBatchV1(OptArgs optArgs) {
                     "world_size=").append(to_string(world_size)).append("_iterations=").append(
                     to_string(optArgs.getIterations()));
             logfile.append("_").append(suffix);
-            sgd1.adamSGD(w, logfile);
+            sgd1.adamSGDBatchv1(w, logfile);
         }
 
 
@@ -783,6 +785,240 @@ void parallelLoadBatchV1(OptArgs optArgs) {
     MPI_Finalize();
 }
 
+void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
+    MPI_Init(NULL, NULL);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    optArgs.toString();
+    ResourceManager resourceManager;
+    Initializer initializer;
+    resourceManager.loadDataSourcePath();
+    resourceManager.loadLogSourcePath();
+    resourceManager.loadSummaryPath();
+    string summarylogfile ="";
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
+    string logfile = "";
+    if (optArgs.isIsSplit()) {
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        cout << "SourceFile : " << sourceFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double *w = new double[features];
+
+        double ytrain[dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest[testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double *[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+        DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile,
+                        world_size, world_rank);
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
+
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        if (optArgs.isIsNormalTime()) {
+            sgd1.adamSGDBatchv1(w);
+        }
+
+        if (optArgs.isIsEpochTime()) {
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
+            sgd1.adamSGDBatchv1(w, logfile);
+        }
+
+
+        double endTime = MPI_Wtime();
+        if (world_rank == 0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+            Predict predict(Xtest, ytest, w, testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+
+        }
+
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
+    } else {
+        if(world_rank==0) {
+            cout << "Training with full data set..." << endl;
+        }
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFile;
+        trainFile.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFile;
+        testFile.append(datasourceBase).append(datasource).append(testFileName);
+        cout << "Train File : " << trainFile << endl;
+        cout << "Test File : " << testFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples;
+        int testSet = testingSamples;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double *w = new double[features];
+
+        double ytrain[dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest[testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double *[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+        DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank, optArgs.isBulk());
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
+
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        if (optArgs.isIsNormalTime()) {
+            sgd1.adamSGDBatchv1(w);
+        }
+
+        if (optArgs.isIsEpochTime()) {
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
+            sgd1.adamSGD(w, logfile);
+        }
+
+
+        double endTime = MPI_Wtime();
+        if (world_rank == 0) {
+
+            double acc = 0;
+            if(!optArgs.isBulk()){
+                Predict predict(Xtest, ytest, w, testSet, features);
+                acc = predict.predict();
+            }else{
+                string bulktestfile;
+                bulktestfile.append(datasourceBase).append(datasource).append("/bulk/");
+                string dir = string(bulktestfile);
+                vector<string> files = vector<string>();
+
+                getdir(dir,files);
+                int fixedTest = 20000;
+                double ytest[fixedTest];
+                initializer.initializeWeightsWithArray(testSet, ytest);
+
+                double **Xtest;
+
+                Xtest = new double *[fixedTest];
+                for (int i = 0; i < fixedTest; ++i) {
+                    Xtest[i] = new double[features];
+                }
+                double cum_acc = 0;
+                for (unsigned int i = 0;i < files.size()-1;i++) {
+                    string file="";
+                    file.append(bulktestfile).append(files[i]);
+                    cout << file << endl;
+                    DataSet dataSet1(features, fixedTest,file);
+                    dataSet1.loadTestData(Xtest, ytest);
+                    Predict predict(Xtest, ytest, w, testSet, features);
+                    acc = predict.predict();
+                    cout << "Test " << i << ", Accuracy : " << acc << endl;
+                    cum_acc += acc;
+                }
+                acc = cum_acc / double(files.size());
+            }
+            cout << "Training Time : " << (endTime - startTime) << endl;
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+        }
+
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
+    }
+    MPI_Finalize();
+}
 
 void parallel(OptArgs optArgs) {
     MPI_Init(NULL, NULL);
