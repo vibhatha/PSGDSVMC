@@ -760,12 +760,12 @@ void PSGD::adamSGDBatchv1(double *w) {
     communication_time = 0;
     double start_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-        if (i % 10 == 0 and world_rank==0) {
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //util.print1DMatrix(w, features);
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
-        }
+//        if (i % 10 == 0 and world_rank==0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
         for (int j = 0; j < trainingSamples; ++j) {
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
@@ -908,12 +908,12 @@ void PSGD::adamSGDBatchv1(double *w, string logfile) {
 
 
     for (int i = 1; i < iterations; ++i) {
-        if (i % 10 == 0 and world_rank==0) {
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //util.print1DMatrix(w, features);
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
-        }
+//        if (i % 10 == 0 and world_rank==0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
         comptimeA[i] = new double[trainingSamples];
         for (int j = 0; j < trainingSamples; ++j) {
 
