@@ -807,7 +807,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     resourceManager.loadLogSourcePath();
     resourceManager.loadSummaryPath();
     string summarylogfile ="";
-    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/batch/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -1468,7 +1468,7 @@ string getTimeStamp() {
 
 void summary(string logfile, int world_size, double acc, double time, string datasource) {
 
-    ofstream myfile(logfile);
+    ofstream myfile(logfile, ios::out | ios::app);
     string timestamp = getTimeStamp();
     if (myfile.is_open()) {
 

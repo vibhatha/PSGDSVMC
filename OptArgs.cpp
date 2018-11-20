@@ -120,7 +120,7 @@ void OptArgs::toString() {
     cout << "Epoch Timing " << this->isIsEpochTime() << endl;
     cout << "Bulk : " << this->isBulk() << endl;
     cout << "BatchGapping : " << this->isBatch() << endl;
-    cout << "Batch Gap : " << this->getBatch_per();
+    cout << "Batch Gap : " << this->getBatch_per() <<endl;
 
 
 }
