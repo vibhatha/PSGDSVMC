@@ -58,6 +58,7 @@ public:
     void adamSGDBatchv1(double* w, string logfile);
     void adamSGDBatchv2(double* w, int comm_gap);
     void adamSGDBatchv2(double* w, int comm_gap, string logfile);
+    void adamSGDRotationv1(double* w);
 
     double *getW() const;
 
