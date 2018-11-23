@@ -1323,7 +1323,10 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile) {
 
 void PSGD::adamSGDRotationv1(double *w) {
     Initializer initializer;
-    cout << "Start Training ..." << endl;
+    if(world_rank==0) {
+        cout << "Start Training ..." << endl;
+    }
+
     double *v = new double[features];
     initializer.initializeWeightsWithArray(features, v);
     double *r = new double[features];
