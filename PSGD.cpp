@@ -1424,14 +1424,16 @@ void PSGD::adamSGDRotationv1(double *w) {
 
             int next = (world_rank + 1) % world_size;
             int prev = (world_rank + world_size - 1) % world_size;
+            if(world_rank>1) {
+                double start_communication = MPI_Wtime();
+                MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
+                MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                double end_communication = MPI_Wtime();
+                communication_time += (end_communication - start_communication);
+                matrix.add(w,wglobal,w);
+                matrix.scalarMultiply(w, 1.0/2.0, w);
+            }
 
-            double start_communication = MPI_Wtime();
-            MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
-            MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            double end_communication = MPI_Wtime();
-            communication_time += (end_communication - start_communication);
-            matrix.add(w,wglobal,w);
-            matrix.scalarMultiply(w, 1.0/2.0, w);
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
             //w_next = comms.recv(dtype=comms.mpi.FLOAT, source=prev, tag=1, size=w.shape[0])
             //w = (w + w_next)/2.0
@@ -1439,15 +1441,18 @@ void PSGD::adamSGDRotationv1(double *w) {
             //delete [] xi;
         }
     }
-    double start_final_comms = MPI_Wtime();
-    MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    double end_final_comms = MPI_Wtime();
-    communication_time += (end_final_comms - start_final_comms);
-    start_compute = MPI_Wtime();
-    matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
-    end_compute = MPI_Wtime();
-    compute_time += (end_compute - start_compute);
+    if(world_rank>1) {
+        double start_final_comms = MPI_Wtime();
+        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        double end_final_comms = MPI_Wtime();
+        communication_time += (end_final_comms - start_final_comms);
+        start_compute = MPI_Wtime();
+        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+        end_compute = MPI_Wtime();
+        compute_time += (end_compute - start_compute);
+    }
+
     /*if(world_rank==0) {
         cout << "============================================" << endl;
         printf("Final Weight\n");
