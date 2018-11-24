@@ -1492,7 +1492,7 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
         int active_rank_size = world_size - miss_rank_size;
         mt19937 rng;
         rng.seed(random_device()());
-        uniform_int_distribution<mt19937::result_type> dist6(0,world_size);
+        uniform_int_distribution<mt19937::result_type> dist6(0,world_size-1);
         cout << "Drop out Rank size : " << miss_rank_size << endl;
         cout << "Active Rank Size : " << active_rank_size << endl;
 
