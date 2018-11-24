@@ -89,8 +89,13 @@ int main(int argc, char **argv) {
 
     //test7();
     //mpiTest();
+    if(optArgs.isSequential()) {
+        trainSequential(optArgs);
+    } else{
+        parallelLoadRandomV1(optArgs);
+    }
 
-    parallelLoadRandomV1(optArgs);
+
 
 
     return 0;

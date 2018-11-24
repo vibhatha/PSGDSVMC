@@ -28,6 +28,7 @@ private:
     double batch_per = 0.10;
     double drop_out_per = 0.25;
     bool isDrop = false;
+    bool sequential = false;
 
 public:
 
@@ -52,6 +53,10 @@ public:
     OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
             double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
             bool batch, double batch_per, double drop_out_per, bool isDrop);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential);
 
 
     const string &getDataset() const;
@@ -123,6 +128,10 @@ public:
     bool isIsDrop() const;
 
     void setIsDrop(bool isDrop);
+
+    bool isSequential() const;
+
+    void setSequential(bool sequential);
 
 
 };

@@ -125,6 +125,11 @@ OptArgs ArgReader::getParams() {
             optArgs.setDrop_out_per(x);
         }
 
+        comp = "-seq";
+        if(comp.compare(argv[i])==0){
+            optArgs.setSequential(true);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

@@ -123,6 +123,7 @@ void OptArgs::toString() {
     cout << "Batch Gap : " << this->getBatch_per() <<endl;
     cout << "Drop : " << this->isIsDrop() << endl;
     cout << "Drop Percentage : " << this->getDrop_out_per() << endl;
+    cout << "Sequential : " << this->isSequential() << endl;
 }
 
 OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
@@ -214,4 +215,22 @@ bool OptArgs::isIsDrop() const {
 
 void OptArgs::setIsDrop(bool isDrop) {
     OptArgs::isDrop = isDrop;
+}
+
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime, bool bulk, bool batch, double batch_per, double drop_out_per, bool isDrop,
+                 bool sequential) : dataset(dataset), features(features), trainingSamples(trainingSamples),
+                                    testingSamples(testingSamples), alpha(alpha), isSplit(isSplit), ratio(ratio),
+                                    threads(threads), workers(workers), iterations(iterations),
+                                    isEpochTime(isEpochTime), isNormalTime(isNormalTime), bulk(bulk), batch(batch),
+                                    batch_per(batch_per), drop_out_per(drop_out_per), isDrop(isDrop),
+                                    sequential(sequential) {}
+
+bool OptArgs::isSequential() const {
+    return sequential;
+}
+
+void OptArgs::setSequential(bool sequential) {
+    OptArgs::sequential = sequential;
 }
