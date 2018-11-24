@@ -1560,7 +1560,6 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-        alpha = 1.0 / (1.0 + (double) i);
         /*if (i % 10 == 0 and world_rank==0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
