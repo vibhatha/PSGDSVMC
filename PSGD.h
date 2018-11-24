@@ -83,7 +83,11 @@ public:
 
     bool isPossibleRanks(int* arr, int size);
 
+    void generateRandomRanks(int *arr, double per);
 
+    bool isIncluded(int* active_ranks, int my_rank, int size);
+
+    int getRankIndex(int* active_ranks, int my_rank, int size);
 
 };
 

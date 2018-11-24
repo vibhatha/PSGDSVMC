@@ -1487,39 +1487,102 @@ void PSGD::adamSGDRotationv1(double *w) {
 }
 
 void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
+    int* active_ranks;
+    int miss_rank_size = dropout_per * world_size;
+    int active_rank_size = world_size - miss_rank_size;
+    active_ranks = new int[active_rank_size];
     if(world_rank==0){
-        int miss_rank_size = dropout_per * world_size;
-        int active_rank_size = world_size - miss_rank_size;
-        mt19937 rng;
-        rng.seed(random_device()());
-        uniform_int_distribution<mt19937::result_type> dist6(0,world_size-1);
-        cout << "Drop out Rank size : " << miss_rank_size << endl;
-        cout << "Active Rank Size : " << active_rank_size << endl;
+        generateRandomRanks(active_ranks, dropout_per);
+    }
+    MPI_Bcast(active_ranks, active_rank_size, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    string s;
+    s.append("Rank : ").append(to_string(world_rank)).append(", ");
+    for (int i = 0; i < active_rank_size; ++i) {
+        s.append(to_string(active_ranks[i])).append(" ");
+   }
+    if(world_rank==0){
+        cout << s << endl;
+    }
 
-        int* active_ranks = new int[active_rank_size];
-        for (int i = 0; i < active_rank_size; ++i) {
-            active_ranks[i] = -1;
+    if(isIncluded(active_ranks, world_rank, active_rank_size)) {
+        int my_index = getRankIndex(active_ranks, world_rank, active_rank_size);
+        int nextId = 0; //(world_rank + 1) % active_rank_size;
+        int prevId = 0; //(world_rank + active_rank_size - 1) % active_rank_size;
+        if(my_index-1>=0){
+            prevId = my_index-1;
         }
-        int j = 0;
-        while (true) {
-            int random_index = dist6(rng);
 
-            if(!isPresent(active_ranks, random_index, active_rank_size)) {
-                active_ranks[j] = random_index;
-                j++;
-            }
-
-            if(isPossibleRanks(active_ranks, active_rank_size)){
-                break;
-            }
-
+        if(my_index-1 < 0) {
+            prevId = active_rank_size-1;
         }
-        for (int i = 0; i < active_rank_size; ++i) {
-            cout << active_ranks[i] << " ";
+        if((my_index+1)<(active_rank_size)){
+            nextId = my_index + 1;
         }
-        cout << endl;
+        if((my_index+1)==active_rank_size) {
+            nextId = 0;
+        }
+
+        cout << "My Rank : " << world_rank << ", aPrevious Rank : " << active_ranks[prevId] << ", Next Rank : " << active_ranks[nextId] << endl;
+    }
+
+}
+
+int PSGD::getRankIndex(int *active_ranks, int my_rank, int size) {
+    int id=-1;
+    for (int i = 0; i < size; ++i) {
+        if(active_ranks[i]==my_rank) {
+            id=i;
+            break;
+        }
+    }
+    return id;
+}
+
+
+bool PSGD::isIncluded(int *active_ranks, int my_rank, int size) {
+    bool status = false;
+    for (int i = 0; i < size; ++i) {
+        if(active_ranks[i]==my_rank){
+            status = true;
+            break;
+        }
+    }
+    return status;
+}
+
+void PSGD::generateRandomRanks(int *active_ranks, double dropout_per) {
+    int miss_rank_size = dropout_per * world_size;
+    int active_rank_size = world_size - miss_rank_size;
+    mt19937 rng;
+    rng.seed(random_device()());
+    uniform_int_distribution<mt19937::result_type> dist6(0,world_size-1);
+    cout << "Drop out Rank size : " << miss_rank_size << endl;
+    cout << "Active Rank Size : " << active_rank_size << endl;
+
+
+    for (int i = 0; i < active_rank_size; ++i) {
+        active_ranks[i] = -1;
+    }
+    int j = 0;
+    while (true) {
+        int random_index = dist6(rng);
+
+        if(!isPresent(active_ranks, random_index, active_rank_size)) {
+            active_ranks[j] = random_index;
+            j++;
+        }
+
+        if(isPossibleRanks(active_ranks, active_rank_size)){
+            break;
+        }
 
     }
+    for (int i = 0; i < active_rank_size; ++i) {
+        cout << active_ranks[i] << " ";
+    }
+    cout << endl;
+
 }
 
 bool PSGD::isPresent(int *arr, int new_rank, int size) {
