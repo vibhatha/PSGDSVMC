@@ -1370,14 +1370,13 @@ void parallelLoadRandomV1(OptArgs optArgs) {
 
 
         double endTime = MPI_Wtime();
-//        if (world_rank == 0) {
-//            cout << "Training Time : " << (endTime - startTime) << endl;
-//            Predict predict(Xtest, ytest, w, testSet, features);
-//            double acc = predict.predict();
-//            cout << "Testing Accuracy : " << acc << "%" << endl;
-//            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
-//
-//        }
+        if (world_rank == 0) {
+            cout << "Training Time : " << (endTime - startTime) << endl;
+            Predict predict(Xtest, ytest, w, testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+        }
 
         for (int i = 0; i < dataPerMachine; ++i) {
             delete[] Xtrain[i];
