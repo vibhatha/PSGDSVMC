@@ -1449,7 +1449,8 @@ void parallelLoadRandomV1(OptArgs optArgs) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGDRotationv1(w);
+            double drop_per = optArgs.getDrop_out_per();
+            sgd1.adamSGDRandomRingv1(w, drop_per, summarylogfile);
         }
 
         if (optArgs.isIsEpochTime()) {

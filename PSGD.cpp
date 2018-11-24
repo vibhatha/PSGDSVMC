@@ -1623,8 +1623,8 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
                     nextId = 0;
                 }
 
-                cout << "My Rank : " << world_rank << ", aPrevious Rank : " << active_ranks[prevId] << ", Next Rank : "
-                     << active_ranks[nextId] << endl;
+//                cout << "My Rank : " << world_rank << ", aPrevious Rank : " << active_ranks[prevId] << ", Next Rank : "
+//                     << active_ranks[nextId] << endl;
 
                 int next = active_ranks[nextId];
                 int prev = active_ranks[prevId];
@@ -1671,7 +1671,9 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
 
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-
+    if(world_rank==0) {
+        cout << "Training Completed ..." << endl;
+    }
     delete[] v;
     delete[] v1;
     delete[] v2;
