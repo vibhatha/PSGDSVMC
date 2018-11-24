@@ -221,12 +221,12 @@ void SGD::adamSGD(double* w) {
     initializer.initializeWeightsWithArray(features, w);
 
     for (int i = 1; i < iterations; ++i) {
-        if (i % 10 == 0) {
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //util.print1DMatrix(w, features);
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
-        }
+//        if (i % 10 == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
         for (int j = 0; j < trainingSamples; ++j) {
 
             double yixiw = matrix.dot(X[j], w);
@@ -261,7 +261,7 @@ void SGD::adamSGD(double* w) {
             matrix.divide(v_hat, w1d, w1);
             matrix.scalarMultiply(w1, alpha, aw1);
             matrix.subtract(w, aw1, w);
-            util.print1DMatrix(w, features);
+            //util.print1DMatrix(w, features);
             //delete [] xi;
         }
     }
