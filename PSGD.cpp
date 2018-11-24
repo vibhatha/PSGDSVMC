@@ -11,6 +11,7 @@
 #include "Matrix1.h"
 #include <math.h>
 #include <mpi.h>
+#include <random>
 
 using namespace std;
 
@@ -1483,6 +1484,67 @@ void PSGD::adamSGDRotationv1(double *w) {
     delete[] xiyi;
     delete[] w1d;
 
+}
+
+void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
+    if(world_rank==0){
+        int miss_rank_size = dropout_per * world_size;
+        int active_rank_size = world_size - miss_rank_size;
+        mt19937 rng;
+        rng.seed(random_device()());
+        uniform_int_distribution<mt19937::result_type> dist6(0,world_size);
+        cout << "Drop out Rank size : " << miss_rank_size << endl;
+        cout << "Active Rank Size : " << active_rank_size << endl;
+
+        int* active_ranks = new int[active_rank_size];
+        for (int i = 0; i < active_rank_size; ++i) {
+            active_ranks[i] = -1;
+        }
+        int j = 0;
+        while (true) {
+            int random_index = dist6(rng);
+
+            if(!isPresent(active_ranks, random_index, active_rank_size)) {
+                active_ranks[j] = random_index;
+                j++;
+            }
+
+            if(isPossibleRanks(active_ranks, active_rank_size)){
+                break;
+            }
+
+        }
+        for (int i = 0; i < active_rank_size; ++i) {
+            cout << active_ranks[i] << " ";
+        }
+        cout << endl;
+
+    }
+}
+
+bool PSGD::isPresent(int *arr, int new_rank, int size) {
+    bool isPresent = false;
+    for (int i = 0; i < size; ++i) {
+        if(arr[i]==new_rank){
+            isPresent = true;
+            break;
+        }
+    }
+    return isPresent;
+}
+
+bool PSGD::isPossibleRanks(int *arr, int size) {
+    int count =0;
+    for (int i = 0; i < size; ++i) {
+        if(arr[i]!=-1){
+            count++;
+        }
+    }
+    if(count==size) {
+        return true;
+    }else{
+        return false;
+    }
 }
 
 void PSGD::writeLog(string logfile, int iterations, int samples, double **compt, double **commt) {

@@ -112,6 +112,19 @@ OptArgs ArgReader::getParams() {
             optArgs.setBatch_per(x);
         }
 
+        comp = "-drop";
+        if(comp.compare(argv[i])==0){
+            optArgs.setIsDrop(true);
+        }
+
+        comp = "-drop_per";
+        if(comp.compare(argv[i])==0){
+            stringstream geek(argv[i+1]);
+            double x = 0;
+            geek >> x;
+            optArgs.setDrop_out_per(x);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

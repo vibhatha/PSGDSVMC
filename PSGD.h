@@ -59,6 +59,7 @@ public:
     void adamSGDBatchv2(double* w, int comm_gap);
     void adamSGDBatchv2(double* w, int comm_gap, string logfile);
     void adamSGDRotationv1(double* w);
+    void adamSGDRandomRingv1(double* w, double dropout_per, string logfile);
 
     double *getW() const;
 
@@ -77,6 +78,12 @@ public:
     const vector<double> &getCompute_time_of_ranks() const;
 
     const vector<double> &getCommunication_time_of_ranks() const;
+
+    bool isPresent(int* arr, int new_rank, int size);
+
+    bool isPossibleRanks(int* arr, int size);
+
+
 
 };
 

@@ -26,6 +26,8 @@ private:
     bool bulk = false;
     bool batch = false;
     double batch_per = 0.10;
+    double drop_out_per = 0.25;
+    bool isDrop = false;
 
 public:
 
@@ -46,6 +48,10 @@ public:
     OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
             double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
             bool batch, double batch_per);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per, double drop_out_per, bool isDrop);
 
 
     const string &getDataset() const;
@@ -109,6 +115,14 @@ public:
     double getBatch_per() const;
 
     void setBatch_per(double batch_per);
+
+    double getDrop_out_per() const;
+
+    void setDrop_out_per(double drop_out_per);
+
+    bool isIsDrop() const;
+
+    void setIsDrop(bool isDrop);
 
 
 };
