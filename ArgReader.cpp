@@ -11,8 +11,8 @@ ArgReader::ArgReader(int argc, char **argv) : argc(argc), argv(argv) {
 
 OptArgs ArgReader::getParams() {
     OptArgs optArgs;
-    cout << "You have entered " << argc
-         << " arguments:" << "\n";
+//    cout << "You have entered " << argc
+//         << " arguments:" << "\n";
 
     for (int i = 1; i < argc; ++i){
         string comp = "-dataset";

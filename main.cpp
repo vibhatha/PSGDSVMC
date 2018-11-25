@@ -99,6 +99,10 @@ int main(int argc, char **argv) {
         parallelLoadRandomV1(optArgs);
     } else if(optArgs.isRandomringv2()) {
         parallelLoadRandomV2(optArgs);
+    } else if(optArgs.isBatch()) {
+        double per = optArgs.getBatch_per();
+        int sample_gap = per * optArgs.getTrainingSamples();
+        parallelLoadBatchV2(optArgs, sample_gap);
     }
 
 
@@ -819,7 +823,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    optArgs.toString();
+    //optArgs.toString();
     ResourceManager resourceManager;
     Initializer initializer;
     resourceManager.loadDataSourcePath();
@@ -1060,7 +1064,7 @@ void parallelLoadRotationV1(OptArgs optArgs) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    optArgs.toString();
+    //optArgs.toString();
     ResourceManager resourceManager;
     Initializer initializer;
     resourceManager.loadDataSourcePath();
@@ -1077,7 +1081,10 @@ void parallelLoadRotationV1(OptArgs optArgs) {
         string testFileName = "/testing.csv";
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
-        cout << "SourceFile : " << sourceFile << endl;
+        if(world_rank==0) {
+            cout << "SourceFile : " << sourceFile << endl;
+        }
+
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();
@@ -1291,12 +1298,13 @@ void parallelLoadRotationV1(OptArgs optArgs) {
 
 
 void parallelLoadRandomV1(OptArgs optArgs) {
+
     MPI_Init(NULL, NULL);
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    optArgs.toString();
+    //optArgs.toString();
     ResourceManager resourceManager;
     Initializer initializer;
     resourceManager.loadDataSourcePath();
@@ -1305,7 +1313,9 @@ void parallelLoadRandomV1(OptArgs optArgs) {
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
     string logfile = "";
-
+    if(world_rank==0) {
+        cout << "Random Ring version 1 " << endl;
+    }
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string logsourceBase = resourceManager.getLogSourceBasePath();
@@ -1314,7 +1324,10 @@ void parallelLoadRandomV1(OptArgs optArgs) {
         string testFileName = "/testing.csv";
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
-        cout << "SourceFile : " << sourceFile << endl;
+        if(world_rank==0) {
+            cout << "SourceFile : " << sourceFile << endl;
+        }
+
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();
@@ -1536,7 +1549,10 @@ void parallelLoadRandomV2(OptArgs optArgs) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    optArgs.toString();
+    //optArgs.toString();
+    if(world_rank==0) {
+        cout << "Random Ring v2" << endl;
+    }
     ResourceManager resourceManager;
     Initializer initializer;
     resourceManager.loadDataSourcePath();
@@ -1554,7 +1570,9 @@ void parallelLoadRandomV2(OptArgs optArgs) {
         string testFileName = "/testing.csv";
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
-        cout << "SourceFile : " << sourceFile << endl;
+        if(world_rank==0) {
+            cout << "SourceFile : " << sourceFile << endl;
+        }
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();

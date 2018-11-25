@@ -1372,25 +1372,25 @@ void PSGD::adamSGDRotationv1(double *w) {
 
     Matrix1 matrix(features);
 
-    initializer.initializeWeightsWithArray(features, w);
+    initializer.initialWeights(features, w);
     compute_time = 0;
     communication_time = 0;
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
        // alpha = 1.0 / (1.0 + (double) i);
-        /*if (i % 10 == 0 and world_rank==0) {
+        if (i % 10 == 0 and world_rank==0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             cout << "Iteration " << i << "/" << iterations << endl;
-        }*/
+        }
         for (int j = 0; j < trainingSamples; ++j) {
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
 
-            double coefficient = 1.0 / (1.0 + double(i));
+            double coefficient = 1.00;//1.0 / (1.0 + double(i));
 
             if (yixiw < 1) {
                 matrix.scalarAddition(X[j], y[j], xiyi);
@@ -1438,7 +1438,7 @@ void PSGD::adamSGDRotationv1(double *w) {
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
             //w_next = comms.recv(dtype=comms.mpi.FLOAT, source=prev, tag=1, size=w.shape[0])
             //w = (w + w_next)/2.0
-            util.print1DMatrix(w, features);
+            //util.print1DMatrix(w, 8);
             //delete [] xi;
         }
     }
@@ -1561,12 +1561,12 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-//        if (i % 1 == 0 and world_rank==0) {
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            //util.print1DMatrix(w, features);
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            cout << "Iteration " << i << "/" << iterations << endl;
-//        }
+        if (i % 10 == 0 and world_rank==0) {
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            //util.print1DMatrix(w, features);
+            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+            cout << "Iteration " << i << "/" << iterations << endl;
+        }
         for (int j = 0; j < trainingSamples; ++j) {
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);

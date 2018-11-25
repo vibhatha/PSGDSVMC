@@ -150,12 +150,12 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
         int start = world_rank * dataPerMachine;
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
-        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << ", M : " << dataPerMachine << endl;
+        //cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << ", M : " << dataPerMachine << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
 
         ifstream file(trainFile);
-        cout << "Loading File : " << trainFile << endl;
+        //cout << "Loading File : " << trainFile << endl;
         int rowTest = 0;
         for (int row = 0; row < totalVisibleSamples; row++) {
             //cout << "Rank : " << world_rank << ", row : " << row << endl;
@@ -189,11 +189,11 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
 
         }
         if(this->isBulk==true) {
-            cout << "Bulk Files are being used ..." << endl;
+            //cout << "Bulk Files are being used ..." << endl;
         }
         if(this->isBulk==false) {
             ifstream file2(testFile);
-            cout << "Loading File : " << testFile << endl;
+            //cout << "Loading File : " << testFile << endl;
 
             for (int row = 0; row < testingSamples; row++) {
                 //cout << "Rank : " << world_rank << ", row : " << row << endl;
@@ -230,7 +230,7 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
     }
 
     if (isSplit == true) {
-        printf("Splitting data ... \n");
+        //printf("Splitting data ... \n");
         int totalSamples = trainingSamples;
         int trainingSet = trainingSamples * ratio;
         int testingSet = totalSamples - trainingSet;
@@ -240,12 +240,12 @@ void DataSet::distributedLoad(double **Xtrain, double *ytrain, double **Xtest, d
         int end = start + dataPerMachine;
         this->setDataPerMachine(dataPerMachine);
 
-        cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
+        //cout << "Loading Data in Rank " << world_rank << ", Start :  " << start << ", End " << end << endl;
         this->setTestingSamples(testingSet);
         this->setTrainingSamples(dataPerMachine);
 
         ifstream file(trainFile);
-        cout << "Loading File : " << trainFile << endl;
+        //cout << "Loading File : " << trainFile << endl;
         int rowTest = 0;
         for (int row = 0; row < totalSamples; row++) {
             //cout << "Rank : " << world_rank << ", row : " << row << endl;

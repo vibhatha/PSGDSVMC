@@ -12,6 +12,7 @@ private:
 
 public:
     double* initialWeights(int features);
+    void initialWeights(int features, double* w);
     double* zeroWeights(int features);
     double* initializeWeightsWithArray(int features, double a []);
     double** initalizeMatrix(int rows, int columns, double** b );

@@ -24,6 +24,21 @@ double* Initializer::initialWeights(int features) {
     return wInit;
 }
 
+void Initializer::initialWeights(int features, double* w) {
+    const int range_from  = 0.0;
+    const int range_to    = 1.0;
+    random_device                  rand_dev;
+
+    for (int i = 0; i < features; ++i) {
+        mt19937                        generator(rand_dev());
+
+        uniform_real_distribution<double>  distr(range_from, range_to);
+        double val =  distr(generator);
+        w[i] = val;
+    }
+
+}
+
 double* Initializer::zeroWeights(int features) {
     wInit = new double[features];
     for (int i = 0; i < features; ++i) {
