@@ -234,3 +234,48 @@ bool OptArgs::isSequential() const {
 void OptArgs::setSequential(bool sequential) {
     OptArgs::sequential = sequential;
 }
+
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime, bool bulk, bool batch, double batch_per, double drop_out_per, bool isDrop,
+                 bool sequential, bool ring, bool randomringv1, bool randomringv2) : dataset(dataset),
+                                                                                     features(features),
+                                                                                     trainingSamples(trainingSamples),
+                                                                                     testingSamples(testingSamples),
+                                                                                     alpha(alpha), isSplit(isSplit),
+                                                                                     ratio(ratio), threads(threads),
+                                                                                     workers(workers),
+                                                                                     iterations(iterations),
+                                                                                     isEpochTime(isEpochTime),
+                                                                                     isNormalTime(isNormalTime),
+                                                                                     bulk(bulk), batch(batch),
+                                                                                     batch_per(batch_per),
+                                                                                     drop_out_per(drop_out_per),
+                                                                                     isDrop(isDrop),
+                                                                                     sequential(sequential), ring(ring),
+                                                                                     randomringv1(randomringv1),
+                                                                                     randomringv2(randomringv2) {}
+
+bool OptArgs::isRing() const {
+    return ring;
+}
+
+void OptArgs::setRing(bool ring) {
+    OptArgs::ring = ring;
+}
+
+bool OptArgs::isRandomringv1() const {
+    return randomringv1;
+}
+
+void OptArgs::setRandomringv1(bool randomringv1) {
+    OptArgs::randomringv1 = randomringv1;
+}
+
+bool OptArgs::isRandomringv2() const {
+    return randomringv2;
+}
+
+void OptArgs::setRandomringv2(bool randomringv2) {
+    OptArgs::randomringv2 = randomringv2;
+}

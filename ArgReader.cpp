@@ -130,6 +130,21 @@ OptArgs ArgReader::getParams() {
             optArgs.setSequential(true);
         }
 
+        comp = "-ring";
+        if(comp.compare(argv[i])==0){
+            optArgs.setRing(true);
+        }
+
+        comp = "-randomringv1";
+        if(comp.compare(argv[i])==0){
+            optArgs.setRandomringv1(true);
+        }
+
+        comp = "-randomringv2";
+        if(comp.compare(argv[i])==0){
+            optArgs.setRandomringv2(true);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

@@ -60,6 +60,7 @@ public:
     void adamSGDBatchv2(double* w, int comm_gap, string logfile);
     void adamSGDRotationv1(double* w);
     void adamSGDRandomRingv1(double* w, double dropout_per, string logfile);
+    void adamSGDRandomRingv2(double* w, double dropout_per, string logfile);
 
     double *getW() const;
 

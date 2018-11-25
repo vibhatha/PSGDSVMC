@@ -1560,12 +1560,12 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-        /*if (i % 10 == 0 and world_rank==0) {
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            //util.print1DMatrix(w, features);
-            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
-        }*/
+//        if (i % 1 == 0 and world_rank==0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
         for (int j = 0; j < trainingSamples; ++j) {
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
@@ -1692,10 +1692,219 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     delete[] xiyi;
     delete[] w1d;
 
+}
+
+void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
+    int *active_ranks;
+    int miss_rank_size = dropout_per * world_size;
+    int active_rank_size = world_size - miss_rank_size;
+    active_ranks = new int[active_rank_size];
 
 
+
+    Initializer initializer;
+    if(world_rank==0) {
+        cout << "Start Training RandomRing v2 ..." << endl;
+    }
+
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+
+
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+    double end_compute = 0;
+    for (int i = 1; i < iterations; ++i) {
+        if (world_rank == 0) {
+            generateRandomRanks(active_ranks, dropout_per);
+        }
+        MPI_Bcast(active_ranks, active_rank_size, MPI_INT, 0, MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
+//        string s;
+//        s.append("Rank : ").append(to_string(world_rank)).append(", ");
+//        for (int i = 0; i < active_rank_size; ++i) {
+//            s.append(to_string(active_ranks[i])).append(" ");
+//        }
+//        if (world_rank == 0) {
+//            cout << s << endl;
+//        }
+//        if (i % 1 == 0 and world_rank==0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        for (int j = 0; j < trainingSamples; ++j) {
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+
+            matrix.scalarMultiply(v, beta1, v1);
+            matrix.scalarMultiply(gradient, (1 - beta1), v2);
+            matrix.add(v1, v2, v);
+            matrix.scalarMultiply(v, (1.0 / (1.0 - (pow(beta1, (double) i)))), v_hat);
+            matrix.inner(gradient, gradient, grad_mul);
+            matrix.scalarMultiply(r, beta2, r1);
+            matrix.scalarMultiply(grad_mul, (1 - beta2), r2);
+            matrix.add(r1, r2, r);
+            matrix.scalarMultiply(r, (1.0 / (1.0 - (pow(beta2, (double) i)))), r_hat);
+            //w1 = matrix.sqrt(r_hat);
+            //w1 = matrix.scalarAddition(w1,epsilon);
+            //w1 = matrix.divide(v_hat,w1);
+            matrix.sqrt(r_hat, sq_r_hat);
+            matrix.scalarAddition(sq_r_hat, epsilon, w1d);
+            matrix.divide(v_hat, w1d, w1);
+            matrix.scalarMultiply(w1, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            end_compute = MPI_Wtime();
+            compute_time += (end_compute - end_compute);
+
+
+            if (isIncluded(active_ranks, world_rank, active_rank_size)) {
+                int my_index = getRankIndex(active_ranks, world_rank, active_rank_size);
+                int nextId = 0; //(world_rank + 1) % active_rank_size;
+                int prevId = 0; //(world_rank + active_rank_size - 1) % active_rank_size;
+                if (my_index - 1 >= 0) {
+                    prevId = my_index - 1;
+                }
+
+                if (my_index - 1 < 0) {
+                    prevId = active_rank_size - 1;
+                }
+                if ((my_index + 1) < (active_rank_size)) {
+                    nextId = my_index + 1;
+                }
+                if ((my_index + 1) == active_rank_size) {
+                    nextId = 0;
+                }
+
+//                cout << "My Rank : " << world_rank << ", aPrevious Rank : " << active_ranks[prevId] << ", Next Rank : "
+//                     << active_ranks[nextId] << endl;
+
+                int next = active_ranks[nextId];
+                int prev = active_ranks[prevId];
+                if(world_rank>1) {
+                    double start_communication = MPI_Wtime();
+                    MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
+                    MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    double end_communication = MPI_Wtime();
+                    communication_time += (end_communication - start_communication);
+                    matrix.add(w,wglobal,w);
+                    matrix.scalarMultiply(w, 1.0/2.0, w);
+                }
+            }
+
+
+
+
+            //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
+            //w_next = comms.recv(dtype=comms.mpi.FLOAT, source=prev, tag=1, size=w.shape[0])
+            //w = (w + w_next)/2.0
+            //util.print1DMatrix(w, features);
+            //delete [] xi;
+        }
+    }
+    if(world_rank>1) {
+        double start_final_comms = MPI_Wtime();
+        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        double end_final_comms = MPI_Wtime();
+        communication_time += (end_final_comms - start_final_comms);
+        start_compute = MPI_Wtime();
+        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+        end_compute = MPI_Wtime();
+        compute_time += (end_compute - start_compute);
+    }
+
+    /*if(world_rank==0) {
+        cout << "============================================" << endl;
+        printf("Final Weight\n");
+        util.print1DMatrix(w, features);
+
+        cout << "============================================" << endl;
+    }*/
+
+    //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    if(world_rank==0) {
+        cout << "Training Completed ..." << endl;
+    }
+    delete[] v;
+    delete[] v1;
+    delete[] v2;
+    delete[] r;
+    delete[] r1;
+    delete[] r2;
+    delete[] v_hat;
+    delete[] r_hat;
+    delete[] w1;
+    delete[] w2;
+    delete[] grad_mul;
+    delete[] sq_r_hat;
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw_axiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] w1d;
 
 }
+
+
 
 int PSGD::getRankIndex(int *active_ranks, int my_rank, int size) {
     int id = -1;
@@ -1726,8 +1935,8 @@ void PSGD::generateRandomRanks(int *active_ranks, double dropout_per) {
     mt19937 rng;
     rng.seed(random_device()());
     uniform_int_distribution<mt19937::result_type> dist6(0, world_size - 1);
-    cout << "Drop out Rank size : " << miss_rank_size << endl;
-    cout << "Active Rank Size : " << active_rank_size << endl;
+    //cout << "Drop out Rank size : " << miss_rank_size << endl;
+    //cout << "Active Rank Size : " << active_rank_size << endl;
 
 
     for (int i = 0; i < active_rank_size; ++i) {
@@ -1747,10 +1956,10 @@ void PSGD::generateRandomRanks(int *active_ranks, double dropout_per) {
         }
 
     }
-    for (int i = 0; i < active_rank_size; ++i) {
-        cout << active_ranks[i] << " ";
-    }
-    cout << endl;
+//    for (int i = 0; i < active_rank_size; ++i) {
+//        cout << active_ranks[i] << " ";
+//    }
+//    cout << endl;
 
 }
 

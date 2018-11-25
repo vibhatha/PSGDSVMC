@@ -29,6 +29,9 @@ private:
     double drop_out_per = 0.25;
     bool isDrop = false;
     bool sequential = false;
+    bool ring = false;
+    bool randomringv1 = false;
+    bool randomringv2 = false;
 
 public:
 
@@ -57,6 +60,11 @@ public:
     OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
             double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
             bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential, bool ring,
+            bool randomringv1, bool randomringv2);
 
 
     const string &getDataset() const;
@@ -132,6 +140,18 @@ public:
     bool isSequential() const;
 
     void setSequential(bool sequential);
+
+    bool isRing() const;
+
+    void setRing(bool ring);
+
+    bool isRandomringv1() const;
+
+    void setRandomringv1(bool randomringv1);
+
+    bool isRandomringv2() const;
+
+    void setRandomringv2(bool randomringv2);
 
 
 };
