@@ -1324,6 +1324,7 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile) {
 
 void PSGD::adamSGDRotationv1(double *w) {
     Initializer initializer;
+    Util util;
     if (world_rank == 0) {
         cout << "Start Training ..." << endl;
     }
@@ -1377,7 +1378,7 @@ void PSGD::adamSGDRotationv1(double *w) {
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-        alpha = 1.0 / (1.0 + (double) i);
+       // alpha = 1.0 / (1.0 + (double) i);
         /*if (i % 10 == 0 and world_rank==0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
@@ -1431,13 +1432,13 @@ void PSGD::adamSGDRotationv1(double *w) {
                 double end_communication = MPI_Wtime();
                 communication_time += (end_communication - start_communication);
                 matrix.add(w, wglobal, w);
-                matrix.scalarMultiply(w, 1.0 / 2.0, w);
+                matrix.scalarMultiply(w, 0.50, w);
             }
 
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
             //w_next = comms.recv(dtype=comms.mpi.FLOAT, source=prev, tag=1, size=w.shape[0])
             //w = (w + w_next)/2.0
-            //util.print1DMatrix(w, features);
+            util.print1DMatrix(w, features);
             //delete [] xi;
         }
     }
