@@ -1372,7 +1372,7 @@ void parallelLoadRandomV1(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+        PSGD sgd1(0.93, 0.999, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
@@ -1469,7 +1469,7 @@ void parallelLoadRandomV1(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+        PSGD sgd1(0.93, 0.999, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
