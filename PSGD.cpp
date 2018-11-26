@@ -1367,6 +1367,10 @@ void PSGD::adamSGDRotationv1(double *w) {
     initializer.initializeWeightsWithArray(features, aw1);
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
+    double *wcomm = new double[features];
+    initializer.initializeWeightsWithArray(features, wcomm);
+    double *wcomm1 = new double[features];
+    initializer.initializeWeightsWithArray(features, wcomm1);
     double epsilon = 0.00000001;
 
 
@@ -1428,11 +1432,11 @@ void PSGD::adamSGDRotationv1(double *w) {
             if (world_rank > 1) {
                 double start_communication = MPI_Wtime();
                 MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
-                MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(wcomm, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 double end_communication = MPI_Wtime();
                 communication_time += (end_communication - start_communication);
-                matrix.add(w, wglobal, w);
-                matrix.scalarMultiply(w, 0.50, w);
+                matrix.add(w, wcomm, wcomm1);
+                matrix.scalarMultiply(wcomm1, 0.50, w);
             }
 
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
@@ -1442,17 +1446,17 @@ void PSGD::adamSGDRotationv1(double *w) {
             //delete [] xi;
         }
     }
-    if (world_rank > 1) {
-        double start_final_comms = MPI_Wtime();
-        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
-                      MPI_COMM_WORLD);
-        double end_final_comms = MPI_Wtime();
-        communication_time += (end_final_comms - start_final_comms);
-        start_compute = MPI_Wtime();
-        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
-        end_compute = MPI_Wtime();
-        compute_time += (end_compute - start_compute);
-    }
+//    if (world_rank > 1) {
+//        double start_final_comms = MPI_Wtime();
+//        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+//                      MPI_COMM_WORLD);
+//        double end_final_comms = MPI_Wtime();
+//        communication_time += (end_final_comms - start_final_comms);
+//        start_compute = MPI_Wtime();
+//        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+//        end_compute = MPI_Wtime();
+//        compute_time += (end_compute - start_compute);
+//    }
 
     /*if(world_rank==0) {
         cout << "============================================" << endl;
@@ -1483,6 +1487,8 @@ void PSGD::adamSGDRotationv1(double *w) {
     delete[] aw1;
     delete[] xiyi;
     delete[] w1d;
+    delete[] wcomm;
+    delete[] wcomm1;
 
 }
 
