@@ -15,6 +15,7 @@ private:
     string dataSourceBasePath;
     string logSourceBasePath;
     string logSummaryBasePath;
+    string weightSummaryBasePath;
 
 public:
     ResourceManager();
@@ -24,6 +25,8 @@ public:
     void loadLogSourcePath();
 
     void loadSummaryPath();
+
+    void loadWeightSummaryPath();
 
     void setDataSourceBasePath(const string &dataSourceBasePath);
 
@@ -36,6 +39,10 @@ public:
     const string &getLogSummaryBasePath() const;
 
     void setLogSummaryBasePath(const string &logSummaryBasePath);
+
+    const string &getWeightSummaryBasePath() const;
+
+    void setWeightSummaryBasePath(const string &weightSummaryBasePath);
 
 };
 

@@ -65,6 +65,21 @@ void ResourceManager::loadSummaryPath() {
     this->setLogSummaryBasePath(token);
 }
 
+void ResourceManager::loadWeightSummaryPath() {
+    string resourceFile = "weightsummary.yaml";
+    std::ifstream file(resourceFile);
+    std::string str;
+    string line;
+    while (std::getline(file, str))
+    {
+        line = str;
+    }
+
+    string delimiter = ": ";
+    std::string token = line.substr(line.find(delimiter) + delimiter.length(),line.length());
+    this->setWeightSummaryBasePath(token);
+}
+
 const string &ResourceManager::getLogSourceBasePath() const {
     return logSourceBasePath;
 }
@@ -79,4 +94,12 @@ const string &ResourceManager::getLogSummaryBasePath() const {
 
 void ResourceManager::setLogSummaryBasePath(const string &logSummaryBasePath) {
     ResourceManager::logSummaryBasePath = logSummaryBasePath;
+}
+
+const string &ResourceManager::getWeightSummaryBasePath() const {
+    return weightSummaryBasePath;
+}
+
+void ResourceManager::setWeightSummaryBasePath(const string &weightSummaryBasePath) {
+    ResourceManager::weightSummaryBasePath = weightSummaryBasePath;
 }

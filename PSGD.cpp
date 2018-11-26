@@ -1549,6 +1549,8 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     initializer.initializeWeightsWithArray(features, aw1);
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
+
+
     double epsilon = 0.00000001;
 
 
@@ -1560,12 +1562,13 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     communication_time = 0;
     double start_compute = 0;
     double end_compute = 0;
+    double cost = 0;
     for (int i = 1; i < iterations; ++i) {
         if (i % 10 == 0 and world_rank==0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
-            cout << "Iteration " << i << "/" << iterations << endl;
+            cout << "Iteration " << i << "/" << iterations << ", Cost : " << cost << endl;
         }
         for (int j = 0; j < trainingSamples; ++j) {
             start_compute = MPI_Wtime();
@@ -1638,8 +1641,10 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
                     matrix.scalarMultiply(w, 1.0/2.0, w);
                 }
             }
-
-
+            //cost = abs(0.5 * np.dot(w, w.T) + self.C * condition)
+            double c1 = matrix.dot(w,w);
+            double c2 = 1 * yixiw;
+            cost = abs(c1+c2);
 
 
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)

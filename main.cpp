@@ -826,11 +826,16 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     //optArgs.toString();
     ResourceManager resourceManager;
     Initializer initializer;
+    Util util;
     resourceManager.loadDataSourcePath();
     resourceManager.loadLogSourcePath();
     resourceManager.loadSummaryPath();
+    resourceManager.loadWeightSummaryPath();
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/batch/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
+    string weightlogfile = "";
+    weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
+            .append("_").append("batch_weight_summary.csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -912,7 +917,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
-
+            util.writeWeight(w, features, weightlogfile);
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
@@ -1043,6 +1048,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
             cout << "Training Time : " << (endTime - startTime) << endl;
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+            util.writeWeight(w, features, weightlogfile);
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
@@ -1067,11 +1073,19 @@ void parallelLoadRotationV1(OptArgs optArgs) {
     //optArgs.toString();
     ResourceManager resourceManager;
     Initializer initializer;
+    Util util;
     resourceManager.loadDataSourcePath();
     resourceManager.loadLogSourcePath();
     resourceManager.loadSummaryPath();
+    resourceManager.loadWeightSummaryPath();
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
+    string weightlogfile = "";
+    weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
+            .append("_").append("ring_weight_summary.csv");
+    if(world_rank==0) {
+        cout << weightlogfile << endl;
+    }
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -1153,7 +1167,7 @@ void parallelLoadRotationV1(OptArgs optArgs) {
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
-
+            util.writeWeight(w, features, weightlogfile);
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
@@ -1281,6 +1295,7 @@ void parallelLoadRotationV1(OptArgs optArgs) {
             cout << "Training Time : " << (endTime - startTime) << endl;
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+            util.writeWeight(w, features, weightlogfile);
         }
 
         for (int i = 0; i < dataPerMachine; ++i) {
@@ -1312,6 +1327,8 @@ void parallelLoadRandomV1(OptArgs optArgs) {
     resourceManager.loadSummaryPath();
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/summary.csv");
+    string weightlogfile="";
+
     string logfile = "";
     if(world_rank==0) {
         cout << "Random Ring version 1 " << endl;
@@ -1372,7 +1389,7 @@ void parallelLoadRandomV1(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.93, 0.999, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+        PSGD sgd1(0.55, 0.55, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
@@ -1469,7 +1486,7 @@ void parallelLoadRandomV1(OptArgs optArgs) {
 //        }
 
 
-        PSGD sgd1(0.93, 0.999, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+        PSGD sgd1(0.55, 0.55, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
