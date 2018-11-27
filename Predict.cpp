@@ -11,7 +11,7 @@ using namespace std;
 
 
 double Predict::predict() {
-    cout << "Testing Samples : " << testingSamples << endl;
+    //cout << "Testing Samples : " << testingSamples << endl;
     double accuracy = 0;
     double totalCorrect = 0;
     Matrix matrix(features);

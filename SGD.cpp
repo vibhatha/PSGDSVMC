@@ -354,18 +354,20 @@ void SGD::adamSGD(double *w, string summarylogfile, string epochlogfile) {
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
-        alpha = 1.0 / ((double)(i) + 1);
+        //alpha = 1.0 / ((double)(i) + 1);
+        //double coefficient = 1.0/(1.0 + (double)i);
         for (int j = 0; j < trainingSamples; ++j) {
 
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
 
-            double coefficient = 1.0;
+
 
             if (yixiw < 1) {
                 matrix.scalarAddition(X[j], y[j], xiyi);
                 matrix.subtract(w, xiyi, w_xiyi);
                 matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
 
             } else {
                 matrix.scalarMultiply(w, (1 - alpha), gradient);
@@ -423,6 +425,91 @@ void SGD::adamSGD(double *w, string summarylogfile, string epochlogfile) {
     delete [] aw1;
     delete [] xiyi;
     delete [] w1d;
+}
+
+void SGD::sgd(double *w, string summarylogfile, string epochlogfile) {
+
+    Initializer initializer;
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double epsilon = 0.00000001;
+    Util util;
+
+    Matrix1 matrix(features);
+
+    initializer.initialWeights(features, w);
+
+    for (int i = 1; i < iterations; ++i) {
+//        if (i % 10 == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        //alpha = 1.0 / ((double)(i) + 1);
+        //double coefficient = 1.0/(1.0 + (double)i);
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+            matrix.scalarMultiply(gradient, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            //util.print1DMatrix(w, 5);
+        }
+        Predict predict(Xtest, ytest, w , testingSamples, features);
+        double acc = predict.predict();
+        cout << "SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+    }
+
+    delete [] gradient;
+    delete [] w_xiyi;
+    delete [] aw1;
+    delete [] xiyi;
+
 }
 
 double *SGD::getW() const {

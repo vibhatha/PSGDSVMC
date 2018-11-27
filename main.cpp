@@ -2103,7 +2103,7 @@ void trainSequential(OptArgs optArgs) {
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
         SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
-        sgd3.adamSGD(w,summarylogfile, epochlogfile);
+        sgd3.sgd(w,summarylogfile, epochlogfile);
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
