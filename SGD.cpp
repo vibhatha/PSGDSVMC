@@ -354,6 +354,7 @@ void SGD::adamSGD(double *w, string summarylogfile, string epochlogfile) {
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
+        alpha = 1.0 / ((double)(i) + 1);
         for (int j = 0; j < trainingSamples; ++j) {
 
             double yixiw = matrix.dot(X[j], w);
