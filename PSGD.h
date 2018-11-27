@@ -30,6 +30,8 @@ private:
     double communication_time=0;
     vector<double> compute_time_of_ranks;
     vector<double> communication_time_of_ranks;
+    double** Xtest;
+    double* ytest;
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
     PSGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
@@ -46,6 +48,10 @@ public:
     PSGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
          int trainingSamples, int testingSamples, int world_size, int world_rank);
 
+    PSGD(double beta1, double beta2, double **X, double *y, double alpha, int iterations, int features,
+         int trainingSamples, int testingSamples, int world_size, int world_rank, double **Xtest, double *ytest);
+
+
     void sgd();
     void adamSGDSeq(double* w);
     void adamSGDSeq(double* w, string logfile);
@@ -58,6 +64,8 @@ public:
     void adamSGDBatchv1(double* w, string logfile);
     void adamSGDBatchv2(double* w, int comm_gap);
     void adamSGDBatchv2(double* w, int comm_gap, string logfile);
+    void adamSGDBatchv2(double* w, int comm_gap, string logfile, string epochlogfile);
+    void sgdBatchv2(double* w, int comm_gap, string logfile, string epochlogfile);
     void adamSGDRotationv1(double* w);
     void adamSGDRandomRingv1(double* w, double dropout_per, string logfile);
     void adamSGDRandomRingv2(double* w, double dropout_per, string logfile);

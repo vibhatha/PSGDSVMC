@@ -831,11 +831,14 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     resourceManager.loadLogSourcePath();
     resourceManager.loadSummaryPath();
     resourceManager.loadWeightSummaryPath();
+    resourceManager.loadEpochSummaryPath();
     string summarylogfile ="";
-    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/batch/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("batch_weight_summary.csv");
+    string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
+    epochlogfile.append("parallel/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("batch_cross_validation_accuracy.csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -894,10 +897,10 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
 
 
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
-                  testingSamples, world_size, world_rank);
+                  testingSamples, world_size, world_rank, Xtest, ytest);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGDBatchv2(w, comm_gap);
+            sgd1.sgdBatchv2(w, comm_gap, logfile, epochlogfile);
         }
 
         if (optArgs.isIsEpochTime()) {

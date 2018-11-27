@@ -364,7 +364,7 @@ void SGD::adamSGD(double *w, string summarylogfile, string epochlogfile) {
 
 
             if (yixiw < 1) {
-                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.scalarMultiply(X[j], y[j], xiyi);
                 matrix.subtract(w, xiyi, w_xiyi);
                 matrix.scalarMultiply(w_xiyi, alpha, gradient);
 
@@ -488,7 +488,7 @@ void SGD::sgd(double *w, string summarylogfile, string epochlogfile) {
             yixiw = yixiw * y[j];
 
             if (yixiw < 1) {
-                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.scalarMultiply(X[j], y[j], xiyi);
                 matrix.subtract(w, xiyi, w_xiyi);
                 matrix.scalarMultiply(w_xiyi, alpha, gradient);
             } else {
