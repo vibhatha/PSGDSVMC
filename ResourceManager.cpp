@@ -80,6 +80,21 @@ void ResourceManager::loadWeightSummaryPath() {
     this->setWeightSummaryBasePath(token);
 }
 
+void ResourceManager::loadEpochSummaryPath() {
+    string resourceFile = "epochlogsummary.yaml";
+    std::ifstream file(resourceFile);
+    std::string str;
+    string line;
+    while (std::getline(file, str))
+    {
+        line = str;
+    }
+
+    string delimiter = ": ";
+    std::string token = line.substr(line.find(delimiter) + delimiter.length(),line.length());
+    this->setEpochlogSummaryBasePath(token);
+}
+
 const string &ResourceManager::getLogSourceBasePath() const {
     return logSourceBasePath;
 }
@@ -102,4 +117,12 @@ const string &ResourceManager::getWeightSummaryBasePath() const {
 
 void ResourceManager::setWeightSummaryBasePath(const string &weightSummaryBasePath) {
     ResourceManager::weightSummaryBasePath = weightSummaryBasePath;
+}
+
+const string &ResourceManager::getEpochlogSummaryBasePath() const {
+    return epochlogSummaryBasePath;
+}
+
+void ResourceManager::setEpochlogSummaryBasePath(const string &epochlogSummaryBasePath) {
+    ResourceManager::epochlogSummaryBasePath = epochlogSummaryBasePath;
 }

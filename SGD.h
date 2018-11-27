@@ -5,6 +5,9 @@
 #ifndef PSGDC_SGD_H
 #define PSGDC_SGD_H
 
+#include <iostream>
+
+using namespace std;
 
 class SGD {
 
@@ -21,6 +24,8 @@ private:
     int trainingSamples;
     int testingSamples;
     double* wFinal;
+    double** Xtest;
+    double* ytest;
 
 public:
 
@@ -33,9 +38,13 @@ public:
     SGD(double beta1, double beta2, double alpha, int iterations, int features, int trainingSamples,
         int testingSamples);
 
+    SGD(double beta1, double beta2, double **X, double *y, double *w, double alpha, int iterations, int features,
+        int trainingSamples, int testingSamples, double **Xtest, double *ytest);
+
     void sgd();
     void adamSGD();
     void adamSGD(double* w);
+    void adamSGD(double* w, string summarylogfile, string epochlogfile);
 
     double *getW() const;
 

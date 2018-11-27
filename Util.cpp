@@ -48,6 +48,15 @@ void Util::writeWeight(double *w, int size, string logfile) {
     }
 }
 
+void Util::writeAccuracyPerEpoch(double epoch, double acc, string file) {
+    ofstream myfile(file, ios::out | ios::app);
+    if (myfile.is_open()) {
+        myfile << epoch <<","<<acc<< "\n";
+        myfile.close();
+    }
+}
+
+
 string Util::getTimestamp() {
     string string1;
     time_t t = time(0);   // get time now
@@ -61,3 +70,16 @@ string Util::getTimestamp() {
     string1.append(datestring).append("__").append(timestring);
     return string1;
 }
+
+
+void Util::summary(string logfile, int world_size, double acc, double time) {
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimestamp();
+    if (myfile.is_open()) {
+
+        myfile << world_size << "," << time << "," << acc << "," << timestamp << "\n";
+
+        myfile.close();
+    }
+}
+

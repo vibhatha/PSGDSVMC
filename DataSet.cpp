@@ -532,15 +532,15 @@ void DataSet::load(double **Xtrain, double *ytrain, double **Xtest, double *ytes
         this->setTestingSamples(testSet);
         this->setTrainingSamples(trainSet);
 
-        ifstream file(sourceFile);
+        ifstream file1(sourceFile);
         cout << "Loading File : " << sourceFile << endl;
         int rowTest = 0;
         for (int row = 0; row < totalSamples; row++) {
             if (row < trainSet) {
 
                 string line;
-                getline(file, line);
-                if (!file.good()) {
+                getline(file1, line);
+                if (!file1.good()) {
                     printf("File is not readable \n");
                     break;
                 }
@@ -569,8 +569,8 @@ void DataSet::load(double **Xtrain, double *ytrain, double **Xtest, double *ytes
                 //cout << "Row : " << row << ", Row Test Id  : " << rowTest << endl;
 
                 string line;
-                getline(file, line);
-                if (!file.good()) {
+                getline(file1, line);
+                if (!file1.good()) {
                     printf("File is not readable \n");
                     break;
                 }

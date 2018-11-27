@@ -2043,11 +2043,23 @@ void trainSequential(OptArgs optArgs) {
     optArgs.toString();
     ResourceManager resourceManager;
     resourceManager.loadDataSourcePath();
+    resourceManager.loadEpochSummaryPath();
+    resourceManager.loadLogSourcePath();
+    resourceManager.loadSummaryPath();
+    resourceManager.loadWeightSummaryPath();
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
+
         string trainFileName = "/training.csv";
         string testFileName = "/testing.csv";
+
+        string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
+        epochlogfile.append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_cross_validation_accuracy.csv");
+
+        string summarylogfile = resourceManager.getLogSummaryBasePath();
+        summarylogfile.append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_summary_log.csv");
+
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
         int features = optArgs.getFeatures();
@@ -2057,7 +2069,6 @@ void trainSequential(OptArgs optArgs) {
         int trainSet = totalSamples * ratio;
         int testSet = totalSamples - trainSet;
         Initializer initializer;
-
 
         double ytrain[trainSet];
         initializer.initializeWeightsWithArray(trainSet, ytrain);
@@ -2084,14 +2095,15 @@ void trainSequential(OptArgs optArgs) {
         DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
         dataSet.load(Xtrain, ytrain, Xtest, ytest);
 
-        //util.print2DMatrix(Xtrain, trainSet, features);
+        util.print2DMatrix(Xtrain, 2, features);
         printf("\n----------------------------------------\n");
-        //util.print2DMatrix(Xtest, testSet, features);
+        util.print2DMatrix(Xtest, 2, features);
         clock_t begin = clock();
         double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
-        sgd2.adamSGD(w);
+        SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
+        sgd3.adamSGD(w,summarylogfile, epochlogfile);
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
@@ -2101,9 +2113,10 @@ void trainSequential(OptArgs optArgs) {
 
 
 
-//        Predict predict(Xtest, ytest, wFinalTest , testSet, features);
-//        double acc = predict.predict();
-//        cout << "Testing Accuracy : " << acc << "%" << endl;
+        Predict predict(Xtest, ytest, w , testSet, features);
+        double acc = predict.predict();
+        cout << "Testing Accuracy : " << acc << "%" << endl;
+        util.summary(summarylogfile, 1, acc, elapsed_secs);
         for (int i = 0; i < trainSet; ++i) {
             delete[] Xtrain[i];
         }
