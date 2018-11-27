@@ -2055,10 +2055,10 @@ void trainSequential(OptArgs optArgs) {
         string testFileName = "/testing.csv";
 
         string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-        epochlogfile.append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_cross_validation_accuracy.csv");
+        epochlogfile.append("sequential/").append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_cross_validation_accuracy.csv");
 
         string summarylogfile = resourceManager.getLogSummaryBasePath();
-        summarylogfile.append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_summary_log.csv");
+        summarylogfile.append("sequential/").append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_summary_log.csv");
 
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
