@@ -69,6 +69,7 @@ public:
     void adamSGDRotationv1(double* w);
     void adamSGDRandomRingv1(double* w, double dropout_per, string logfile);
     void adamSGDRandomRingv2(double* w, double dropout_per, string logfile);
+    void sgdFullBatchv1(double* w, int comm_gap, string logfile, string epochlogfile);
 
     double *getW() const;
 
