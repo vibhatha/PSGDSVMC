@@ -1941,8 +1941,6 @@ void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
     initializer.initializeWeightsWithArray(features, gradient);
     double *xiyi = new double[features];
     initializer.initializeWeightsWithArray(features, xiyi);
-    double *w_xiyi = new double[features];
-    initializer.initializeWeightsWithArray(features, w_xiyi);
     double *aw1 = new double[features];
     initializer.initializeWeightsWithArray(features, aw1);
     double *wglobal = new double[features];
@@ -1990,11 +1988,10 @@ void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
 
             if (yixiw < 1) {
                 matrix.scalarAddition(X[j], y[j], xiyi);
-                matrix.subtract(w, xiyi, w_xiyi);
-                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+                matrix.subtract(w, xiyi, gradient);
 
             } else {
-                matrix.scalarMultiply(w, (1 - alpha), gradient);
+                gradient = w;
             }
 
             matrix.scalarMultiply(gradient, alpha, aw1);
@@ -2032,7 +2029,6 @@ void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
 
 
     delete[] gradient;
-    delete[] w_xiyi;
     delete[] aw1;
     delete[] xiyi;
     delete[] comptimeA;
@@ -2041,14 +2037,13 @@ void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
 
 
 void PSGD::sgdFullBatchv2(double *w, string epochlogfile) {
+    double C=1.0;
     Initializer initializer;
     cout << "Start Training ..." << endl;
     double *gradient = new double[features];
     initializer.initializeWeightsWithArray(features, gradient);
     double *xiyi = new double[features];
     initializer.initializeWeightsWithArray(features, xiyi);
-    double *w_xiyi = new double[features];
-    initializer.initializeWeightsWithArray(features, w_xiyi);
     double *aw1 = new double[features];
     initializer.initializeWeightsWithArray(features, aw1);
     double *wglobal = new double[features];
@@ -2083,16 +2078,15 @@ void PSGD::sgdFullBatchv2(double *w, string epochlogfile) {
             perDataPerItrCompt = 0;
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
-            yixiw = yixiw * y[j];
+            yixiw = yixiw * y[j] * C;
             double coefficient = 1.0 / (1.0 + double(i));
 
             if (yixiw < 1) {
-                matrix.scalarMultiply(X[j], y[j], xiyi);
-                matrix.subtract(w, xiyi, w_xiyi);
-                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+                matrix.scalarMultiply(X[j], C*y[j], xiyi);
+                matrix.subtract(w, xiyi, gradient);
 
             } else {
-                matrix.scalarMultiply(w, (1 - alpha), gradient);
+                gradient = w;
             }
 
             matrix.scalarMultiply(gradient, alpha, aw1);
@@ -2125,7 +2119,6 @@ void PSGD::sgdFullBatchv2(double *w, string epochlogfile) {
 
 
     delete[] gradient;
-    delete[] w_xiyi;
     delete[] aw1;
     delete[] xiyi;
     delete[] wglobal;
