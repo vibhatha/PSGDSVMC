@@ -279,3 +279,50 @@ bool OptArgs::isRandomringv2() const {
 void OptArgs::setRandomringv2(bool randomringv2) {
     OptArgs::randomringv2 = randomringv2;
 }
+
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime, bool bulk, bool batch, double batch_per, double drop_out_per, bool isDrop,
+                 bool sequential, bool ring, bool randomringv1, bool randomringv2, bool fullbatchv1) : dataset(dataset),
+                                                                                                       features(
+                                                                                                               features),
+                                                                                                       trainingSamples(
+                                                                                                               trainingSamples),
+                                                                                                       testingSamples(
+                                                                                                               testingSamples),
+                                                                                                       alpha(alpha),
+                                                                                                       isSplit(isSplit),
+                                                                                                       ratio(ratio),
+                                                                                                       threads(threads),
+                                                                                                       workers(workers),
+                                                                                                       iterations(
+                                                                                                               iterations),
+                                                                                                       isEpochTime(
+                                                                                                               isEpochTime),
+                                                                                                       isNormalTime(
+                                                                                                               isNormalTime),
+                                                                                                       bulk(bulk),
+                                                                                                       batch(batch),
+                                                                                                       batch_per(
+                                                                                                               batch_per),
+                                                                                                       drop_out_per(
+                                                                                                               drop_out_per),
+                                                                                                       isDrop(isDrop),
+                                                                                                       sequential(
+                                                                                                               sequential),
+                                                                                                       ring(ring),
+                                                                                                       randomringv1(
+                                                                                                               randomringv1),
+                                                                                                       randomringv2(
+                                                                                                               randomringv2),
+                                                                                                       fullbatchv1(
+                                                                                                               fullbatchv1) {}
+
+
+bool OptArgs::isFullbatchv1() const {
+    return fullbatchv1;
+}
+
+void OptArgs::setFullbatchv1(bool fullbatchv1) {
+    OptArgs::fullbatchv1 = fullbatchv1;
+}

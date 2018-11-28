@@ -145,6 +145,11 @@ OptArgs ArgReader::getParams() {
             optArgs.setRandomringv2(true);
         }
 
+        comp = "-fullbatch";
+        if(comp.compare(argv[i])==0){
+            optArgs.setFullbatchv1(true);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

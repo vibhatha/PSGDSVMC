@@ -1459,7 +1459,7 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile, string epochl
             comptimeA[i][j] = perDataPerItrCompt;
 
         }
-        Predict predict(Xtest, ytest, w , testingSamples, features);
+        Predict predict(Xtest, ytest, w, testingSamples, features);
         double acc = predict.predict();
         cout << "PSGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
@@ -1594,13 +1594,13 @@ void PSGD::sgdBatchv2(double *w, int comm_gap, string logfile, string epochlogfi
             comptimeA[i][j] = perDataPerItrCompt;
 
         }
-        if(world_rank==0) {
-            util.print1DMatrix(w, 5);
-            Predict predict(Xtest, ytest, w , testingSamples, features);
-            double acc = predict.predict();
-            cout << "PSGD Batch v2 Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
-            util.writeAccuracyPerEpoch(i, acc, epochlogfile);
-        }
+
+        util.print1DMatrix(w, 5);
+        Predict predict(Xtest, ytest, w, testingSamples, features);
+        double acc = predict.predict();
+        cout << "PSGD Batch v2 Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+
 
     }
     /*if(world_rank==0) {
@@ -1612,9 +1612,8 @@ void PSGD::sgdBatchv2(double *w, int comm_gap, string logfile, string epochlogfi
     }*/
     cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
-             commtimeA);
-
+    //writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
+    //         commtimeA);
 
 
     delete[] gradient;
@@ -1625,7 +1624,7 @@ void PSGD::sgdBatchv2(double *w, int comm_gap, string logfile, string epochlogfi
     delete[] comptimeA;
 }
 
-void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochlogfile) {
+void PSGD::adamSGDFullBatchv1(double *w, string logfile, string epochlogfile) {
     Initializer initializer;
     cout << "Start Training ..." << endl;
     double *v = new double[features];
@@ -1682,18 +1681,14 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
     double start_compute = 0;
     double final_communication_time = 0;
 
-
     double **comptimeA;
-    double **commtimeA;
+
     comptimeA = new double *[iterations];
     for (int i = 0; i < iterations; ++i) {
         comptimeA[i] = new double[trainingSamples];
     }
 
-    commtimeA = new double *[iterations];
-    for (int i = 0; i < iterations; ++i) {
-        commtimeA[i] = new double[trainingSamples];
-    }
+    double predictionTime = 0;
     double perDataPerItrCompt = 0;
     for (int i = 1; i < iterations; ++i) {
         //alpha = 1.0 / (1.0 + (double) i);
@@ -1703,7 +1698,6 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
-        commtimeA[i] = new double[trainingSamples];
         comptimeA[i] = new double[trainingSamples];
         for (int j = 0; j < trainingSamples; ++j) {
 
@@ -1721,7 +1715,6 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
             } else {
                 matrix.scalarMultiply(w, (1 - alpha), gradient);
             }
-
 
             matrix.scalarMultiply(v, beta1, v1);
             matrix.scalarMultiply(gradient, (1 - beta1), v2);
@@ -1743,15 +1736,15 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
             double end_compute = MPI_Wtime();
             compute_time += (end_compute - start_compute);
             perDataPerItrCompt = (end_compute - start_compute);
-            //util.print1DMatrix(w, features);
-            //delete [] xi;
             comptimeA[i][j] = perDataPerItrCompt;
 
         }
-
-        Predict predict(Xtest, ytest, w , testingSamples, features);
+        double start_predict = MPI_Wtime();
+        Predict predict(Xtest, ytest, w, testingSamples, features);
         double acc = predict.predict();
-        cout << "PSGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        double end_predict = MPI_Wtime();
+        predictionTime += (end_predict - start_predict);
+        cout << "PSGD Full Batch :  Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
     }
 
@@ -1764,14 +1757,12 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
     matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
     double end_compute = MPI_Wtime();
     compute_time += (end_compute - start_compute);
-    perDataPerItrCompt += (end_compute - start_compute);
-    final_communication_time = end_communication - start_communication;
 
     cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
     writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
-             commtimeA);
-
+             communication_time);
+    this->setTotalPredictionTime(predictionTime);
 
     delete[] v;
     delete[] v1;
@@ -1791,9 +1782,353 @@ void PSGD::sgdFullBatchv1(double *w, int comm_gap, string logfile, string epochl
     delete[] aw1;
     delete[] xiyi;
     delete[] w1d;
-    delete[] commtimeA;
     delete[] comptimeA;
 }
+
+
+void PSGD::adamSGDFullBatchv2(double *w, string epochlogfile) {
+    Initializer initializer;
+    cout << "Start Training ..." << endl;
+    double *v = new double[features];
+    initializer.initializeWeightsWithArray(features, v);
+    double *r = new double[features];
+    initializer.initializeWeightsWithArray(features, r);
+    double *v1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v1);
+    double *v2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r1 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *r2 = new double[features];
+    initializer.initializeWeightsWithArray(features, v2);
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *w2 = new double[features];
+    initializer.initializeWeightsWithArray(features, w2);
+    double *v_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, v_hat);
+    double *r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, r_hat);
+    double *sq_r_hat = new double[features];
+    initializer.initializeWeightsWithArray(features, sq_r_hat);
+    double *grad_mul = new double[features];
+    initializer.initializeWeightsWithArray(features, grad_mul);
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw_axiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, aw_axiyi);
+    double *w1d = new double[features];
+    initializer.initializeWeightsWithArray(features, w1d);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+    double final_communication_time = 0;
+    double predictionTime = 0;
+    double perDataPerItrCompt = 0;
+    for (int i = 1; i < iterations; ++i) {
+        //alpha = 1.0 / (1.0 + (double) i);
+//        if (i % 10 == 0 and world_rank == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            perDataPerItrCompt = 0;
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+            matrix.scalarMultiply(v, beta1, v1);
+            matrix.scalarMultiply(gradient, (1 - beta1), v2);
+            matrix.add(v1, v2, v);
+            matrix.scalarMultiply(v, (1.0 / (1.0 - (pow(beta1, (double) i)))), v_hat);
+            matrix.inner(gradient, gradient, grad_mul);
+            matrix.scalarMultiply(r, beta2, r1);
+            matrix.scalarMultiply(grad_mul, (1 - beta2), r2);
+            matrix.add(r1, r2, r);
+            matrix.scalarMultiply(r, (1.0 / (1.0 - (pow(beta2, (double) i)))), r_hat);
+            //w1 = matrix.sqrt(r_hat);
+            //w1 = matrix.scalarAddition(w1,epsilon);
+            //w1 = matrix.divide(v_hat,w1);
+            matrix.sqrt(r_hat, sq_r_hat);
+            matrix.scalarAddition(sq_r_hat, epsilon, w1d);
+            matrix.divide(v_hat, w1d, w1);
+            matrix.scalarMultiply(w1, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+        }
+        double start_predict = MPI_Wtime();
+        Predict predict(Xtest, ytest, w, testingSamples, features);
+        double acc = predict.predict();
+        double end_predict = MPI_Wtime();
+        predictionTime += (end_predict - start_predict);
+        cout << "PSGD Full Batch : " << world_rank << " Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+    }
+
+    double start_communication = MPI_Wtime();
+    MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    double end_communication = MPI_Wtime();
+    communication_time += (end_communication - start_communication);
+    start_compute = MPI_Wtime();
+    matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+    double end_compute = MPI_Wtime();
+    compute_time += (end_compute - start_compute);
+
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    this->setTotalPredictionTime(predictionTime);
+
+    delete[] v;
+    delete[] v1;
+    delete[] v2;
+    delete[] r;
+    delete[] r1;
+    delete[] r2;
+    delete[] v_hat;
+    delete[] r_hat;
+    delete[] w1;
+    delete[] w2;
+    delete[] grad_mul;
+    delete[] sq_r_hat;
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw_axiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] w1d;
+}
+
+
+void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
+    Initializer initializer;
+    cout << "Start Training ..." << endl;
+
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+    double final_communication_time = 0;
+
+    double **comptimeA;
+
+    comptimeA = new double *[iterations];
+    for (int i = 0; i < iterations; ++i) {
+        comptimeA[i] = new double[trainingSamples];
+    }
+
+    double predictionTime = 0;
+    double perDataPerItrCompt = 0;
+    for (int i = 1; i < iterations; ++i) {
+        //alpha = 1.0 / (1.0 + (double) i);
+//        if (i % 10 == 0 and world_rank == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        comptimeA[i] = new double[trainingSamples];
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            perDataPerItrCompt = 0;
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            if (yixiw < 1) {
+                matrix.scalarAddition(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+            matrix.scalarMultiply(gradient, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+            perDataPerItrCompt = (end_compute - start_compute);
+            comptimeA[i][j] = perDataPerItrCompt;
+
+        }
+        double start_predict = MPI_Wtime();
+        Predict predict(Xtest, ytest, w, testingSamples, features);
+        double acc = predict.predict();
+        double end_predict = MPI_Wtime();
+        predictionTime += (end_predict - start_predict);
+        cout << "PSGD Full Batch :  Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+    }
+
+    double start_communication = MPI_Wtime();
+    MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    double end_communication = MPI_Wtime();
+    communication_time += (end_communication - start_communication);
+    start_compute = MPI_Wtime();
+    matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+    double end_compute = MPI_Wtime();
+    compute_time += (end_compute - start_compute);
+
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    writeLog(logfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
+             communication_time);
+    this->setTotalPredictionTime(predictionTime);
+
+
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw1;
+    delete[] xiyi;
+    delete[] comptimeA;
+}
+
+
+void PSGD::sgdFullBatchv2(double *w, string epochlogfile) {
+    Initializer initializer;
+    cout << "Start Training ..." << endl;
+    double *gradient = new double[features];
+    initializer.initializeWeightsWithArray(features, gradient);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *w_xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *aw1 = new double[features];
+    initializer.initializeWeightsWithArray(features, aw1);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double epsilon = 0.00000001;
+    Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
+
+    Matrix1 matrix(features);
+
+    initializer.initializeWeightsWithArray(features, w);
+    compute_time = 0;
+    communication_time = 0;
+    double start_compute = 0;
+    double final_communication_time = 0;
+    double predictionTime = 0;
+    double perDataPerItrCompt = 0;
+    for (int i = 1; i < iterations; ++i) {
+        //alpha = 1.0 / (1.0 + (double) i);
+//        if (i % 10 == 0 and world_rank == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            perDataPerItrCompt = 0;
+            start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+            double coefficient = 1.0 / (1.0 + double(i));
+
+            if (yixiw < 1) {
+                matrix.scalarMultiply(X[j], y[j], xiyi);
+                matrix.subtract(w, xiyi, w_xiyi);
+                matrix.scalarMultiply(w_xiyi, alpha, gradient);
+
+            } else {
+                matrix.scalarMultiply(w, (1 - alpha), gradient);
+            }
+
+            matrix.scalarMultiply(gradient, alpha, aw1);
+            matrix.subtract(w, aw1, w);
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+        }
+        double start_predict = MPI_Wtime();
+        Predict predict(Xtest, ytest, w, testingSamples, features);
+        double acc = predict.predict();
+        double end_predict = MPI_Wtime();
+        predictionTime += (end_predict - start_predict);
+        cout << "PSGD Full Batch : " << world_rank << " Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+    }
+
+    double start_communication = MPI_Wtime();
+    MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    double end_communication = MPI_Wtime();
+    communication_time += (end_communication - start_communication);
+    start_compute = MPI_Wtime();
+    matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+    double end_compute = MPI_Wtime();
+    compute_time += (end_compute - start_compute);
+
+    cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
+    cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
+    this->setTotalPredictionTime(predictionTime);
+
+
+    delete[] gradient;
+    delete[] w_xiyi;
+    delete[] aw1;
+    delete[] xiyi;
+}
+
 
 void PSGD::adamSGDRotationv1(double *w) {
     Initializer initializer;
@@ -1855,8 +2190,8 @@ void PSGD::adamSGDRotationv1(double *w) {
     double start_compute = 0;
     double end_compute = 0;
     for (int i = 1; i < iterations; ++i) {
-       // alpha = 1.0 / (1.0 + (double) i);
-        if (i % 10 == 0 and world_rank==0) {
+        // alpha = 1.0 / (1.0 + (double) i);
+        if (i % 10 == 0 and world_rank == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -1986,7 +2321,7 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
 
 
     Initializer initializer;
-    if(world_rank==0) {
+    if (world_rank == 0) {
         cout << "Start Training ..." << endl;
     }
 
@@ -2033,7 +2368,6 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     double epsilon = 0.00000001;
 
 
-
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
@@ -2043,7 +2377,7 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
     double end_compute = 0;
     double cost = 0;
     for (int i = 1; i < iterations; ++i) {
-        if (i % 10 == 0 and world_rank==0) {
+        if (i % 10 == 0 and world_rank == 0) {
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
             //util.print1DMatrix(w, features);
             //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -2110,20 +2444,20 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
 
                 int next = active_ranks[nextId];
                 int prev = active_ranks[prevId];
-                if(world_rank>1) {
+                if (world_rank > 1) {
                     double start_communication = MPI_Wtime();
                     MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
                     MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     double end_communication = MPI_Wtime();
                     communication_time += (end_communication - start_communication);
-                    matrix.add(w,wglobal,w);
-                    matrix.scalarMultiply(w, 1.0/2.0, w);
+                    matrix.add(w, wglobal, w);
+                    matrix.scalarMultiply(w, 1.0 / 2.0, w);
                 }
             }
             //cost = abs(0.5 * np.dot(w, w.T) + self.C * condition)
-            double c1 = matrix.dot(w,w);
+            double c1 = matrix.dot(w, w);
             double c2 = 1 * yixiw;
-            cost = abs(c1+c2);
+            cost = abs(c1 + c2);
 
 
             //comms.send(w, dtype=comms.mpi.FLOAT,dest=next, tag=1)
@@ -2133,7 +2467,7 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
             //delete [] xi;
         }
     }
-    if(world_rank>1) {
+    if (world_rank > 1) {
         double start_final_comms = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                       MPI_COMM_WORLD);
@@ -2155,7 +2489,7 @@ void PSGD::adamSGDRandomRingv1(double *w, double dropout_per, string logfile) {
 
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    if(world_rank==0) {
+    if (world_rank == 0) {
         cout << "Training Completed ..." << endl;
     }
     delete[] v;
@@ -2186,9 +2520,8 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
     active_ranks = new int[active_rank_size];
 
 
-
     Initializer initializer;
-    if(world_rank==0) {
+    if (world_rank == 0) {
         cout << "Start Training RandomRing v2 ..." << endl;
     }
 
@@ -2231,7 +2564,6 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
     double epsilon = 0.00000001;
-
 
 
     Matrix1 matrix(features);
@@ -2322,14 +2654,14 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
 
                 int next = active_ranks[nextId];
                 int prev = active_ranks[prevId];
-                if(world_rank>1) {
+                if (world_rank > 1) {
                     double start_communication = MPI_Wtime();
                     MPI_Send(w, features, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
                     MPI_Recv(wglobal, features, MPI_DOUBLE, prev, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     double end_communication = MPI_Wtime();
                     communication_time += (end_communication - start_communication);
-                    matrix.add(w,wglobal,w);
-                    matrix.scalarMultiply(w, 1.0/2.0, w);
+                    matrix.add(w, wglobal, w);
+                    matrix.scalarMultiply(w, 1.0 / 2.0, w);
                 }
             }
 
@@ -2343,7 +2675,7 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
             //delete [] xi;
         }
     }
-    if(world_rank>1) {
+    if (world_rank > 1) {
         double start_final_comms = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                       MPI_COMM_WORLD);
@@ -2365,7 +2697,7 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
 
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    if(world_rank==0) {
+    if (world_rank == 0) {
         cout << "Training Completed ..." << endl;
     }
     delete[] v;
@@ -2388,7 +2720,6 @@ void PSGD::adamSGDRandomRingv2(double *w, double dropout_per, string logfile) {
     delete[] w1d;
 
 }
-
 
 
 int PSGD::getRankIndex(int *active_ranks, int my_rank, int size) {
@@ -2510,6 +2841,24 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
     }
 }
 
+void PSGD::writeLog(string logfile, int iterations, int samples, double **compt, double commt) {
+    cout << logfile << commt << "," << compt[0][0] << endl;
+    ofstream myfile(logfile);
+    if (myfile.is_open()) {
+        for (int i = 1; i < iterations; ++i) {
+            double per_itr_comp = 0;
+            double per_itr_comm = commt;
+            for (int j = 0; j < samples; ++j) {
+
+                per_itr_comp += compt[i][j];
+            }
+            cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+            myfile << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+        }
+        myfile.close();
+    }
+}
+
 double *PSGD::getW() const {
     return w;
 }
@@ -2574,5 +2923,13 @@ PSGD::PSGD(double beta1, double beta2, double **X, double *y, double alpha, int 
         : beta1(beta1), beta2(beta2), X(X), y(y), alpha(alpha), iterations(iterations), features(features),
           trainingSamples(trainingSamples), testingSamples(testingSamples), world_size(world_size),
           world_rank(world_rank), Xtest(Xtest), ytest(ytest) {}
+
+double PSGD::getTotalPredictionTime() const {
+    return totalPredictionTime;
+}
+
+void PSGD::setTotalPredictionTime(double totalPredictionTime) {
+    PSGD::totalPredictionTime = totalPredictionTime;
+}
 
 

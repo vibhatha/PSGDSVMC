@@ -32,6 +32,7 @@ private:
     vector<double> communication_time_of_ranks;
     double** Xtest;
     double* ytest;
+    double totalPredictionTime;
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
     PSGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
@@ -59,6 +60,7 @@ public:
     void adamSGD(double* w);
     void adamSGD(double* w, string logfile);
     void writeLog(string logfile, int iterations, int samples, double** compt, double** commt);
+    void writeLog(string logfile, int iterations, int samples, double** compt, double commt);
     void writeLog(string logfile, int iterations, int samples, double** compt, double* commt);
     void adamSGDBatchv1(double* w);
     void adamSGDBatchv1(double* w, string logfile);
@@ -69,7 +71,10 @@ public:
     void adamSGDRotationv1(double* w);
     void adamSGDRandomRingv1(double* w, double dropout_per, string logfile);
     void adamSGDRandomRingv2(double* w, double dropout_per, string logfile);
-    void sgdFullBatchv1(double* w, int comm_gap, string logfile, string epochlogfile);
+    void adamSGDFullBatchv1(double *w, string logfile, string epochlogfile);
+    void adamSGDFullBatchv2(double *w, string epochlogfile);
+    void sgdFullBatchv1(double *w, string logfile, string epochlogfile);
+    void sgdFullBatchv2(double *w, string epochlogfile);
 
     double *getW() const;
 
@@ -98,6 +103,10 @@ public:
     bool isIncluded(int* active_ranks, int my_rank, int size);
 
     int getRankIndex(int* active_ranks, int my_rank, int size);
+
+    double getTotalPredictionTime() const;
+
+    void setTotalPredictionTime(double totalPredictionTime);
 
 };
 

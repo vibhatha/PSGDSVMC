@@ -32,6 +32,7 @@ private:
     bool ring = false;
     bool randomringv1 = false;
     bool randomringv2 = false;
+    bool fullbatchv1 = false;
 
 public:
 
@@ -65,6 +66,11 @@ public:
             double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
             bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential, bool ring,
             bool randomringv1, bool randomringv2);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential, bool ring,
+            bool randomringv1, bool randomringv2, bool fullbatchv1);
 
 
     const string &getDataset() const;
@@ -152,6 +158,10 @@ public:
     bool isRandomringv2() const;
 
     void setRandomringv2(bool randomringv2);
+
+    bool isFullbatchv1() const;
+
+    void setFullbatchv1(bool fullbatchv1);
 
 
 };

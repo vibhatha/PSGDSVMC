@@ -95,6 +95,21 @@ void ResourceManager::loadEpochSummaryPath() {
     this->setEpochlogSummaryBasePath(token);
 }
 
+void ResourceManager::loadCommCompSummaryPath() {
+    string resourceFile = "commcomp.yaml";
+    std::ifstream file(resourceFile);
+    std::string str;
+    string line;
+    while (std::getline(file, str))
+    {
+        line = str;
+    }
+
+    string delimiter = ": ";
+    std::string token = line.substr(line.find(delimiter) + delimiter.length(),line.length());
+    this->setCommcompSummaryBasePath(token);
+}
+
 const string &ResourceManager::getLogSourceBasePath() const {
     return logSourceBasePath;
 }
@@ -125,4 +140,12 @@ const string &ResourceManager::getEpochlogSummaryBasePath() const {
 
 void ResourceManager::setEpochlogSummaryBasePath(const string &epochlogSummaryBasePath) {
     ResourceManager::epochlogSummaryBasePath = epochlogSummaryBasePath;
+}
+
+const string &ResourceManager::getCommcompSummaryBasePath() const {
+    return commcompSummaryBasePath;
+}
+
+void ResourceManager::setCommcompSummaryBasePath(const string &commcompSummaryBasePath) {
+    ResourceManager::commcompSummaryBasePath = commcompSummaryBasePath;
 }

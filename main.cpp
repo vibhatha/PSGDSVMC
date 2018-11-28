@@ -58,6 +58,8 @@ void trainSequential(OptArgs optArgs);
 
 void sequentialLoad(OptArgs optArgs);
 
+void parallelFullBatchv1(OptArgs optArgs);
+
 void mpiTest();
 
 int getdir (string dir, vector<string> &files);
@@ -103,6 +105,8 @@ int main(int argc, char **argv) {
         double per = optArgs.getBatch_per();
         int sample_gap = per * optArgs.getTrainingSamples();
         parallelLoadBatchV2(optArgs, sample_gap);
+    } else if(optArgs.isFullbatchv1()) {
+        parallelFullBatchv1(optArgs);
     }
 
 
@@ -118,6 +122,254 @@ void mpiTest() {
 //    int world_size;
 //    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 //    cout << "World Rank : " << world_rank << ", World Size : " << world_size << endl;
+    MPI_Finalize();
+}
+
+void parallelFullBatchv1(OptArgs optArgs) {
+    MPI_Init(NULL, NULL);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    //optArgs.toString();
+    ResourceManager resourceManager;
+    Initializer initializer;
+    Util util;
+    resourceManager.loadDataSourcePath();
+    resourceManager.loadLogSourcePath();
+    resourceManager.loadSummaryPath();
+    resourceManager.loadWeightSummaryPath();
+    resourceManager.loadEpochSummaryPath();
+    resourceManager.loadCommCompSummaryPath();
+    string commcomplogfile="";
+    commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("fullbatch/").append(optArgs.getDataset()).append("/").append("comm_comp_time_").append(getTimeStamp()).append(".csv");
+    string summarylogfile ="";
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append("/fullbatch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
+    string weightlogfile = "";
+    weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
+            .append("_").append("full_batch_weight_summary.csv");
+    string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
+    epochlogfile.append("parallel/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("rank_").append(to_string(world_rank)).append("_").append("full_batch_cross_validation_accuracy.csv");
+    string logfile = "";
+    if (optArgs.isIsSplit()) {
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        cout << "SourceFile : " << sourceFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double *w = new double[features];
+
+        double ytrain[dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest[testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double *[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+        DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile,
+                        world_size, world_rank);
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
+
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank, Xtest, ytest);
+        double startTime = MPI_Wtime();
+        if (optArgs.isIsNormalTime()) {
+            sgd1.sgdFullBatchv2(w, epochlogfile);
+        }
+
+        if (optArgs.isIsEpochTime()) {
+            sgd1.sgdFullBatchv1(w, commcomplogfile, epochlogfile);
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
+        }
+
+        double endTime = MPI_Wtime();
+        if (world_rank == 0) {
+            double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
+            cout << "Training Time : " << totalTrainingTime << endl;
+            Predict predict(Xtest, ytest, w, testSet, features);
+            double acc = predict.predict();
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource);
+            util.writeWeight(w, features, weightlogfile);
+        }
+
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
+    } else {
+        if(world_rank==0) {
+            cout << "Training with full data set..." << endl;
+        }
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string logsourceBase = resourceManager.getLogSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFile;
+        trainFile.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFile;
+        testFile.append(datasourceBase).append(datasource).append(testFileName);
+        cout << "Train File : " << trainFile << endl;
+        cout << "Test File : " << testFile << endl;
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples;
+        int testSet = testingSamples;
+        int dataPerMachine = trainSet / world_size;
+        int totalVisibleSamples = dataPerMachine * world_size;
+
+        double *w = new double[features];
+
+        double ytrain[dataPerMachine];
+        initializer.initializeWeightsWithArray(dataPerMachine, ytrain);
+
+
+        double ytest[testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[dataPerMachine];
+        for (int i = 0; i < dataPerMachine; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double *[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+        DataSet dataSet(features, trainingSamples, testingSamples, trainFile, testFile, world_size, world_rank, optArgs.isBulk());
+        dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+//        dataPerMachine = dataSet.getDataPerMachine();
+//        if(world_rank==0) {
+//            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
+//            Util util;
+//            util.print2DMatrix(Xtest, 20, features);
+//            printf("\n----------------------------------------\n");
+//        }
+
+
+        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+                  testingSamples, world_size, world_rank);
+        double startTime = MPI_Wtime();
+        if (optArgs.isIsNormalTime()) {
+            sgd1.sgdFullBatchv2(w, epochlogfile);
+        }
+
+        if (optArgs.isIsEpochTime()) {
+            string suffix = getTimeStamp();
+            logfile.append(logsourceBase).append("logs/epochlog/").append(datasource).append("/").append(
+                    "world_size=").append(to_string(world_size)).append("_iterations=").append(
+                    to_string(optArgs.getIterations()));
+            logfile.append("_").append(suffix);
+            sgd1.sgdFullBatchv1(w, commcomplogfile, epochlogfile);
+        }
+
+
+        double endTime = MPI_Wtime();
+        if (world_rank == 0) {
+
+            double acc = 0;
+            if(!optArgs.isBulk()){
+                Predict predict(Xtest, ytest, w, testSet, features);
+                acc = predict.predict();
+            }else{
+                string bulktestfile;
+                bulktestfile.append(datasourceBase).append(datasource).append("/bulk/");
+                string dir = string(bulktestfile);
+                vector<string> files = vector<string>();
+
+                getdir(dir,files);
+                int fixedTest = 20000;
+                double ytest[fixedTest];
+                initializer.initializeWeightsWithArray(testSet, ytest);
+
+                double **Xtest;
+
+                Xtest = new double *[fixedTest];
+                for (int i = 0; i < fixedTest; ++i) {
+                    Xtest[i] = new double[features];
+                }
+                double cum_acc = 0;
+                for (unsigned int i = 0;i < files.size()-1;i++) {
+                    string file="";
+                    file.append(bulktestfile).append(files[i]);
+                    cout << file << endl;
+                    DataSet dataSet1(features, fixedTest,file);
+                    dataSet1.loadTestData(Xtest, ytest);
+                    Predict predict(Xtest, ytest, w, testSet, features);
+                    acc = predict.predict();
+                    cout << "Test " << i << ", Accuracy : " << acc << endl;
+                    cum_acc += acc;
+                }
+                acc = cum_acc / double(files.size());
+            }
+            double totalTrainingTime = ((endTime - startTime) - sgd1.getTotalPredictionTime());
+            cout << "Training Time : " << totalTrainingTime << endl;
+            cout << "Testing Accuracy : " << acc << "%" << endl;
+            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource);
+            util.writeWeight(w, features, weightlogfile);
+        }
+
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < dataPerMachine; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
+    }
     MPI_Finalize();
 }
 
@@ -838,8 +1090,9 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
     string logfile = "";
+
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string logsourceBase = resourceManager.getLogSourceBasePath();
@@ -997,7 +1250,8 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.adamSGDBatchv2(w, comm_gap);
+            sgd1.sgdBatchv2(w, comm_gap, logfile, epochlogfile);
+            //sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
         if (optArgs.isIsEpochTime()) {

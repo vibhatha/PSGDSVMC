@@ -17,6 +17,7 @@ private:
     string logSummaryBasePath;
     string weightSummaryBasePath;
     string epochlogSummaryBasePath;
+    string commcompSummaryBasePath;
 
 public:
     ResourceManager();
@@ -30,6 +31,8 @@ public:
     void loadWeightSummaryPath();
 
     void loadEpochSummaryPath();
+
+    void loadCommCompSummaryPath();
 
     void setDataSourceBasePath(const string &dataSourceBasePath);
 
@@ -50,6 +53,10 @@ public:
     const string &getEpochlogSummaryBasePath() const;
 
     void setEpochlogSummaryBasePath(const string &epochlogSummaryBasePath);
+
+    const string &getCommcompSummaryBasePath() const;
+
+    void setCommcompSummaryBasePath(const string &commcompSummaryBasePath);
 
 };
 
