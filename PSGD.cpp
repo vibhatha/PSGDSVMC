@@ -2036,6 +2036,7 @@ void PSGD::sgdFullBatchv1(double *w, string logfile, string epochlogfile) {
     delete[] aw1;
     delete[] xiyi;
     delete[] comptimeA;
+    delete [] wglobal;
 }
 
 
@@ -2127,6 +2128,7 @@ void PSGD::sgdFullBatchv2(double *w, string epochlogfile) {
     delete[] w_xiyi;
     delete[] aw1;
     delete[] xiyi;
+    delete[] wglobal;
 }
 
 
