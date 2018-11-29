@@ -76,6 +76,7 @@ public:
     void sgdFullBatchv1(double *w, string logfile, string epochlogfile);
     void sgdFullBatchv2(double *w, string epochlogfile);
 
+
     double *getW() const;
 
     double *getWFinal() const;

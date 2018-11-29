@@ -60,6 +60,8 @@ void sequentialLoad(OptArgs optArgs);
 
 void parallelFullBatchv1(OptArgs optArgs);
 
+void sequentialPegasos(OptArgs optArgs);
+
 void mpiTest();
 
 int getdir (string dir, vector<string> &files);
@@ -107,6 +109,8 @@ int main(int argc, char **argv) {
         parallelLoadBatchV2(optArgs, sample_gap);
     } else if(optArgs.isFullbatchv1()) {
         parallelFullBatchv1(optArgs);
+    } else if(optArgs.isPegasos()) {
+        sequentialPegasos(optArgs);
     }
 
 
@@ -2421,6 +2425,143 @@ void trainSequential(OptArgs optArgs) {
         printf("Testing Samples : % d \n", testingSamples);
         printf("Training time %f s \n", elapsed_secs);
 
+        //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
+        //double acc = predict.predict();
+        //cout << "Testing Accuracy : " << acc << "%" << endl;
+        delete[] Xtrain, Xtest, ytrain, ytest, w;
+    }
+
+}
+
+void sequentialPegasos(OptArgs optArgs) {
+    optArgs.toString();
+    ResourceManager resourceManager;
+    resourceManager.loadDataSourcePath();
+    resourceManager.loadEpochSummaryPath();
+    resourceManager.loadLogSourcePath();
+    resourceManager.loadSummaryPath();
+    resourceManager.loadWeightSummaryPath();
+    string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
+    string datasourceBase = resourceManager.getDataSourceBasePath();
+    string datasource = optArgs.getDataset();
+
+    epochlogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_pegasos_cross_validation_accuracy.csv");
+
+    string summarylogfile = resourceManager.getLogSummaryBasePath();
+    summarylogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_pegasos_summary_log.csv");
+
+    if (optArgs.isIsSplit()) {
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+
+        string sourceFile;
+        sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        double ratio = optArgs.getRatio();
+        int totalSamples = trainingSamples;
+        int trainSet = totalSamples * ratio;
+        int testSet = totalSamples - trainSet;
+        Initializer initializer;
+
+        double ytrain[trainSet];
+        initializer.initializeWeightsWithArray(trainSet, ytrain);
+
+
+        double ytest[testSet];
+        initializer.initializeWeightsWithArray(testSet, ytest);
+
+        double **Xtrain;
+        double **Xtest;
+        Xtrain = new double *[trainSet];
+        for (int i = 0; i < trainSet; ++i) {
+            Xtrain[i] = new double[features];
+        }
+
+        Xtest = new double *[testSet];
+        for (int i = 0; i < testSet; ++i) {
+            Xtest[i] = new double[features];
+        }
+
+
+        Util util;
+
+        DataSet dataSet(sourceFile, features, trainingSamples, optArgs.isIsSplit(), ratio);
+        dataSet.load(Xtrain, ytrain, Xtest, ytest);
+
+        util.print2DMatrix(Xtrain, 2, features);
+        printf("\n----------------------------------------\n");
+        util.print2DMatrix(Xtest, 2, features);
+        clock_t begin = clock();
+        double *w = new double[features];
+        //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
+        SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
+        sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
+        //sgd1.sgd();
+        clock_t end = clock();
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainSet);
+        printf("Testing Samples : % d \n", testSet);
+        printf("Training time %f s \n", elapsed_secs);
+
+
+
+        Predict predict(Xtest, ytest, w , testSet, features);
+        double acc = predict.predict();
+        cout << "Testing Accuracy : " << acc << "%" << endl;
+        util.summary(summarylogfile, 1, acc, elapsed_secs);
+        for (int i = 0; i < trainSet; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < testSet; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
+
+
+    } else {
+        string datasourceBase = resourceManager.getDataSourceBasePath();
+        string datasource = optArgs.getDataset();
+        string trainFileName = "/training.csv";
+        string testFileName = "/testing.csv";
+        string trainFilePath;
+        trainFilePath.append(datasourceBase).append(datasource).append(trainFileName);
+        string testFilePath;
+        testFilePath.append(datasourceBase).append(datasource).append(testFileName);
+        int features = optArgs.getFeatures();
+        int trainingSamples = optArgs.getTrainingSamples();
+        int testingSamples = optArgs.getTestingSamples();
+
+        DataSet dataset(features, trainingSamples, testingSamples, trainFilePath, testFilePath);
+        dataset.load();
+        double **Xtrain = dataset.getXtrain();
+        double *ytrain = dataset.getYtrain();
+
+        double **Xtest = dataset.getXtest();
+        double *ytest = dataset.getYtest();
+        Util util;
+//        util.print2DMatrix(Xtrain, trainingSamples, features);
+        printf("\n----------------------------------------\n");
+//        util.print2DMatrix(Xtest, testingSamples, features);
+        clock_t begin = clock();
+        double *w = new double[features];
+        //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
+        SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
+        sgd2.pegasosSgd(w, summarylogfile, epochlogfile);
+        //sgd1.adamSGD();
+        clock_t end = clock();
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        printf("Training Samples : % d \n", trainingSamples);
+        printf("Testing Samples : % d \n", testingSamples);
+        printf("Training time %f s \n", elapsed_secs);
+
+        Predict predict(Xtest, ytest, w , testingSamples, features);
+        double acc = predict.predict();
+        cout << "Testing Accuracy : " << acc << "%" << endl;
+        util.summary(summarylogfile, 1, acc, elapsed_secs);
         //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         //double acc = predict.predict();
         //cout << "Testing Accuracy : " << acc << "%" << endl;

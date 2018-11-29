@@ -150,6 +150,12 @@ OptArgs ArgReader::getParams() {
             optArgs.setFullbatchv1(true);
         }
 
+        comp = "-pegasos";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasos(true);
+        }
+
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

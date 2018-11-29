@@ -512,6 +512,58 @@ void SGD::sgd(double *w, string summarylogfile, string epochlogfile) {
 
 }
 
+void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
+
+    Initializer initializer;
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double epsilon = 0.00000001;
+    double eta = 0;
+
+    Util util;
+
+    Matrix1 matrix(features);
+
+    initializer.initialWeights(features, w);
+
+    for (int i = 1; i < iterations; ++i) {
+        eta = 1.0 / (alpha * i);
+//        if (i % 10 == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        //alpha = 1.0 / ((double)(i) + 1);
+        //double coefficient = 1.0/(1.0 + (double)i);
+        for (int j = 0; j < trainingSamples; ++j) {
+
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            if (yixiw < 1) {
+                matrix.scalarMultiply(X[j], y[j]*eta, xiyi);
+                matrix.scalarMultiply(w, (1-(eta*alpha)), w1);
+                matrix.add(w1, xiyi, w);
+            } else {
+                matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
+            }
+
+            //util.print1DMatrix(w, 5);
+        }
+        Predict predict(Xtest, ytest, w , testingSamples, features);
+        double acc = predict.predict();
+        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+    }
+
+    delete [] xiyi;
+    delete [] w1;
+}
+
+
 double *SGD::getW() const {
     return w;
 }
