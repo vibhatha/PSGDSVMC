@@ -2276,10 +2276,12 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 compute_time += (end_compute - start_compute);
                 perDataPerItrCompt += (end_compute - start_compute);
                 commtimeA[i][j] = end_communication - start_communication;
+            } else {
+                commtimeA[i][j] = 0;
             }
             //util.print1DMatrix(w, features);
             //delete [] xi;
-            commtimeA[i][j] = 0;
+
             comptimeA[i][j] = perDataPerItrCompt;
 
         }
@@ -2301,7 +2303,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     }*/
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    writeLog(summarylogfile.append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
+    writeLog(summarylogfile.append(util.getTimestamp()).append("_").append("_process=").append(to_string(world_rank)), iterations, trainingSamples, comptimeA,
              commtimeA);
     delete[] w1;
     delete[] xiyi;

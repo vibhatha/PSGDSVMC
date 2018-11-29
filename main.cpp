@@ -390,6 +390,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
     resourceManager.loadSummaryPath();
     resourceManager.loadWeightSummaryPath();
     resourceManager.loadEpochSummaryPath();
+    resourceManager.loadCommCompSummaryPath();
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/pegasos/").append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
@@ -397,8 +398,8 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             .append("_").append("batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
     epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
-    string logfile = "";
-
+    string commcomplogfile = "";
+    commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/");
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string logsourceBase = resourceManager.getLogSourceBasePath();
@@ -459,7 +460,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank, Xtest, ytest);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.pegasosSGDBatchv2(w, comm_gap, logfile, epochlogfile);
+            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -551,7 +552,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.pegasosSGDBatchv2(w, comm_gap, logfile, epochlogfile);
+            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile);
             //sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
