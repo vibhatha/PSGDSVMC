@@ -17,6 +17,7 @@ public:
     void writeWeight(double* w, int size, string file);
     void writeAccuracyPerEpoch(double epoch, double acc, string file);
     void summary(string logfile, int world_size, double acc, double time, string datasource);
+    void summary(string logfile, int world_size, double acc, double time, double alpha);
     void summary(string logfile, int world_size, double acc, double time);
     string getTimestamp();
 

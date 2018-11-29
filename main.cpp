@@ -74,6 +74,8 @@ string getTimeStamp();
 
 void summary(string logfile, int world_size, double acc, double time, string datasource);
 
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha);
+
 int main(int argc, char **argv) {
     //std::cout << "Hello, World!" << std::endl;
 
@@ -153,14 +155,14 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
     resourceManager.loadEpochSummaryPath();
     resourceManager.loadCommCompSummaryPath();
     string commcomplogfile="";
-    commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append("comm_comp_time_").append(getTimeStamp()).append(".csv");
+    commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append("comm_comp_time_").append(getTimeStamp()).append("_alpha_").append(to_string(optArgs.getAlpha())).append(".csv");
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append("pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
-            .append("_").append("pegasos_full_batch_weight_summary.csv");
+            .append("_").append("_alpha_").append(to_string(optArgs.getAlpha())).append("pegasos_full_batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_").append("pegasos_fullbatch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_").append("alpha_").append(to_string(optArgs.getAlpha())).append("_pegasos_fullbatch_cross_validation_accuracy.csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -234,7 +236,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource);
+            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource, optArgs.getAlpha());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -358,7 +360,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
             double totalTrainingTime = ((endTime - startTime) - sgd1.getTotalPredictionTime());
             cout << "Training Time : " << totalTrainingTime << endl;
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource);
+            summary(summarylogfile, world_size, acc, totalTrainingTime, datasource, optArgs.getAlpha());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -395,9 +397,9 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/pegasos/").append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
-            .append("_").append("batch_weight_summary.csv");
+            .append("_").append("_alpha_").append(to_string(optArgs.getAlpha())).append("batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_alpha_").append(to_string(optArgs.getAlpha())).append("_batch_cross_validation_accuracy.csv");
     string commcomplogfile = "";
     commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/");
     if (optArgs.isIsSplit()) {
@@ -474,7 +476,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource, optArgs.getAlpha());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -601,7 +603,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             }
             cout << "Training Time : " << (endTime - startTime) << endl;
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource);
+            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource, optArgs.getAlpha());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -2983,15 +2985,16 @@ void sequentialPegasos(OptArgs optArgs) {
         util.print2DMatrix(Xtrain, 2, features);
         printf("\n----------------------------------------\n");
         util.print2DMatrix(Xtest, 2, features);
-        clock_t begin = clock();
+
         double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
         SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
+        clock_t begin = clock();
         sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
         //sgd1.sgd();
         clock_t end = clock();
-        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd3.getTotalPredictionTime());
         printf("Training Samples : % d \n", trainSet);
         printf("Testing Samples : % d \n", testSet);
         printf("Training time %f s \n", elapsed_secs);
@@ -3001,7 +3004,7 @@ void sequentialPegasos(OptArgs optArgs) {
         Predict predict(Xtest, ytest, w , testSet, features);
         double acc = predict.predict();
         cout << "Testing Accuracy : " << acc << "%" << endl;
-        util.summary(summarylogfile, 1, acc, elapsed_secs);
+        util.summary(summarylogfile, 1, acc, elapsed_secs, optArgs.getAlpha());
         for (int i = 0; i < trainSet; ++i) {
             delete[] Xtrain[i];
         }
@@ -3044,7 +3047,7 @@ void sequentialPegasos(OptArgs optArgs) {
         sgd2.pegasosSgd(w, summarylogfile, epochlogfile);
         //sgd1.adamSGD();
         clock_t end = clock();
-        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
+        double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd2.getTotalPredictionTime());
         printf("Training Samples : % d \n", trainingSamples);
         printf("Testing Samples : % d \n", testingSamples);
         printf("Training time %f s \n", elapsed_secs);
@@ -3056,7 +3059,15 @@ void sequentialPegasos(OptArgs optArgs) {
         //Predict predict(Xtest, ytest, wFinal , testingSamples, features);
         //double acc = predict.predict();
         //cout << "Testing Accuracy : " << acc << "%" << endl;
-        delete[] Xtrain, Xtest, ytrain, ytest, w;
+        for (int i = 0; i < trainingSamples; ++i) {
+            delete[] Xtrain[i];
+        }
+        for (int i = 0; i < testingSamples; ++i) {
+            delete[] Xtest[i];
+        }
+        delete[] Xtrain;
+        delete[] Xtest;
+        delete[] w;
     }
 
 }
@@ -3152,6 +3163,18 @@ void summary(string logfile, int world_size, double acc, double time, string dat
     if (myfile.is_open()) {
 
         myfile << datasource << "," << world_size << "," << time << "," << acc << "," << timestamp << "\n";
+
+        myfile.close();
+    }
+}
+
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha) {
+
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimeStamp();
+    if (myfile.is_open()) {
+
+        myfile << datasource << "," << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "\n";
 
         myfile.close();
     }

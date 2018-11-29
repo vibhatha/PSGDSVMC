@@ -521,6 +521,9 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     initializer.initializeWeightsWithArray(features, xiyi);
     double epsilon = 0.00000001;
     double eta = 0;
+    clock_t prediction_time;
+
+    double totalpredictiontime=0;
 
     Util util;
 
@@ -553,11 +556,16 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 
             //util.print1DMatrix(w, 5);
         }
+        prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
         double acc = predict.predict();
         cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        prediction_time = clock()-prediction_time;
+        totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
     }
+
+    this->setTotalPredictionTime(totalpredictiontime);
 
     delete [] xiyi;
     delete [] w1;
@@ -592,3 +600,11 @@ SGD::SGD(double beta1, double beta2, double **X, double *y, double *w, double al
                                                                                    trainingSamples(trainingSamples),
                                                                                    testingSamples(testingSamples),
                                                                                    Xtest(Xtest), ytest(ytest) {}
+
+double SGD::getTotalPredictionTime() const {
+    return totalPredictionTime;
+}
+
+void SGD::setTotalPredictionTime(double totalPredictionTime) {
+    SGD::totalPredictionTime = totalPredictionTime;
+}

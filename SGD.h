@@ -26,6 +26,7 @@ private:
     double* wFinal;
     double** Xtest;
     double* ytest;
+    double totalPredictionTime = 0;
 
 public:
 
@@ -53,6 +54,10 @@ public:
     double *getWFinal() const;
 
     void setWFinal(double *wFinal);
+
+    double getTotalPredictionTime() const;
+
+    void setTotalPredictionTime(double totalPredictionTime);
 
 };
 

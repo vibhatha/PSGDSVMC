@@ -83,3 +83,13 @@ void Util::summary(string logfile, int world_size, double acc, double time) {
     }
 }
 
+void Util::summary(string logfile, int world_size, double acc, double time, double alpha) {
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimestamp();
+    if (myfile.is_open()) {
+
+        myfile << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "\n";
+
+        myfile.close();
+    }
+}
