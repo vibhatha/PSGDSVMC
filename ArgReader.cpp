@@ -165,7 +165,6 @@ OptArgs ArgReader::getParams() {
             optArgs.setPegasosBatch(true);
         }
 
-
         //cout  << i  << ", " << argv[i] << "\n";
     }
 
