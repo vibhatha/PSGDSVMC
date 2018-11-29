@@ -155,6 +155,16 @@ OptArgs ArgReader::getParams() {
             optArgs.setPegasos(true);
         }
 
+        comp = "-pegasosfb";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasosFullBatch(true);
+        }
+
+        comp = "-pegasosb";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasosBatch(true);
+        }
+
 
         //cout  << i  << ", " << argv[i] << "\n";
     }
