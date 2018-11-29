@@ -3000,7 +3000,6 @@ void sequentialPegasos(OptArgs optArgs) {
         printf("Training time %f s \n", elapsed_secs);
 
 
-
         Predict predict(Xtest, ytest, w , testSet, features);
         double acc = predict.predict();
         cout << "Testing Accuracy : " << acc << "%" << endl;
