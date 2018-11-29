@@ -75,6 +75,8 @@ public:
     void adamSGDFullBatchv2(double *w, string epochlogfile);
     void sgdFullBatchv1(double *w, string logfile, string epochlogfile);
     void sgdFullBatchv2(double *w, string epochlogfile);
+    void pegasosSGDFullBatchv1(double *w, string epochlogfile);
+    void pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile);
 
 
     double *getW() const;
