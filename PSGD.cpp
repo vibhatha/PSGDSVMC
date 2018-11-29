@@ -2170,7 +2170,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
         double start_predict = MPI_Wtime();
         Predict predict(Xtest, ytest, w , testingSamples, features);
         double acc = predict.predict();
-        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        cout << "Pegasos Full Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         double end_predict = MPI_Wtime();
         predict_time+= (end_predict-start_predict);
@@ -2286,7 +2286,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         start_predict = MPI_Wtime();
         Predict predict(Xtest, ytest, w, testingSamples, features);
         double acc = predict.predict();
-        cout << "PSGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
