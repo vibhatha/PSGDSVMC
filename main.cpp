@@ -160,7 +160,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("pegasos_full_batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("rank_").append(to_string(world_rank)).append("_").append("pegasos_fullbatch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/pegasos/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_").append("pegasos_fullbatch_cross_validation_accuracy.csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -397,7 +397,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
     string commcomplogfile = "";
     commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/");
     if (optArgs.isIsSplit()) {
