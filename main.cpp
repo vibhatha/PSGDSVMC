@@ -2803,6 +2803,7 @@ void trainSequential(OptArgs optArgs) {
     resourceManager.loadLogSourcePath();
     resourceManager.loadSummaryPath();
     resourceManager.loadWeightSummaryPath();
+    string exptype = "adam";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
         string datasource = optArgs.getDataset();
@@ -2811,10 +2812,10 @@ void trainSequential(OptArgs optArgs) {
         string testFileName = "/testing.csv";
 
         string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-        epochlogfile.append("sequential/").append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_cross_validation_accuracy.csv");
+        epochlogfile.append("sequential/").append(exptype).append("/").append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_cross_validation_accuracy.csv");
 
         string summarylogfile = resourceManager.getLogSummaryBasePath();
-        summarylogfile.append("sequential/").append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_summary_log.csv");
+        summarylogfile.append("sequential/").append(exptype).append("/").append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential_summary_log.csv");
 
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
@@ -2859,7 +2860,7 @@ void trainSequential(OptArgs optArgs) {
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
         SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
-        sgd3.sgd(w,summarylogfile, epochlogfile);
+        sgd3.adamSGD(w,summarylogfile, epochlogfile);
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC));
