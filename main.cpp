@@ -1648,7 +1648,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
 //        }
 
 
-        PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
+        PSGD sgd1(0.5, 0.992, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank, Xtest, ytest);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
