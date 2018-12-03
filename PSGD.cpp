@@ -1356,6 +1356,8 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile, string epochl
     initializer.initializeWeightsWithArray(features, xiyi);
     double *w_xiyi = new double[features];
     initializer.initializeWeightsWithArray(features, w_xiyi);
+    double *w_print = new double[features];
+    initializer.initializeWeightsWithArray(features, w_print);
     double *aw_axiyi = new double[features];
     initializer.initializeWeightsWithArray(features, aw_axiyi);
     double *w1d = new double[features];
@@ -1364,6 +1366,8 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile, string epochl
     initializer.initializeWeightsWithArray(features, aw1);
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
+    double *wglobal_print = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal_print);
     double epsilon = 0.00000001;
     Util util;
     //cout << "Training Samples : " << trainingSamples << endl;
@@ -1459,10 +1463,17 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile, string epochl
             comptimeA[i][j] = perDataPerItrCompt;
 
         }
-        Predict predict(Xtest, ytest, w, testingSamples, features);
-        double acc = predict.predict();
-        cout << "PSGD Adam Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
+        if(world_rank==0) {
+            Predict predict(Xtest, ytest, w_print, testingSamples, features);
+            double acc = predict.predict();
+            cout << "PSGD AllReduce Adam Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+            util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+            util.print1DMatrix(w_print, 10);
+        }
+
     }
     /*if(world_rank==0) {
         cout << "============================================" << endl;
@@ -2202,6 +2213,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(features, xiyi);
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
+    double *wglobal_print = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal_print);
+    double *w_print = new double[features];
+    initializer.initializeWeightsWithArray(features, w_print);
     double epsilon = 0.00000001;
     Util util;
     //cout << "Training Samples : " << trainingSamples << endl;
@@ -2286,10 +2301,15 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
         }
         start_predict = MPI_Wtime();
-        Predict predict(Xtest, ytest, w, testingSamples, features);
-        double acc = predict.predict();
-        cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
+        if(world_rank==0) {
+            Predict predict(Xtest, ytest, w_print, testingSamples, features);
+            double acc = predict.predict();
+            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+            util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
     }
