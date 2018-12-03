@@ -636,15 +636,16 @@ void parallelFullBatchv1(OptArgs optArgs) {
     resourceManager.loadWeightSummaryPath();
     resourceManager.loadEpochSummaryPath();
     resourceManager.loadCommCompSummaryPath();
+    string exptype = "adam";
     string commcomplogfile="";
     commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("fullbatch/").append(optArgs.getDataset()).append("/").append("comm_comp_time_").append(getTimeStamp()).append(".csv");
     string summarylogfile ="";
-    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append("/fullbatch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append(exptype).append("/fullbatch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("full_batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("rank_").append(to_string(world_rank)).append("_").append("full_batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/").append(exptype).append("/fullbatch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_").append("rank_").append(to_string(world_rank)).append("_").append("full_batch_cross_validation_accuracy.csv");
     string logfile = "";
     if (optArgs.isIsSplit()) {
         string datasourceBase = resourceManager.getDataSourceBasePath();
@@ -1581,13 +1582,14 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
     resourceManager.loadSummaryPath();
     resourceManager.loadWeightSummaryPath();
     resourceManager.loadEpochSummaryPath();
+    string exptype = "adam";
     string summarylogfile ="";
-    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
+    summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/").append(exptype).append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("batch_weight_summary.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/").append(exptype).append("/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_rank_").append(to_string(world_rank)).append("_batch_cross_validation_accuracy.csv");
     string logfile = "";
 
     if (optArgs.isIsSplit()) {
