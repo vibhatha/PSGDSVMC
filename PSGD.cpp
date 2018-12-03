@@ -1461,7 +1461,7 @@ void PSGD::adamSGDBatchv2(double *w, int comm_gap, string logfile, string epochl
         }
         Predict predict(Xtest, ytest, w, testingSamples, features);
         double acc = predict.predict();
-        cout << "PSGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        cout << "PSGD Adam Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
     }
     /*if(world_rank==0) {
