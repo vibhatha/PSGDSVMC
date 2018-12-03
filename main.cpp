@@ -1650,7 +1650,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank, Xtest, ytest);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.sgdBatchv2(w, comm_gap, logfile, epochlogfile);
+            sgd1.adamSGDBatchv2(w, comm_gap, logfile, epochlogfile);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -1747,7 +1747,7 @@ void parallelLoadBatchV2(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.sgdBatchv2(w, comm_gap, logfile, epochlogfile);
+            sgd1.adamSGDBatchv2(w, comm_gap, logfile, epochlogfile);
             //sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
