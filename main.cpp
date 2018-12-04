@@ -472,11 +472,12 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
 
         double endTime = MPI_Wtime();
         if (world_rank == 0) {
-            cout << "Training Time : " << (endTime - startTime) << endl;
+            double trainingTime = (endTime - startTime) - (sgd1.getTotalPredictionTime());
+            cout << "Training Time : " << trainingTime << endl;
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, (endTime - startTime), datasource, optArgs.getAlpha());
+            summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha());
             util.writeWeight(w, features, weightlogfile);
         }
 
