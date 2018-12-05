@@ -565,13 +565,13 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         double acc = predict.predict();
         cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
-        prediction_time = clock()-prediction_time;
-        totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
         i++;
         error = 100.0 - acc;
         if(error<error_threshold){
             break;
         }
+        prediction_time = clock()-prediction_time;
+        totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
     }
 
     this->setTotalPredictionTime(totalpredictiontime);
