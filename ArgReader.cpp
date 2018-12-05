@@ -165,6 +165,14 @@ OptArgs ArgReader::getParams() {
             optArgs.setPegasosBatch(true);
         }
 
+        comp = "-error";
+        if(comp.compare(argv[i])==0){
+            stringstream geek(argv[i+1]);
+            double x = 0;
+            geek >> x;
+            optArgs.setError_threshold(x);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 
