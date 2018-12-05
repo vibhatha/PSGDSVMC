@@ -566,7 +566,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         prediction_time = clock()-prediction_time;
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
         i++;
-        if(cost<0.1){
+        if(cost<0.099){
             break;
         }
     }
