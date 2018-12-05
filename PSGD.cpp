@@ -2258,6 +2258,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     iterations = 10000;
     int  breakFlag [] = {100};
     int i = 1;
+    double error_threshold = 11.0;
+    double error = 0;
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
@@ -2323,12 +2325,13 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         if(world_rank==0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             double acc = predict.predict();
+            error = 100.0 -acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost <<  endl;
             util.writeLossAccuracyPerEpoch(i, acc, cost, epochlogfile);
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
-        if(cost<0.099 and world_rank==0) {
+        if(error<error_threshold and world_rank==0) {
             breakFlag[0]=-1;
         }
         double bcast_time_start = MPI_Wtime();
