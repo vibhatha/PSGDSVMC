@@ -2249,8 +2249,9 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         commtimeA[i] = new double[trainingSamples];
     }
     double cost = 10.0;
-    int i = 1;
-    while (cost > 0.01) {
+    iterations = 10000;
+    int  breakFlag [] = {100};
+    for (int i = 1; i < iterations ; ++i) {
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
 //        if (i % 10 == 0 and world_rank == 0) {
@@ -2314,7 +2315,15 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
-        i++;
+        if(cost<0.01 and world_rank==0) {
+            breakFlag[0]=-1;
+            MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
+        }
+        if(breakFlag[0]==-1){
+            cout << "Break Flag : " << breakFlag[0] << endl;
+            break;
+        }
+
     }
     this->setTotalPredictionTime(prediction_time);
     /*if(world_rank==0) {
