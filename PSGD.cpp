@@ -2307,8 +2307,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             double start_cost = MPI_Wtime();
             local_cost[0] = cost;
             MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-            matrix.scalarMultiply(global_cost, 1.0 / (double) world_size, local_cost);
-            cost = local_cost[0];
+            cost = global_cost[0]/ (double) world_size;
             double end_cost = MPI_Wtime();
             prediction_time+= (end_cost - start_cost);
             //util.print1DMatrix(w, features);
