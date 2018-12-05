@@ -461,6 +461,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
 
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank, Xtest, ytest);
+        sgd1.setError_threshold(optArgs.getError_threshold());
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
             sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile);

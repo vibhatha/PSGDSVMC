@@ -2159,7 +2159,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
-    double error_threshold = 12.0;
+    double error_threshold = this->getError_threshold();
     double error = 0;
     int  breakFlag [] = {100};
     int i = 1;
@@ -2301,7 +2301,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     iterations = 10000;
     int  breakFlag [] = {100};
     int i = 1;
-    double error_threshold = 12.0;
+    double error_threshold = this->getError_threshold();
     double error = 0;
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
