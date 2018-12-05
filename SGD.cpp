@@ -10,6 +10,7 @@
 #include "Matrix1.h"
 #include "Predict.h"
 #include <math.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -530,6 +531,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
+    double cost = 0;
 
     for (int i = 1; i < iterations; ++i) {
         eta = 1.0 / (alpha * i);
@@ -553,13 +555,13 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
             } else {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
-
+            cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
             //util.print1DMatrix(w, 5);
         }
         prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
         double acc = predict.predict();
-        //cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         prediction_time = clock()-prediction_time;
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
