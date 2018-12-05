@@ -56,6 +56,14 @@ void Util::writeAccuracyPerEpoch(double epoch, double acc, string file) {
     }
 }
 
+void Util::writeLossAccuracyPerEpoch(double epoch, double acc, double cost, string file) {
+    ofstream myfile(file, ios::out | ios::app);
+    if (myfile.is_open()) {
+        myfile << epoch <<","<<acc<<","<<cost<<"\n";
+        myfile.close();
+    }
+}
+
 
 string Util::getTimestamp() {
     string string1;

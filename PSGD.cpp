@@ -2312,7 +2312,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             double acc = predict.predict();
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost <<  endl;
-            util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+            util.writeLossAccuracyPerEpoch(i, acc, cost, epochlogfile);
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
