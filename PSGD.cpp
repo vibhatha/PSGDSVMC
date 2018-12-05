@@ -2143,6 +2143,14 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
     initializer.initializeWeightsWithArray(features, xiyi);
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
+    double *local_cost = new double[1];
+    initializer.initializeWeightsWithArray(1, local_cost);
+    double *global_cost = new double[1];
+    initializer.initializeWeightsWithArray(1, global_cost);
+    double *wglobal_print = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal_print);
+    double *w_print = new double[features];
+    initializer.initializeWeightsWithArray(features, w_print);
     double epsilon = 0.00000001;
     double eta = 0;
 
@@ -2151,8 +2159,13 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
+    double error_threshold = 12.0;
+    double error = 0;
+    int  breakFlag [] = {100};
+    int i = 1;
     double predict_time = 0;
-    for (int i = 1; i < iterations; ++i) {
+    double cost = 0;
+    while(breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -2177,15 +2190,45 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
             double end_compute = MPI_Wtime();
             compute_time += (end_compute - start_compute);
             //util.print1DMatrix(w, 5);
+            cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
+            double start_cost = MPI_Wtime();
+            local_cost[0] = cost;
+            MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            cost = global_cost[0]/ (double) world_size;
+            double end_cost = MPI_Wtime();
+            predict_time += (end_cost - start_cost);
         }
+//        double start_predict = MPI_Wtime();
+//        Predict predict(Xtest, ytest, w , testingSamples, features);
+//        double acc = predict.predict();
+//        cout << "Pegasos Full Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
+//        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+//        double end_predict = MPI_Wtime();
+//        predict_time+= (end_predict-start_predict);
         double start_predict = MPI_Wtime();
-        Predict predict(Xtest, ytest, w , testingSamples, features);
-        double acc = predict.predict();
-        cout << "Pegasos Full Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << endl;
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+        matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
+        if(world_rank==0) {
+            Predict predict(Xtest, ytest, w_print, testingSamples, features);
+            double acc = predict.predict();
+            error = 100.0 - acc;
+            cout << "Pegasos Full Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost <<  endl;
+            util.writeLossAccuracyPerEpoch(i, acc, cost, epochlogfile);
+        }
         double end_predict = MPI_Wtime();
-        predict_time+= (end_predict-start_predict);
-
+        predict_time += (end_predict-start_predict);
+        if(error<error_threshold and world_rank==0) {
+            breakFlag[0]=-1;
+        }
+        double bcast_time_start = MPI_Wtime();
+        MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
+        if(breakFlag[0]==-1){
+            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
+        }
+        double bcast_time_end = MPI_Wtime();
+        predict_time += (bcast_time_end-bcast_time_start);
+        i++;
     }
 
     double start_communication = MPI_Wtime();
