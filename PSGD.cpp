@@ -2248,8 +2248,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     for (int i = 0; i < iterations; ++i) {
         commtimeA[i] = new double[trainingSamples];
     }
-    double cost = 10;
-    int i = 0;
+    double cost = 10.0;
+    int i = 1;
     while (cost > 0.01) {
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
