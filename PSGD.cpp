@@ -2258,7 +2258,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     iterations = 10000;
     int  breakFlag [] = {100};
     int i = 1;
-    double error_threshold = 11.0;
+    double error_threshold = 12.0;
     double error = 0;
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);

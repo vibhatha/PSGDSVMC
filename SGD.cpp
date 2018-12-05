@@ -532,7 +532,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 
     initializer.initialWeights(features, w);
     double cost = 1.0;
-    double error_threshold = 11.0;
+    double error_threshold = 12.0;
     int i=1;
     double error = 100;
     while (true) {
