@@ -11,6 +11,9 @@
 #include "Predict.h"
 #include <math.h>
 #include <algorithm>
+#include <vector>
+#include <chrono>
+#include <random>
 
 using namespace std;
 
@@ -530,6 +533,14 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 
     Matrix1 matrix(features);
 
+    //generate a random seed of data points
+    vector<int> indices(trainingSamples);
+    std::iota(indices.begin(), indices.end(), 0);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+    shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+
+
     initializer.initialWeights(features, w);
     double cost = 1.0;
     double error_threshold = 12.0;
@@ -545,8 +556,9 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 //        }
         //alpha = 1.0 / ((double)(i) + 1);
         //double coefficient = 1.0/(1.0 + (double)i);
-        for (int j = 0; j < trainingSamples; ++j) {
-
+        int j =0;
+        for (int k = 0; k < trainingSamples; ++k) {
+            j = indices.at(k);
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
 
@@ -575,6 +587,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     }
 
     this->setTotalPredictionTime(totalpredictiontime);
+
 
     delete [] xiyi;
     delete [] w1;
@@ -616,4 +629,9 @@ double SGD::getTotalPredictionTime() const {
 
 void SGD::setTotalPredictionTime(double totalPredictionTime) {
     SGD::totalPredictionTime = totalPredictionTime;
+}
+
+int seed() {
+    int i = 1;
+    return i++;
 }

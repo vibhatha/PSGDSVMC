@@ -64,6 +64,11 @@ void Util::writeLossAccuracyPerEpoch(double epoch, double acc, double cost, stri
     }
 }
 
+int Util::seed() {
+    static int i = 1;
+    return i++;
+}
+
 
 string Util::getTimestamp() {
     string string1;

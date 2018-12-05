@@ -21,6 +21,7 @@ public:
     void summary(string logfile, int world_size, double acc, double time, double alpha);
     void summary(string logfile, int world_size, double acc, double time);
     string getTimestamp();
+    int seed();
 
 };
 

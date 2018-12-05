@@ -59,6 +59,7 @@ public:
 
     void setTotalPredictionTime(double totalPredictionTime);
 
+    int seed();
 };
 
 
