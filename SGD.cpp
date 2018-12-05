@@ -531,7 +531,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
-    double cost = 0;
+    double cost = 1;
     int i=0;
     while(cost>0.01) {
         eta = 1.0 / (alpha * i);
