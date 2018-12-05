@@ -219,6 +219,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
 
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank, Xtest, ytest);
+        sgd1.setError_threshold(optArgs.getError_threshold());
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {//works with -nt flag
             sgd1.pegasosSGDFullBatchv1(w, epochlogfile);
@@ -2994,6 +2995,7 @@ void sequentialPegasos(OptArgs optArgs) {
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet);
         SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
+        sgd3.setError_threshold(optArgs.getError_threshold());
         clock_t begin = clock();
         sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
         //sgd1.sgd();

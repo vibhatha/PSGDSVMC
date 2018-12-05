@@ -543,7 +543,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 
     initializer.initialWeights(features, w);
     double cost = 1.0;
-    double error_threshold = 12.0;
+    double error_threshold = this->getError_threshold();
     int i=1;
     double error = 100;
     while (true) {
@@ -629,6 +629,14 @@ double SGD::getTotalPredictionTime() const {
 
 void SGD::setTotalPredictionTime(double totalPredictionTime) {
     SGD::totalPredictionTime = totalPredictionTime;
+}
+
+double SGD::getError_threshold() const {
+    return error_threshold;
+}
+
+void SGD::setError_threshold(double error_threshold) {
+    SGD::error_threshold = error_threshold;
 }
 
 int seed() {

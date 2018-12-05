@@ -36,6 +36,7 @@ private:
     bool pegasos = false;
     bool pegasosBatch = false;
     bool pegasosFullBatch = false;
+    double error_threshold = 10.0;
 
 
 public:
@@ -86,6 +87,12 @@ public:
             bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential, bool ring,
             bool randomringv1, bool randomringv2, bool fullbatchv1, bool pegasos, bool pegasosBatch,
             bool pegasosFullBatch);
+
+    OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha, bool isSplit,
+            double ratio, int threads, int workers, int iterations, bool isEpochTime, bool isNormalTime, bool bulk,
+            bool batch, double batch_per, double drop_out_per, bool isDrop, bool sequential, bool ring,
+            bool randomringv1, bool randomringv2, bool fullbatchv1, bool pegasos, bool pegasosBatch,
+            bool pegasosFullBatch, double error_threshold);
 
 
     const string &getDataset() const;
@@ -189,6 +196,10 @@ public:
     bool isPegasosFullBatch() const;
 
     void setPegasosFullBatch(bool pegasosFullBatch);
+
+    double getError_threshold() const;
+
+    void setError_threshold(double error_threshold);
 
 
 };

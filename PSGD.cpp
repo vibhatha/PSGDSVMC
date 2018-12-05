@@ -3164,4 +3164,12 @@ void PSGD::setTotalPredictionTime(double totalPredictionTime) {
     PSGD::totalPredictionTime = totalPredictionTime;
 }
 
+double PSGD::getError_threshold() const {
+    return error_threshold;
+}
+
+void PSGD::setError_threshold(double error_threshold) {
+    PSGD::error_threshold = error_threshold;
+}
+
 

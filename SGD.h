@@ -27,6 +27,7 @@ private:
     double** Xtest;
     double* ytest;
     double totalPredictionTime = 0;
+    double error_threshold = 0;
 
 public:
 
@@ -60,6 +61,10 @@ public:
     void setTotalPredictionTime(double totalPredictionTime);
 
     int seed();
+
+    double getError_threshold() const;
+
+    void setError_threshold(double error_threshold);
 };
 
 

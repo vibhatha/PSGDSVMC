@@ -33,6 +33,7 @@ private:
     double** Xtest;
     double* ytest;
     double totalPredictionTime;
+    double error_threshold;
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
     PSGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
@@ -110,6 +111,10 @@ public:
     double getTotalPredictionTime() const;
 
     void setTotalPredictionTime(double totalPredictionTime);
+
+    double getError_threshold() const;
+
+    void setError_threshold(double error_threshold);
 
 };
 

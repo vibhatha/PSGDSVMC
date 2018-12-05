@@ -5,9 +5,9 @@ import sys
 import re
 from matplotlib import pyplot as plt
 
-datasource = 'w8a'
-base_path = '/home/vibhatha/Documents/Research/logs/psgsvmc/2018_11_30/epochlog_processed/parallel/pegasos/fullbatch/'+datasource
-result_path = '/home/vibhatha/Documents/Research/logs/psgsvmc/2018_11_30/results/parallel/pegasos/fullbatch/'+datasource+'/'
+datasource = 'covtype'
+base_path = '/home/vibhatha/Documents/Research/logs/psgsvmc/2018_11_30/epochlog_processed/parallel/adam/batch/'+datasource
+result_path = '/home/vibhatha/Documents/Research/logs/psgsvmc/2018_11_30/results/parallel/adam/batch/'+datasource+'/'
 graph_path = '/home/vibhatha/Documents/Research/logs/psgsvmc/2018_11_30/results/'
 
 #print(list)
