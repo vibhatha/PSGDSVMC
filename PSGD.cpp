@@ -2316,7 +2316,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
-        if(cost<0.01 and world_rank==0) {
+        if(cost<0.1 and world_rank==0) {
             breakFlag[0]=-1;
         }
         double bcast_time_start = MPI_Wtime();
