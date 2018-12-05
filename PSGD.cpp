@@ -2217,6 +2217,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(features, wglobal_print);
     double *w_print = new double[features];
     initializer.initializeWeightsWithArray(features, w_print);
+    double *local_cost = new double[1];
+    initializer.initializeWeightsWithArray(1, local_cost);
+    double *global_cost = new double[1];
+    initializer.initializeWeightsWithArray(1, global_cost);
     double epsilon = 0.00000001;
     Util util;
     //cout << "Training Samples : " << trainingSamples << endl;
@@ -2300,6 +2304,13 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 commtimeA[i][j] = 0;
             }
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
+            double start_cost = MPI_Wtime();
+            local_cost[0] = cost;
+            MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            matrix.scalarMultiply(global_cost, 1.0 / (double) world_size, local_cost);
+            cost = local_cost[0];
+            double end_cost = MPI_Wtime();
+            prediction_time+= (end_cost - start_cost);
             //util.print1DMatrix(w, features);
             //delete [] xi;
 
