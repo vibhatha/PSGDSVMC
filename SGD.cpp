@@ -531,9 +531,9 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
-    double cost = 0;
-
-    for (int i = 1; i < iterations; ++i) {
+    double cost = 1.0;
+    int i=0;
+    while (cost>0.01) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -565,6 +565,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         prediction_time = clock()-prediction_time;
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
+        i++;
     }
 
     this->setTotalPredictionTime(totalpredictiontime);
