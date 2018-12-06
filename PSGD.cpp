@@ -13,6 +13,9 @@
 #include <math.h>
 #include <mpi.h>
 #include <random>
+#include <chrono>
+#include <algorithm>
+
 
 using namespace std;
 
@@ -2285,14 +2288,28 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double training_time = 0;
     double eta = 0;
 
+    //shuffeling stage
+
+    vector<int> accuracies_set(0);
+    vector<int> indices(trainingSamples);
+    std::iota(indices.begin(), indices.end(), 0);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+    shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+
+    cout << "Size of Indices : " << indices.size() <<  ", "<< trainingSamples << endl;
+
     vector<double> comptimeV;
     vector<double> commtimeV;
     double cost = 10.0;
     iterations = 10000;
     int  breakFlag [] = {100};
     int i = 1;
+
     double error_threshold = this->getError_threshold();
     double error = 0;
+    int marker = 0;
+
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
@@ -2302,6 +2319,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
+
         for (int j = 0; j < trainingSamples; ++j) {
 
             double perDataPerItrCompt = 0;
@@ -2364,14 +2382,26 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
-        if(error<error_threshold and world_rank==0) {
+
+        double bcast_time_start = MPI_Wtime();
+
+
+        if(error<error_threshold and world_rank==0){
+            accuracies_set.push_back(marker);
+        }else{
+            marker = 0;
+            accuracies_set.reserve(0);
+        }
+
+        if(accuracies_set.size()==10) {
             breakFlag[0]=-1;
         }
-        double bcast_time_start = MPI_Wtime();
+
         MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
         if(breakFlag[0]==-1){
             cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
         }
+
         double bcast_time_end = MPI_Wtime();
         prediction_time += (bcast_time_end-bcast_time_start);
         i++;

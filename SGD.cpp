@@ -586,7 +586,6 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         }else{
             marker = 0;
             accuracies_set.reserve(0);
-            accuracies_set.reserve(10);
         }
 
         if(accuracies_set.size()==10) {
