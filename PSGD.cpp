@@ -2390,7 +2390,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             accuracies_set.push_back(marker);
         }else{
             marker = 0;
-            accuracies_set.reserve(0);
+            accuracies_set.clear();
         }
 
         if(accuracies_set.size()==10) {
