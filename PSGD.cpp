@@ -2396,7 +2396,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     }*/
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    writeLog(summarylogfile.append(util.getTimestamp()).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)), iterations, trainingSamples, comptimeA,
+    writeLog(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)), iterations, trainingSamples, comptimeA,
              commtimeA);
     delete[] w1;
     delete[] xiyi;
