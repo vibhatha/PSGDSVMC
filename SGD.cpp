@@ -534,7 +534,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     Matrix1 matrix(features);
 
     //generate a random seed of data points
-    vector<int> accuracies_set(10);
+    vector<int> accuracies_set(0);
     vector<int> indices(trainingSamples);
     std::iota(indices.begin(), indices.end(), 0);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
