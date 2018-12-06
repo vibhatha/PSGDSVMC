@@ -534,6 +534,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     Matrix1 matrix(features);
 
     //generate a random seed of data points
+    vector<int> accuracies_set(10);
     vector<int> indices(trainingSamples);
     std::iota(indices.begin(), indices.end(), 0);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -546,6 +547,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     double error_threshold = this->getError_threshold();
     int i=1;
     double error = 100;
+    int marker = 0;
     while (true) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
@@ -580,6 +582,14 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         i++;
         error = 100.0 - acc;
         if(error<error_threshold){
+            accuracies_set.push_back(marker);
+        }else{
+            marker = 0;
+            accuracies_set.reserve(0);
+            accuracies_set.reserve(10);
+        }
+
+        if(accuracies_set.size()==10) {
             break;
         }
         prediction_time = clock()-prediction_time;
