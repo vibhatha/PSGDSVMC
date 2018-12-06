@@ -61,6 +61,7 @@ public:
     void adamSGD(double* w);
     void adamSGD(double* w, string logfile);
     void writeLog(string logfile, int iterations, int samples, double** compt, double** commt);
+    void writeVectorLog(string logfile, int iterations, int samples, vector<double> compt, vector<double> commt);
     void writeLog(string logfile, int iterations, int samples, double** compt, double commt);
     void writeLog(string logfile, int iterations, int samples, double** compt, double* commt);
     void adamSGDBatchv1(double* w);

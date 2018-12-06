@@ -64,6 +64,14 @@ void Util::writeLossAccuracyPerEpoch(double epoch, double acc, double cost, stri
     }
 }
 
+void Util::writeTimeLossAccuracyPerEpoch(double epoch, double acc, double cost, double time, string file) {
+    ofstream myfile(file, ios::out | ios::app);
+    if (myfile.is_open()) {
+        myfile << epoch <<","<<acc<<","<<cost<<","<<time<<","<<"\n";
+        myfile.close();
+    }
+}
+
 int Util::seed() {
     static int i = 1;
     return i++;

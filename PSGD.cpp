@@ -2282,21 +2282,11 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double start_predict = 0;
     double end_predict = 0;
     double prediction_time = 0;
+    double training_time = 0;
     double eta = 0;
 
-    double **comptimeA;
-    double **commtimeA;
-    comptimeA = new double *[iterations];
-    double init_start = MPI_Wtime();
-    for (int i = 0; i < iterations; ++i) {
-        comptimeA[i] = new double[trainingSamples];
-    }
-
-    commtimeA = new double *[iterations];
-    for (int i = 0; i < iterations; ++i) {
-        commtimeA[i] = new double[trainingSamples];
-    }
-    double init_end = MPI_Wtime();
+    vector<double> comptimeV;
+    vector<double> commtimeV;
     double cost = 10.0;
     iterations = 10000;
     int  breakFlag [] = {100};
@@ -2312,8 +2302,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
-        commtimeA[i] = new double[trainingSamples];
-        comptimeA[i] = new double[trainingSamples];
         for (int j = 0; j < trainingSamples; ++j) {
 
             double perDataPerItrCompt = 0;
@@ -2344,9 +2332,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 end_compute = MPI_Wtime();
                 compute_time += (end_compute - start_compute);
                 perDataPerItrCompt += (end_compute - start_compute);
-                commtimeA[i][j] = end_communication - start_communication;
+                commtimeV.push_back(end_communication - start_communication);
             } else {
-                commtimeA[i][j] = 0;
+
+                commtimeV.push_back(0);
             }
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
             double start_cost = MPI_Wtime();
@@ -2358,9 +2347,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             //util.print1DMatrix(w, features);
             //delete [] xi;
 
-            comptimeA[i][j] = perDataPerItrCompt;
+            comptimeV.push_back(perDataPerItrCompt);
 
         }
+        training_time += communication_time + compute_time;
         start_predict = MPI_Wtime();
         MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
                       MPI_COMM_WORLD);
@@ -2369,8 +2359,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             double acc = predict.predict();
             error = 100.0 -acc;
-            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost <<  endl;
-            util.writeLossAccuracyPerEpoch(i, acc, cost, epochlogfile);
+            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
+            util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict-start_predict);
@@ -2386,7 +2376,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         prediction_time += (bcast_time_end-bcast_time_start);
         i++;
     }
-    this->setTotalPredictionTime(prediction_time+(init_end-init_start));
+    this->setTotalPredictionTime(prediction_time);
     /*if(world_rank==0) {
         cout << "============================================" << endl;
         printf("Final Weight\n");
@@ -2396,12 +2386,18 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     }*/
     //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    writeLog(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)), iterations, trainingSamples, comptimeA,
-             commtimeA);
+    string file = "";
+    file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)));
+    cout << "Log FIle : " << file << endl;
+    writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
     delete[] w1;
     delete[] xiyi;
-    delete[] commtimeA;
-    delete[] comptimeA;
+    delete[] wglobal;
+    delete[] wglobal_print;
+    delete[] w_print;
+    delete[] local_cost;
+    delete[] global_cost;
+
 }
 
 
@@ -3090,8 +3086,28 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
                 per_itr_comm += commt[i][j];
                 per_itr_comp += compt[i][j];
             }
-            //cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+            cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
             myfile << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+        }
+        myfile.close();
+    }
+}
+
+void PSGD::writeVectorLog(string logfile, int iterations, int samples, vector<double> compt, vector<double> commt) {
+    cout << logfile << endl;
+    ofstream myfile(logfile);
+    if (myfile.is_open()) {
+        double per_itr_comp = 0;
+        double per_itr_comm = 0;
+        for (int i = 0; i < compt.size(); ++i) {
+            per_itr_comm += commt.at(i);
+            per_itr_comp += compt.at(i);
+            if((i+1)%trainingSamples==0) {
+                //cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+                myfile << i/trainingSamples << "," << per_itr_comp << "," << per_itr_comm << "\n";
+                per_itr_comm=0;
+                per_itr_comp=0;
+            }
         }
         myfile.close();
     }
