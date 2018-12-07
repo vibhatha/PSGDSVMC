@@ -2386,7 +2386,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         double bcast_time_start = MPI_Wtime();
 
 
-        if(error<error_threshold and world_rank==0){
+        if(error<cost and world_rank==0){
             accuracies_set.push_back(marker);
         }else{
             marker = 0;
