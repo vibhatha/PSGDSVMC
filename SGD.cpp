@@ -548,6 +548,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     int i=1;
     double error = 100;
     int marker = 0;
+    double cost_sum = 0;
     while (true) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
@@ -572,10 +573,13 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
+            cost_sum += cost;
             //util.print1DMatrix(w, 5);
         }
         prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
+        cost = cost_sum / trainingSamples;
+        cost_sum = 0;
         double acc = predict.predict();
         cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
