@@ -588,7 +588,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==5) {
+        if(accuracies_set.size()==2) {
             break;
         }
         prediction_time = clock()-prediction_time;
