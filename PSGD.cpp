@@ -2267,6 +2267,9 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(1, local_cost);
     double *global_cost = new double[1];
     initializer.initializeWeightsWithArray(1, global_cost);
+    double *w_init = new double[features];
+    initializer.initializeWeightsWithArray(features, w_init);
+
     double epsilon = 0.00000001;
     Util util;
     //cout << "Training Samples : " << trainingSamples << endl;
@@ -2278,6 +2281,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     Matrix1 matrix(features);
 
     initializer.initialWeights(features, w);
+    MPI_Allreduce(w, w_init, features, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    matrix.scalarMultiply(w_init, 1.0 / (double) world_size, w);
+
+
     compute_time = 0;
     communication_time = 0;
     double start_compute = 0;
