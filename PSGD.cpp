@@ -2377,7 +2377,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             local_cost[0] = cost;
             MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
             cost = global_cost[0]/ (double) world_size;
-            cost = cost / trainingSamples;
+            cost_sum += cost;
             double end_cost = MPI_Wtime();
             prediction_time+= (end_cost - start_cost);
 
@@ -2389,11 +2389,12 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         }
         training_time += communication_time + compute_time;
         start_predict = MPI_Wtime();
-        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
-                      MPI_COMM_WORLD);
+        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
         if(world_rank==0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
+            cost = cost_sum / trainingSamples;
+            cost_sum=0;
             double acc = predict.predict();
             error = 100.0 -acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Log Hinge Loss : " << cost << endl;
