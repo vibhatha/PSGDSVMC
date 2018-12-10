@@ -2319,7 +2319,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
-
         for (int j = 0; j < trainingSamples; ++j) {
 
             double perDataPerItrCompt = 0;
@@ -2393,7 +2392,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==10) {
+        if(accuracies_set.size()==2) {
             breakFlag[0]=-1;
         }
 
