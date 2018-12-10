@@ -2277,7 +2277,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
     Matrix1 matrix(features);
 
-    initializer.initializeWeightsWithArray(features, w);
+    initializer.initialWeights(features, w);
     compute_time = 0;
     communication_time = 0;
     double start_compute = 0;
