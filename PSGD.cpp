@@ -2397,7 +2397,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             cost_sum=0;
             double acc = predict.predict();
             error = 100.0 -acc;
-            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Log Hinge Loss : " << cost << endl;
+            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
             util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
         end_predict = MPI_Wtime();
