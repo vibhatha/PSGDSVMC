@@ -2253,6 +2253,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
 void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile) {
     Initializer initializer;
     cout << "Start Training ..." << endl;
+    double init_time_start = MPI_Wtime();
     double *w1 = new double[features];
     initializer.initializeWeightsWithArray(features, w1);
     double *xiyi = new double[features];
@@ -2269,6 +2270,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(1, global_cost);
     double *w_init = new double[features];
     initializer.initializeWeightsWithArray(features, w_init);
+
 
     double epsilon = 0.00000001;
     Util util;
@@ -2294,17 +2296,26 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double prediction_time = 0;
     double training_time = 0;
     double eta = 0;
-
-    //shuffeling stage
-
     vector<int> accuracies_set(0);
-    vector<int> indices(trainingSamples);
-    std::iota(indices.begin(), indices.end(), 0);
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-
-    shuffle (indices.begin(), indices.end(), default_random_engine(seed));
-
-    cout << "Size of Indices : " << indices.size() <<  ", "<< trainingSamples << endl;
+    //shuffeling stage
+    int indexes [trainingSamples];
+//    if(world_rank==0) {
+//
+//        vector<int> indices(trainingSamples);
+//        std::iota(indices.begin(), indices.end(), 0);
+//        unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+//
+//        shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+//
+//        cout << "Size of Indices : " << indices.size() <<  ", "<< trainingSamples << endl;
+//
+//        for (int k = 0; k < trainingSamples; ++k) {
+//            indexes[k] = indices.at(k);
+//        }
+//    }
+//
+//
+//    MPI_Bcast(indexes,trainingSamples, MPI_INT, 0, MPI_COMM_WORLD);
 
     vector<double> comptimeV;
     vector<double> commtimeV;
@@ -2316,7 +2327,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double error_threshold = this->getError_threshold();
     double error = 0;
     int marker = 0;
-
+    double init_time_end = MPI_Wtime();
+    double cost_sum = 0;
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
@@ -2327,7 +2339,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 //            cout << "Iteration " << i << "/" << iterations << endl;
 //        }
         for (int j = 0; j < trainingSamples; ++j) {
-
             double perDataPerItrCompt = 0;
             start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
@@ -2366,8 +2377,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             local_cost[0] = cost;
             MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
             cost = global_cost[0]/ (double) world_size;
+            cost = cost / (double) world_size;
             double end_cost = MPI_Wtime();
             prediction_time+= (end_cost - start_cost);
+
             //util.print1DMatrix(w, features);
             //delete [] xi;
 
@@ -2383,7 +2396,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             double acc = predict.predict();
             error = 100.0 -acc;
-            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
+            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Log Hinge Loss : " << cost << endl;
             util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
         end_predict = MPI_Wtime();
@@ -2392,14 +2405,14 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         double bcast_time_start = MPI_Wtime();
 
 
-        if(error<error_threshold and world_rank==0){
+        if(cost<error_threshold and world_rank==0){
             accuracies_set.push_back(marker);
         }else{
             marker = 0;
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==2) {
+        if(accuracies_set.size()==10) {
             breakFlag[0]=-1;
         }
 
@@ -2412,6 +2425,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         prediction_time += (bcast_time_end-bcast_time_start);
         i++;
     }
+    prediction_time += (init_time_end-init_time_start);
     this->setTotalPredictionTime(prediction_time);
     /*if(world_rank==0) {
         cout << "============================================" << endl;
