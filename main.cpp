@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
         parallelPegasosFullBatchV1(optArgs);
     } else if(optArgs.isPegasosBatch()) {
         double per = optArgs.getBatch_per();
-        int sample_gap = per * optArgs.getTrainingSamples();
+        int sample_gap = (int) per; //per * optArgs.getTrainingSamples();
         parallelPegasosBatchV1(optArgs, sample_gap);
     }
 
