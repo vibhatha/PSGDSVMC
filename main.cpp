@@ -421,7 +421,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         int testSet = totalSamples - trainSet;
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
-        comm_gap = optArgs.getBatch_per() * dataPerMachine;
+        //comm_gap = optArgs.getBatch_per() * dataPerMachine;
         if(world_rank==0) {
             cout << "Comm Gap : " << comm_gap << endl;
         }
