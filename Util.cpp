@@ -114,3 +114,9 @@ void Util::summary(string logfile, int world_size, double acc, double time, doub
         myfile.close();
     }
 }
+
+void Util::compareChange(double *w_new, double *w_old, double *w_res, int features) {
+    for (int i = 0; i < features; ++i) {
+        w_res[i] = w_new[i] - w_old[i];
+    }
+}

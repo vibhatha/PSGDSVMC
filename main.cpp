@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
         parallelPegasosFullBatchV1(optArgs);
     } else if(optArgs.isPegasosBatch()) {
         double per = optArgs.getBatch_per();
-        int sample_gap = per * optArgs.getTrainingSamples();
+        int sample_gap = (int) per; //per * optArgs.getTrainingSamples();
         parallelPegasosBatchV1(optArgs, sample_gap);
     }
 
@@ -421,7 +421,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         int testSet = totalSamples - trainSet;
         int dataPerMachine = trainSet / world_size;
         int totalVisibleSamples = dataPerMachine * world_size;
-        comm_gap = optArgs.getBatch_per() * dataPerMachine;
+        //comm_gap = optArgs.getBatch_per() * dataPerMachine;
         if(world_rank==0) {
             cout << "Comm Gap : " << comm_gap << endl;
         }
