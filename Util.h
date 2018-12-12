@@ -21,6 +21,7 @@ public:
     void summary(string logfile, int world_size, double acc, double time, string datasource);
     void summary(string logfile, int world_size, double acc, double time, double alpha);
     void summary(string logfile, int world_size, double acc, double time);
+    void compareChange(double* w_new, double* w_old, double* w_res, int features);
     string getTimestamp();
     int seed();
 
