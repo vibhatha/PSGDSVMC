@@ -2250,7 +2250,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
     delete [] w1;
 }
 
-void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile) {
+void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile, string weightfile) {
     Initializer initializer;
     cout << "Start Training ..." << endl;
     double init_time_start = MPI_Wtime();
@@ -2274,6 +2274,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(features, w_old);
     double *w_res = new double[features];
     initializer.initializeWeightsWithArray(features, w_res);
+    double *w_mem_arr = new double[features];
+    initializer.initializeWeightsWithArray(features, w_mem_arr);
 
     double epsilon = 0.00000001;
     Util util;
@@ -2322,6 +2324,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
     vector<double> comptimeV;
     vector<double> commtimeV;
+    vector<double*> w_mem;
     double cost = 10.0;
     iterations = 10000;
     int  breakFlag [] = {100};
@@ -2354,6 +2357,18 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             } else {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
+//            if(i==1 and j==0) {
+//                w_mem.push_back(w);
+//            } else{
+//                w_mem.push_back(w);
+//            }
+            if(j>2){
+                util.compareChange(w, w_mem_arr, w_res, features);
+            }
+
+            //util.print1DMatrix(w_res, features);
+            //util.writeWeightEpochLog(w, features, weightfile);
+
 
 
             end_compute = MPI_Wtime();
@@ -2372,7 +2387,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 perDataPerItrCompt += (end_compute - start_compute);
                 commtimeV.push_back(end_communication - start_communication);
             } else {
-
                 commtimeV.push_back(0);
             }
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
@@ -2383,12 +2397,11 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             cost_sum += cost;
             double end_cost = MPI_Wtime();
             prediction_time+= (end_cost - start_cost);
-
+            util.copyArray(w, w_mem_arr, features);
             //util.print1DMatrix(w, features);
             //delete [] xi;
-            w_old = w;
-            comptimeV.push_back(perDataPerItrCompt);
 
+            comptimeV.push_back(perDataPerItrCompt);
 
         }
         training_time += communication_time + compute_time;

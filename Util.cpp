@@ -24,16 +24,36 @@ void Util::print2DMatrix(double** x, int row, int column) {
 }
 
 void Util::print1DMatrix(double* x, int features) {
+    cout << "* ";
     for (int i = 0; i < features; ++i) {
         cout  << x[i] << " ";
     }
+    cout << "* ";
     cout << "\n";
+
 }
 
 void Util::writeWeight(double *w, int size, string logfile) {
     string timestamp = getTimestamp();
     string line;
     logfile.append("_").append(timestamp);
+    ofstream myfile(logfile, ios::out | ios::app);
+    for (int i = 0; i < size; ++i) {
+        if(i<size-2){
+            line.append(to_string(w[i])).append(",");
+        }else{
+            line.append(to_string(w[i]));
+        }
+    }
+    if (myfile.is_open()) {
+        myfile << line << "\n";
+        myfile.close();
+    }
+}
+
+void Util::writeWeightEpochLog(double *w, int size, string logfile) {
+    string timestamp = getTimestamp();
+    string line;
     ofstream myfile(logfile, ios::out | ios::app);
     for (int i = 0; i < size; ++i) {
         if(i<size-2){
@@ -118,5 +138,11 @@ void Util::summary(string logfile, int world_size, double acc, double time, doub
 void Util::compareChange(double *w_new, double *w_old, double *w_res, int features) {
     for (int i = 0; i < features; ++i) {
         w_res[i] = w_new[i] - w_old[i];
+    }
+}
+
+void Util::copyArray(double *a, double *b, int size) {
+    for (int i = 0; i < size; ++i) {
+        b[i] = a[i];
     }
 }
