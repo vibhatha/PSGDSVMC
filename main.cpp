@@ -397,8 +397,10 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
     string summarylogfile ="";
     summarylogfile.append(resourceManager.getLogSummaryBasePath()).append("/parallel/pegasos/").append("/batch/").append(optArgs.getDataset()).append("/").append("summary_comm_gap=").append(to_string(optArgs.getBatch_per())).append(".csv");
     string weightlogfile = "";
+    string epochweightlogfile = "";
     weightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/").append(optArgs.getDataset()).append("/").append(getTimeStamp())
             .append("_").append("_alpha_").append(to_string(optArgs.getAlpha())).append("batch_weight_summary.csv");
+    epochweightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("alpha_").append(to_string(optArgs.getAlpha())).append("_comm_gap=").append(to_string(comm_gap)).append("_epoch_weightlog.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
     epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_alpha_").append(to_string(optArgs.getAlpha())).append("_batch_cross_validation_accuracy.csv");
     string commcomplogfile = "";
@@ -464,7 +466,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         sgd1.setError_threshold(optArgs.getError_threshold());
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile);
+            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile, epochweightlogfile);
         }
 
         if (optArgs.isIsEpochTime()) {
@@ -557,7 +559,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
                   testingSamples, world_size, world_rank);
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile);
+            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile, epochweightlogfile);
             //sgd1.adamSGDBatchv2(w, comm_gap);
         }
 
