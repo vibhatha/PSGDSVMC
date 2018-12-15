@@ -120,3 +120,9 @@ void Util::compareChange(double *w_new, double *w_old, double *w_res, int featur
         w_res[i] = w_new[i] - w_old[i];
     }
 }
+
+void Util::copyArray(double *a, double *b, int size) {
+    for (int i = 0; i < size; ++i) {
+        b[i] = a[i];
+    }
+}

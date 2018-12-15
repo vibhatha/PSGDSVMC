@@ -2274,6 +2274,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(features, w_old);
     double *w_res = new double[features];
     initializer.initializeWeightsWithArray(features, w_res);
+    double *w_mem = new double[features];
+    initializer.initializeWeightsWithArray(features, w_mem);
 
     double epsilon = 0.00000001;
     Util util;
@@ -2336,7 +2338,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         eta = 1.0 / (alpha * i);
         //alpha = 1.0 / (1.0 + (double) i);
 //        if (i % 10 == 0 and world_rank == 0) {
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;clear
 //            //util.print1DMatrix(w, features);
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
 //            cout << "Iteration " << i << "/" << iterations << endl;
@@ -2355,14 +2357,15 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
 
+            //util.compareChange(w, w_mem, w_res, features);
+            //util.print1DMatrix(w_res, features);
 
             end_compute = MPI_Wtime();
             compute_time += (end_compute - start_compute);
             perDataPerItrCompt = (end_compute - start_compute);
             if (j % comm_gap == 0) {
                 double start_communication = MPI_Wtime();
-                MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
-                              MPI_COMM_WORLD);
+                MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
                 double end_communication = MPI_Wtime();
                 communication_time += (end_communication - start_communication);
                 start_compute = MPI_Wtime();
@@ -2383,10 +2386,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             cost_sum += cost;
             double end_cost = MPI_Wtime();
             prediction_time+= (end_cost - start_cost);
+            //util.copyArray(w, w_mem, features);
 
             //util.print1DMatrix(w, features);
             //delete [] xi;
-            w_old = w;
             comptimeV.push_back(perDataPerItrCompt);
 
 
