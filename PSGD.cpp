@@ -2250,7 +2250,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
     delete [] w1;
 }
 
-void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile) {
+void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile, string weightFile) {
     Initializer initializer;
     cout << "Start Training ..." << endl;
     double init_time_start = MPI_Wtime();
