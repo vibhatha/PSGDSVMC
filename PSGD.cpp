@@ -2270,10 +2270,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     initializer.initializeWeightsWithArray(1, global_cost);
     double *w_init = new double[features];
     initializer.initializeWeightsWithArray(features, w_init);
-    double *w_old = new double[features];
-    initializer.initializeWeightsWithArray(features, w_old);
-    double *w_res = new double[features];
-    initializer.initializeWeightsWithArray(features, w_res);
+
 
     double epsilon = 0.00000001;
     Util util;
@@ -2386,9 +2383,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
             //util.print1DMatrix(w, features);
             //delete [] xi;
-            w_old = w;
-            comptimeV.push_back(perDataPerItrCompt);
 
+            comptimeV.push_back(perDataPerItrCompt);
 
         }
         training_time += communication_time + compute_time;
