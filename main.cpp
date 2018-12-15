@@ -76,6 +76,8 @@ void summary(string logfile, int world_size, double acc, double time, string dat
 
 void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha);
 
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold);
+
 int main(int argc, char **argv) {
     //std::cout << "Hello, World!" << std::endl;
 
@@ -480,7 +482,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha());
+            summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha(), sgd1.getError_threshold());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -3182,6 +3184,18 @@ void summary(string logfile, int world_size, double acc, double time, string dat
     if (myfile.is_open()) {
 
         myfile << datasource << "," << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "\n";
+
+        myfile.close();
+    }
+}
+
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold) {
+
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimeStamp();
+    if (myfile.is_open()) {
+
+        myfile << datasource << "," << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "," << error_threshold << "\n";
 
         myfile.close();
     }

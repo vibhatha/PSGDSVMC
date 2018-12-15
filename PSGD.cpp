@@ -2428,6 +2428,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     }
     prediction_time += (init_time_end-init_time_start);
     this->setTotalPredictionTime(prediction_time);
+    this->setError_threshold(error_threshold);
     /*if(world_rank==0) {
         cout << "============================================" << endl;
         printf("Final Weight\n");

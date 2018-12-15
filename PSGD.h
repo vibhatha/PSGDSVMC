@@ -34,6 +34,7 @@ private:
     double* ytest;
     double totalPredictionTime;
     double error_threshold;
+
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
     PSGD(double** X, double* y, double alpha, int iterations, int features, int trainingSamples,int testingSamples);
