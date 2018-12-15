@@ -2418,9 +2418,9 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         }
 
         MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
-        if(breakFlag[0]==-1){
-            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
-        }
+//        if(breakFlag[0]==-1){
+//            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
+//        }
 
         double bcast_time_end = MPI_Wtime();
         prediction_time += (bcast_time_end-bcast_time_start);
@@ -2439,7 +2439,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
     string file = "";
     file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)));
-    cout << "Log FIle : " << file << endl;
+    //cout << "Log FIle : " << file << endl;
     writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
     delete[] w1;
     delete[] xiyi;
@@ -3145,7 +3145,7 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
 }
 
 void PSGD::writeVectorLog(string logfile, int iterations, int samples, vector<double> compt, vector<double> commt) {
-    cout << logfile << endl;
+    //cout << logfile << endl;
     ofstream myfile(logfile);
     if (myfile.is_open()) {
         double per_itr_comp = 0;
@@ -3194,7 +3194,7 @@ void PSGD::writeLog(string logfile, int iterations, int samples, double **compt,
 
                 per_itr_comp += compt[i][j];
             }
-            cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
+            //cout << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
             myfile << i << "," << per_itr_comp << "," << per_itr_comm << "\n";
         }
         myfile.close();
