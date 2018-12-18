@@ -2373,13 +2373,13 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 commtimeV.push_back(0);
             }
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
-            double start_cost = MPI_Wtime();
+            //double start_cost = MPI_Wtime();
             local_cost[0] = cost;
             MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
             cost = global_cost[0]/ (double) world_size;
             cost_sum += cost;
-            double end_cost = MPI_Wtime();
-            prediction_time+= (end_cost - start_cost);
+            //double end_cost = MPI_Wtime();
+            //prediction_time+= (end_cost - start_cost);
 
             //util.print1DMatrix(w, features);
             //delete [] xi;
