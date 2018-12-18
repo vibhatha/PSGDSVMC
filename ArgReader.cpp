@@ -173,6 +173,11 @@ OptArgs ArgReader::getParams() {
             optArgs.setError_threshold(x);
         }
 
+        comp = "-pegasosbs";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasosBlockSequential(true);
+        }
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 

@@ -114,3 +114,17 @@ void Util::summary(string logfile, int world_size, double acc, double time, doub
         myfile.close();
     }
 }
+
+void Util::averageWeight(vector<double *> weights, int features, double *w) {
+        int block_size = weights.size();
+        //cout << "Size : " << block_size << " ";
+        for (int j = 0; j < features; ++j) {
+            for (int i = 0; i < block_size; ++i) {
+                w[j] += weights.at(i)[j];
+            }
+            w[j]/=block_size;
+            //cout << w[j] << " ";
+        }
+        //cout << endl;
+
+}

@@ -49,6 +49,7 @@ public:
     void adamSGD(double* w, string summarylogfile, string epochlogfile);
     void sgd(double* w, string summarylogfile, string epochlogfile);
     void pegasosSgd(double* w, string summarylogfile, string epochlogfile);
+    void pegasosBlockSgd(double* w, string summarylogfile, string epcohlogfile, int block_size);
 
     double *getW() const;
 

@@ -6,6 +6,7 @@
 #define PSGDC_UTIL_H
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ public:
     void summary(string logfile, int world_size, double acc, double time, double alpha);
     void summary(string logfile, int world_size, double acc, double time);
     string getTimestamp();
+    void averageWeight(vector<double*> weights, int features, double* w);
     int seed();
 
 };
