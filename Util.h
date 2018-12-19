@@ -24,6 +24,7 @@ public:
     void summary(string logfile, int world_size, double acc, double time);
     string getTimestamp();
     void averageWeight(vector<double*> weights, int features, double* w);
+    void copyArray(double* source, double* copy, int features);
     int seed();
 
 };

@@ -120,11 +120,25 @@ void Util::averageWeight(vector<double *> weights, int features, double *w) {
         //cout << "Size : " << block_size << " ";
         for (int j = 0; j < features; ++j) {
             for (int i = 0; i < block_size; ++i) {
-                w[j] += weights.at(i)[j];
+                w[j] = weights.at(i)[j];
             }
             w[j]/=block_size;
             //cout << w[j] << " ";
         }
-        //cout << endl;
+    cout << "------------------------" << endl;
+    for (int k = 0; k < block_size; ++k) {
+        for (int i = 0; i < features; ++i) {
+            cout << weights.at(k)[i] << " ";
+        }
+        cout << endl;
+    }
+    cout << "------------------------" << endl;
 
+
+}
+
+void Util::copyArray(double *source, double *copy, int features) {
+    for (int i = 0; i < features; ++i) {
+        copy[i] = source[i];
+    }
 }
