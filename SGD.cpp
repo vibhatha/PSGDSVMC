@@ -607,7 +607,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==5) {
+        if(accuracies_set.size()==5 or i > iterations) {
             break;
         }
         convergence_calculate_time += clock();
