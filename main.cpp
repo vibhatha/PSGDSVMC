@@ -3005,7 +3005,12 @@ void sequentialPegasos(OptArgs optArgs) {
         SGD sgd3(0.5,0.5, Xtrain, ytrain, w, optArgs.getAlpha(), optArgs.getIterations(), features, trainSet, testSet, Xtest, ytest);
         sgd3.setError_threshold(optArgs.getError_threshold());
         clock_t begin = clock();
-        sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
+        if(optArgs.isPegasosSeqNoTime()) {
+            sgd3.pegasosSgdNoTiming(w, summarylogfile, epochlogfile);
+        } else {
+            sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
+        }
+
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd3.getTotalPredictionTime());
@@ -3057,7 +3062,12 @@ void sequentialPegasos(OptArgs optArgs) {
         double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
-        sgd2.pegasosSgd(w, summarylogfile, epochlogfile);
+        if(optArgs.isPegasosSeqNoTime()) {
+            sgd2.pegasosSgdNoTiming(w, summarylogfile, epochlogfile);
+        } else {
+            sgd2.pegasosSgd(w, summarylogfile, epochlogfile);
+        }
+
         //sgd1.adamSGD();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd2.getTotalPredictionTime());

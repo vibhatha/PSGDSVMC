@@ -436,4 +436,28 @@ void OptArgs::setPegasosBlockSequential(bool pegasosBlockSequential) {
     OptArgs::pegasosBlockSequential = pegasosBlockSequential;
 }
 
+OptArgs::OptArgs(const string &dataset, int features, int trainingSamples, int testingSamples, double alpha,
+                 bool isSplit, double ratio, int threads, int workers, int iterations, bool isEpochTime,
+                 bool isNormalTime, bool bulk, bool batch, double batch_per, double drop_out_per, bool isDrop,
+                 bool sequential, bool ring, bool randomringv1, bool randomringv2, bool fullbatchv1, bool pegasos,
+                 bool pegasosBatch, bool pegasosFullBatch, double error_threshold, bool pegasosBlockSequential,
+                 bool pegasosSeqNoTime) : dataset(dataset), features(features), trainingSamples(trainingSamples),
+                                          testingSamples(testingSamples), alpha(alpha), isSplit(isSplit), ratio(ratio),
+                                          threads(threads), workers(workers), iterations(iterations),
+                                          isEpochTime(isEpochTime), isNormalTime(isNormalTime), bulk(bulk),
+                                          batch(batch), batch_per(batch_per), drop_out_per(drop_out_per),
+                                          isDrop(isDrop), sequential(sequential), ring(ring),
+                                          randomringv1(randomringv1), randomringv2(randomringv2),
+                                          fullbatchv1(fullbatchv1), pegasos(pegasos), pegasosBatch(pegasosBatch),
+                                          pegasosFullBatch(pegasosFullBatch), error_threshold(error_threshold),
+                                          pegasosBlockSequential(pegasosBlockSequential),
+                                          pegasosSeqNoTime(pegasosSeqNoTime) {}
+
+bool OptArgs::isPegasosSeqNoTime() const {
+    return pegasosSeqNoTime;
+}
+
+void OptArgs::setPegasosSeqNoTime(bool pegasosSeqNoTime) {
+    OptArgs::pegasosSeqNoTime = pegasosSeqNoTime;
+}
 

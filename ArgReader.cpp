@@ -178,6 +178,12 @@ OptArgs ArgReader::getParams() {
             optArgs.setPegasosBlockSequential(true);
         }
 
+        comp = "-notime";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasosSeqNoTime(true);
+        }
+
+
         //cout  << i  << ", " << argv[i] << "\n";
     }
 
