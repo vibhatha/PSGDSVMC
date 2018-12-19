@@ -698,6 +698,8 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
                     matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
                 }
                // util.print1DMatrix(w, features);
+                cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
+                cost_sum += cost;
 
                 for (int m = 0; m < features; ++m) {
                     tempW[m] += w[m];
@@ -716,8 +718,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
 
             util.copyArray(w, w_init, features);
             //w_init = w;
-            cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
-            cost_sum += cost;
+
             //util.print1DMatrix(w, 5);
             //util.print1DMatrix(w, features);
             initializer.initializeWeightsWithArray(features, tempW);
