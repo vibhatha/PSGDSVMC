@@ -518,6 +518,8 @@ void SGD::sgd(double *w, string summarylogfile, string epochlogfile) {
 
 void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
 
+    double init_time = 0;
+    init_time -= clock();
     Initializer initializer;
     double *w1 = new double[features];
     initializer.initializeWeightsWithArray(features, w1);
@@ -549,6 +551,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
     double error = 100;
     int marker = 0;
     double cost_sum = 0;
+    init_time += clock();
     while (true) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
@@ -620,7 +623,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         log_write_time += clock();
         totalpredictiontime += (((double)log_write_time)/CLOCKS_PER_SEC);
     }
-
+    totalpredictiontime += (((double)init_time)/CLOCKS_PER_SEC);
     this->setTotalPredictionTime(totalpredictiontime);
 
 
