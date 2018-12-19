@@ -585,7 +585,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         i++;
         error = 100.0 - acc;
-        if(error<error_threshold){
+        if(cost<error_threshold){
             accuracies_set.push_back(marker);
         }else{
             marker = 0;
