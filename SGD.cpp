@@ -682,6 +682,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         //double coefficient = 1.0/(1.0 + (double)i);
         int j =0;
         double yixiw = 0;
+        int count = 0;
         for (int k = 0; k < trainingSamples-block_size; k=k+block_size) {
             //cout << "---------------------" << endl;
 
@@ -708,6 +709,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
                 util.copyArray(w_init, w, features);
 
                 //w=w_init;
+                count++;
             }
 
             //cout << "---------------------" << endl;
@@ -728,7 +730,8 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-        cout << "Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
+        cout << "Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
+        count = 0;
         util.writeAccuracyPerEpoch(i, acc, epcohlogfile);
         i++;
         error = 100.0 - acc;
