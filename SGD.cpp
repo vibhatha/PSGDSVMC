@@ -593,8 +593,8 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-
-
+        prediction_time = clock()-prediction_time;
+        convergence_calculate_time -= clock();
         i++;
         error = 100.0 - acc;
         if(cost<error_threshold){
@@ -607,7 +607,7 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         if(accuracies_set.size()==5) {
             break;
         }
-        prediction_time = clock()-prediction_time;
+        convergence_calculate_time += clock();
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
         dot_prod_time /= CLOCKS_PER_SEC;
         weight_update_time /= CLOCKS_PER_SEC;
