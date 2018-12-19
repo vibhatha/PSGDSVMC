@@ -730,7 +730,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-        cout << "Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
+        cout  << "Block Size:  "<< block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
         count = 0;
         util.writeAccuracyPerEpoch(i, acc, epcohlogfile);
         i++;
