@@ -713,7 +713,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==2) {
+        if(accuracies_set.size()==5) {
             break;
         }
         prediction_time = clock()-prediction_time;
