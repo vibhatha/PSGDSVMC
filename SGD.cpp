@@ -560,11 +560,20 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         //alpha = 1.0 / ((double)(i) + 1);
         //double coefficient = 1.0/(1.0 + (double)i);
         int j =0;
+        double dot_prod_time = 0;
+        double weight_update_time = 0;
+        double cost_calculate_time = 0;
+        double convergence_calculate_time = 0;
+        double predict_time = 0;
+        double log_write_time = 0;
         for (int k = 0; k < trainingSamples; ++k) {
             j = indices.at(k);
+
+            dot_prod_time -= clock();
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
-
+            dot_prod_time += clock();
+            weight_update_time -= clock();
             if (yixiw < 1) {
                 matrix.scalarMultiply(X[j], y[j]*eta, xiyi);
                 matrix.scalarMultiply(w, (1-(eta*alpha)), w1);
@@ -572,8 +581,11 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
             } else {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
+            weight_update_time += clock();
+            cost_calculate_time -= clock();
             cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
             cost_sum += cost;
+            cost_calculate_time += clock();
             //util.print1DMatrix(w, 5);
         }
         prediction_time = clock();
@@ -581,8 +593,8 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+
+
         i++;
         error = 100.0 - acc;
         if(cost<error_threshold){
@@ -592,11 +604,21 @@ void SGD::pegasosSgd(double *w, string summarylogfile, string epochlogfile) {
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==2) {
+        if(accuracies_set.size()==5) {
             break;
         }
         prediction_time = clock()-prediction_time;
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
+        dot_prod_time /= CLOCKS_PER_SEC;
+        weight_update_time /= CLOCKS_PER_SEC;
+        cost_calculate_time /= CLOCKS_PER_SEC;
+        convergence_calculate_time /= CLOCKS_PER_SEC;
+        prediction_time /= CLOCKS_PER_SEC;
+        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
+        log_write_time -= clock();
+        util.writeAccuracyPerEpoch(i, acc, dot_prod_time, weight_update_time, cost_calculate_time, convergence_calculate_time, prediction_time, epochlogfile);
+        log_write_time += clock();
+        totalpredictiontime += (((double)log_write_time)/CLOCKS_PER_SEC);
     }
 
     this->setTotalPredictionTime(totalpredictiontime);

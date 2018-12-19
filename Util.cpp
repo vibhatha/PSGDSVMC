@@ -56,6 +56,16 @@ void Util::writeAccuracyPerEpoch(double epoch, double acc, string file) {
     }
 }
 
+void Util::writeAccuracyPerEpoch(double epoch, double acc, double dot_prod_time, double weight_update_time,
+                                 double cost_calculate_time, double convergence_calculate_time, double predict_time,
+                                 string file) {
+    ofstream myfile(file, ios::out | ios::app);
+    if (myfile.is_open()) {
+        myfile << epoch <<","<<acc<<","<<dot_prod_time<<","<<weight_update_time<<","<<cost_calculate_time<<","<<convergence_calculate_time<< "," <<predict_time << "," << "\n";
+        myfile.close();
+    }
+}
+
 void Util::writeLossAccuracyPerEpoch(double epoch, double acc, double cost, string file) {
     ofstream myfile(file, ios::out | ios::app);
     if (myfile.is_open()) {
