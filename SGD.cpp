@@ -713,7 +713,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
 
             util.copyArray(w, w_init, features);
             //w_init = w;
-            cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw)) / block_size;
+            cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
             cost_sum += cost;
             //util.print1DMatrix(w, 5);
             //util.print1DMatrix(w, features);
@@ -728,6 +728,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         util.writeAccuracyPerEpoch(i, acc, epcohlogfile);
         i++;
         error = 100.0 - acc;
+        prediction_time = clock()-prediction_time;
         if(cost<error_threshold){
             accuracies_set.push_back(marker);
         }else{
@@ -738,7 +739,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         if(accuracies_set.size()==5) {
             break;
         }
-        prediction_time = clock()-prediction_time;
+
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
     }
 
