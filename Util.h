@@ -20,6 +20,7 @@ public:
     void writeLossAccuracyPerEpoch(double epoch, double acc, double cost, string file);
     void writeTimeLossAccuracyPerEpoch(double epoch, double acc, double cost, double time, string file);
     void summary(string logfile, int world_size, double acc, double time, string datasource);
+    void summary(string logfile, int world_size, double acc, double time, double alpha, double error);
     void summary(string logfile, int world_size, double acc, double time, double alpha);
     void summary(string logfile, int world_size, double acc, double time);
     string getTimestamp();
