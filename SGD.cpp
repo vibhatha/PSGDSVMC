@@ -722,13 +722,16 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
 
 
 void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile, int block_size) {
-    double init_time = 0;
-    init_time -= clock();
+    cout << "Pegasos Block SGD " << endl;
     Initializer initializer;
     double *w1 = new double[features];
     initializer.initializeWeightsWithArray(features, w1);
+    double *w_init = new double[features];
+    initializer.initialWeights(features, w_init);
     double *xiyi = new double[features];
     initializer.initializeWeightsWithArray(features, xiyi);
+    double* tempW = new double [features];
+    initializer.initializeWeightsWithArray(features, tempW);
     double epsilon = 0.00000001;
     double eta = 0;
     clock_t prediction_time;
@@ -745,45 +748,75 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     std::iota(indices.begin(), indices.end(), 0);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 
-    shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+    //shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+
 
     initializer.initialWeights(features, w);
+    w_init = w;
     double cost = 1.0;
     double error_threshold = this->getError_threshold();
     int i=1;
     double error = 100;
     int marker = 0;
     double cost_sum = 0;
-    init_time += clock();
-    double yixiw = 0;
-    int j =0;
     while (true) {
         eta = 1.0 / (alpha * i);
-        for (int k = 0; k < trainingSamples; ++k) {
-            j = indices.at(k);
-            yixiw = matrix.dot(X[j], w);
-            yixiw = yixiw * y[j];
-            if (yixiw < 1) {
-                matrix.scalarMultiply(X[j], y[j]*eta, xiyi);
-                matrix.scalarMultiply(w, (1-(eta*alpha)), w1);
-                matrix.add(w1, xiyi, w);
-            } else {
-                matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
+        int j =0;
+        double yixiw = 0;
+        int count = 0;
+        for (int k = 0; k < trainingSamples-block_size; k=k+block_size) {
+            //cout << "---------------------" << endl;
+
+            for (int l = 0; l < block_size; ++l) {
+                j = indices.at(k+l);
+                yixiw = matrix.dot(X[j], w);
+                yixiw = yixiw * y[j];
+                //cout << i << ", " << j << " : " << X[j][0] << " , " << y[j] << ", " << yixiw << endl;
+                if (yixiw < 1) {
+                    matrix.scalarMultiply(X[j], y[j]*eta, xiyi);
+                    matrix.scalarMultiply(w, (1-(eta*alpha)), w1);
+                    matrix.add(w1, xiyi, w);
+                } else {
+                    matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
+                }
+                // util.print1DMatrix(w, features);
+                cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
+                cost_sum += cost;
+
+                for (int m = 0; m < features; ++m) {
+                    tempW[m] += w[m];
+                }
+
+                util.copyArray(w_init, w, features);
+
+                //w=w_init;
+                count++;
             }
-            cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
-            cost_sum += cost;
+
+            //cout << "---------------------" << endl;
+
+            for (int m = 0; m < features; ++m) {
+                w[m]= tempW[m]/block_size;
+            }
+
+            util.copyArray(w, w_init, features);
+            //w_init = w;
+
             //util.print1DMatrix(w, 5);
+            //util.print1DMatrix(w, features);
+            initializer.initializeWeightsWithArray(features, tempW);
         }
         prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
-        prediction_time = clock()-prediction_time;
+        cout  << "Block Size:  "<< block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
 
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         i++;
         error = 100.0 - acc;
+        prediction_time = clock()-prediction_time;
         if(cost<error_threshold){
             accuracies_set.push_back(marker);
         }else{
@@ -791,14 +824,13 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==5 or i > iterations) {
+        if(accuracies_set.size()==5 or iterations<i) {
             break;
         }
 
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
-        cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
     }
-    totalpredictiontime += (((double)init_time)/CLOCKS_PER_SEC);
+
     this->setTotalPredictionTime(totalpredictiontime);
 
 
