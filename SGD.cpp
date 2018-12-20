@@ -671,14 +671,6 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
     int j =0;
     while (true) {
         eta = 1.0 / (alpha * i);
-//        if (i % 10 == 0) {
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            //util.print1DMatrix(w, features);
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            cout << "Iteration " << i << "/" << iterations << endl;
-//        }
-        //alpha = 1.0 / ((double)(i) + 1);
-        //double coefficient = 1.0/(1.0 + (double)i);
 
         for (int k = 0; k < trainingSamples; ++k) {
             j = indices.at(k);
@@ -768,14 +760,6 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     int j =0;
     while (true) {
         eta = 1.0 / (alpha * i);
-//        if (i % 10 == 0) {
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            //util.print1DMatrix(w, features);
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            cout << "Iteration " << i << "/" << iterations << endl;
-//        }
-        //alpha = 1.0 / ((double)(i) + 1);
-        //double coefficient = 1.0/(1.0 + (double)i);
 
         for (int k = 0; k < trainingSamples; ++k) {
             j = indices.at(k);
