@@ -127,7 +127,8 @@ int main(int argc, char **argv) {
         double per = optArgs.getBatch_per();
         parallelPegasosBatchV1(optArgs, per);
     } else if(optArgs.isPegasosBlockSequential()) {
-        sequentialPegasosBatchV1(optArgs, optArgs.getBatch_per());
+        //sequentialPegasosBatchV1(optArgs, optArgs.getBatch_per());
+        sequentialPegasos(optArgs);
     }
 
     return 0;
