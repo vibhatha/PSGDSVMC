@@ -667,6 +667,8 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
     int marker = 0;
     double cost_sum = 0;
     init_time += clock();
+    double yixiw = 0;
+    int j =0;
     while (true) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
@@ -677,12 +679,10 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
 //        }
         //alpha = 1.0 / ((double)(i) + 1);
         //double coefficient = 1.0/(1.0 + (double)i);
-        int j =0;
+
         for (int k = 0; k < trainingSamples; ++k) {
             j = indices.at(k);
-
-
-            double yixiw = matrix.dot(X[j], w);
+            yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
             if (yixiw < 1) {
                 matrix.scalarMultiply(X[j], y[j]*eta, xiyi);
@@ -700,7 +700,8 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
         cost = cost_sum / trainingSamples;
         cost_sum = 0;
         double acc = predict.predict();
-
+        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
+        prediction_time = clock()-prediction_time;
 
         i++;
         error = 100.0 - acc;
@@ -714,8 +715,7 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
         if(accuracies_set.size()==5 or i > iterations) {
             break;
         }
-        util.writeAccuracyPerEpoch(i, acc, epochlogfile);
-        prediction_time = clock()-prediction_time;
+
         totalpredictiontime += (((double)prediction_time)/CLOCKS_PER_SEC);
         cout << "Pegasos SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
     }
@@ -828,7 +828,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epcohlogfile,
         cost_sum = 0;
         double acc = predict.predict();
         cout  << "Block Size:  "<< block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
-        count = 0;
+
         util.writeAccuracyPerEpoch(i, acc, epcohlogfile);
         i++;
         error = 100.0 - acc;
