@@ -747,7 +747,6 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
 
     shuffle (indices.begin(), indices.end(), default_random_engine(seed));
 
-
     initializer.initialWeights(features, w);
     double cost = 1.0;
     double error_threshold = this->getError_threshold();
@@ -760,7 +759,6 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     int j =0;
     while (true) {
         eta = 1.0 / (alpha * i);
-
         for (int k = 0; k < trainingSamples; ++k) {
             j = indices.at(k);
             yixiw = matrix.dot(X[j], w);
