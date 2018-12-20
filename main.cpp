@@ -127,8 +127,7 @@ int main(int argc, char **argv) {
         double per = optArgs.getBatch_per();
         parallelPegasosBatchV1(optArgs, per);
     } else if(optArgs.isPegasosBlockSequential()) {
-        //sequentialPegasosBatchV1(optArgs, optArgs.getBatch_per());
-        sequentialPegasos(optArgs);
+        sequentialPegasosBatchV1(optArgs, optArgs.getBatch_per());
     }
 
     return 0;
@@ -3215,8 +3214,8 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         double *w = new double[features];
         //SGD sgd1(Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples, testingSamples);
         SGD sgd2(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, trainingSamples);
-        //sgd2.pegasosSgd(w, summarylogfile, epochlogfile);
-        sgd2.pegasosBlockSgd(w, summarylogfile, epochlogfile, comm_gap);
+        sgd2.pegasosSgdNoTiming(w, summarylogfile, epochlogfile);
+        //sgd2.pegasosBlockSgd(w, summarylogfile, epochlogfile, comm_gap);
         //sgd1.adamSGD();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd2.getTotalPredictionTime());
