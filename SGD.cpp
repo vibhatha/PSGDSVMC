@@ -683,14 +683,13 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
             } else {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
-            cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
-            cost_sum += cost;
+
             //util.print1DMatrix(w, 5);
         }
         prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
-        cost = cost_sum / trainingSamples;
-        cost_sum = 0;
+        cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
+        //cost = cost_sum / trainingSamples;
         double acc = predict.predict();
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
         prediction_time = clock()-prediction_time;
@@ -780,8 +779,8 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                     matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
                 }
                 // util.print1DMatrix(w, features);
-                cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
-                cost_sum += cost;
+
+
 
                 for (int m = 0; m < features; ++m) {
                     tempW[m] += w[m];
@@ -808,8 +807,9 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
         }
         prediction_time = clock();
         Predict predict(Xtest, ytest, w , testingSamples, features);
-        cost = cost_sum / trainingSamples;
-        cost_sum = 0;
+        //cost = cost_sum / trainingSamples;
+        //cost_sum = 0;
+        cost = 0.5 * (alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw))) / block_size;
         double acc = predict.predict();
         cout  << "Block Size:  "<< block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
 
