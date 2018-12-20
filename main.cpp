@@ -3163,7 +3163,7 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         clock_t begin = clock();
         //sgd3.pegasosSgd(w,summarylogfile, epochlogfile);
         //sgd3.pegasosBlockSgd(w, summarylogfile, epochlogfile, comm_gap);
-        sgd2.pegasosSgdNoTiming(w, summarylogfile, epochlogfile);
+        sgd3.pegasosSgdNoTiming(w, summarylogfile, epochlogfile);
         //sgd1.sgd();
         clock_t end = clock();
         double elapsed_secs = double((end - begin) / double(CLOCKS_PER_SEC)) - (sgd3.getTotalPredictionTime());
