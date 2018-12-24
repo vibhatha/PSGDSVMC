@@ -2399,7 +2399,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==5) {
+        if(accuracies_set.size()==5 or iterations < i ) {
             breakFlag[0]=-1;
         }
 
