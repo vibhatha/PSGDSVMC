@@ -2320,7 +2320,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     vector<double> comptimeV;
     vector<double> commtimeV;
     double cost = 10.0;
-    iterations = 10000;
     int  breakFlag [] = {100};
     int i = 1;
 
@@ -2362,7 +2361,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 perDataPerItrCompt += (end_compute - start_compute);
                 commtimeV.push_back(end_communication - start_communication);
             } else {
-
                 commtimeV.push_back(0);
             }
 
@@ -2380,10 +2378,9 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
         if(world_rank==0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
-
             double acc = predict.predict();
-            error = 100.0 -acc;
-            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
+            error = 100.0 - acc;
+            cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
             util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
         end_predict = MPI_Wtime();
@@ -2399,9 +2396,10 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             accuracies_set.clear();
         }
 
-        if(accuracies_set.size()==5 or iterations < i ) {
+        if((accuracies_set.size()==5) or iterations < i ) {
             breakFlag[0]=-1;
         }
+
 
         MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
 //        if(breakFlag[0]==-1){
