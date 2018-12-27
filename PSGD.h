@@ -34,6 +34,7 @@ private:
     double* ytest;
     double totalPredictionTime;
     double error_threshold;
+    int effective_epochs;
 
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
@@ -117,6 +118,10 @@ public:
     double getError_threshold() const;
 
     void setError_threshold(double error_threshold);
+
+    int getEffective_epochs() const;
+
+    void setEffective_epochs(int effective_epochs);
 
 };
 

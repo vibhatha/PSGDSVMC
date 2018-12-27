@@ -2400,7 +2400,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             breakFlag[0]=-1;
         }
 
-
         MPI_Bcast(breakFlag,1, MPI_INT, 0, MPI_COMM_WORLD);
 //        if(breakFlag[0]==-1){
 //            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
@@ -2413,6 +2412,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     prediction_time += (init_time_end-init_time_start);
     this->setTotalPredictionTime(prediction_time);
     this->setError_threshold(error_threshold);
+    this->setEffective_epochs(i);
     /*if(world_rank==0) {
         cout << "============================================" << endl;
         printf("Final Weight\n");
@@ -3265,6 +3265,14 @@ double PSGD::getError_threshold() const {
 
 void PSGD::setError_threshold(double error_threshold) {
     PSGD::error_threshold = error_threshold;
+}
+
+int PSGD::getEffective_epochs() const {
+    return effective_epochs;
+}
+
+void PSGD::setEffective_epochs(int effective_epochs) {
+    PSGD::effective_epochs = effective_epochs;
 }
 
 
