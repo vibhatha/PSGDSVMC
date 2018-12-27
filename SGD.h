@@ -28,6 +28,7 @@ private:
     double* ytest;
     double totalPredictionTime = 0;
     double error_threshold = 0;
+    int effective_epochs = 0;
 
 public:
 
@@ -67,6 +68,10 @@ public:
     double getError_threshold() const;
 
     void setError_threshold(double error_threshold);
+
+    int getEffective_epochs() const;
+
+    void setEffective_epochs(int effective_epochs);
 };
 
 

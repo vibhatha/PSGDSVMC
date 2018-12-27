@@ -136,6 +136,17 @@ void Util::summary(string logfile, int world_size, double acc, double time, doub
     }
 }
 
+void Util::summary(string logfile, int world_size, double acc, double time, double alpha, double error, int effective_epochs) {
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimestamp();
+    if (myfile.is_open()) {
+
+        myfile << world_size << "," << time << "," << acc << "," << alpha << "," << "," << error << "," << timestamp << "," << effective_epochs << "\n";
+
+        myfile.close();
+    }
+}
+
 void Util::averageWeight(vector<double *> weights, int features, double *w) {
         int block_size = weights.size();
         //cout << "Size : " << block_size << " ";

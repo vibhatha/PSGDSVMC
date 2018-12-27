@@ -832,7 +832,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     }
 
     this->setTotalPredictionTime(totalpredictiontime);
-
+    this->setEffective_epochs(i);
 
     delete [] xiyi;
     delete [] w1;
@@ -882,6 +882,14 @@ double SGD::getError_threshold() const {
 
 void SGD::setError_threshold(double error_threshold) {
     SGD::error_threshold = error_threshold;
+}
+
+int SGD::getEffective_epochs() const {
+    return effective_epochs;
+}
+
+void SGD::setEffective_epochs(int effective_epochs) {
+    SGD::effective_epochs = effective_epochs;
 }
 
 int seed() {

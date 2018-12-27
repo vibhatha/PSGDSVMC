@@ -467,7 +467,6 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
 //            printf("\n----------------------------------------\n");
 //        }
 
-
         PSGD sgd1(0.5, 0.5, Xtrain, ytrain, optArgs.getAlpha(), optArgs.getIterations(), features, dataPerMachine,
                   testingSamples, world_size, world_rank, Xtest, ytest);
         sgd1.setError_threshold(optArgs.getError_threshold());
@@ -3174,7 +3173,7 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         Predict predict(Xtest, ytest, w , testSet, features);
         double acc = predict.predict();
         cout << "Testing Accuracy : " << acc << "%" << endl;
-        util.summary(summarylogfile, comm_gap, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold());
+        util.summary(summarylogfile, comm_gap, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold(), sgd3.getEffective_epochs());
         for (int i = 0; i < trainSet; ++i) {
             delete[] Xtrain[i];
         }
