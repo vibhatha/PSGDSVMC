@@ -2329,6 +2329,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double init_time_end = MPI_Wtime();
     double cost_sum = 0;
     double yixiw;
+    double acc = 0;
     while (breakFlag[0]!=-1) {
         eta = 1.0 / (alpha * i);
         for (int j = 0; j < trainingSamples; ++j) {
@@ -2378,7 +2379,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
         if(world_rank==0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
-            double acc = predict.predict();
+            acc = predict.predict();
             error = 100.0 - acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
             util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
@@ -2413,6 +2414,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     this->setTotalPredictionTime(prediction_time);
     this->setError_threshold(error_threshold);
     this->setEffective_epochs(i);
+    this->setResultant_final_cross_accuracy(acc);
+    this->setResultant_minimum_cost(cost);
     /*if(world_rank==0) {
         cout << "============================================" << endl;
         printf("Final Weight\n");
@@ -3273,6 +3276,22 @@ int PSGD::getEffective_epochs() const {
 
 void PSGD::setEffective_epochs(int effective_epochs) {
     PSGD::effective_epochs = effective_epochs;
+}
+
+double PSGD::getResultant_minimum_cost() const {
+    return resultant_minimum_cost;
+}
+
+void PSGD::setResultant_minimum_cost(double resultant_minimum_cost) {
+    PSGD::resultant_minimum_cost = resultant_minimum_cost;
+}
+
+double PSGD::getResultant_final_cross_accuracy() const {
+    return resultant_final_cross_accuracy;
+}
+
+void PSGD::setResultant_final_cross_accuracy(double resultant_final_cross_accuracy) {
+    PSGD::resultant_final_cross_accuracy = resultant_final_cross_accuracy;
 }
 
 

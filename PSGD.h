@@ -35,6 +35,8 @@ private:
     double totalPredictionTime;
     double error_threshold;
     int effective_epochs;
+    double resultant_minimum_cost=0;
+    double resultant_final_cross_accuracy=0;
 
 public:
     PSGD(double** X, double* y, double alpha, int iterations);
@@ -122,6 +124,14 @@ public:
     int getEffective_epochs() const;
 
     void setEffective_epochs(int effective_epochs);
+
+    double getResultant_minimum_cost() const;
+
+    void setResultant_minimum_cost(double resultant_minimum_cost);
+
+    double getResultant_final_cross_accuracy() const;
+
+    void setResultant_final_cross_accuracy(double resultant_final_cross_accuracy);
 
 };
 

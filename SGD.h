@@ -29,6 +29,8 @@ private:
     double totalPredictionTime = 0;
     double error_threshold = 0;
     int effective_epochs = 0;
+    double resultant_minimum_cost = 0;
+    double resultant_cross_accuracy = 0;
 
 public:
 
@@ -72,6 +74,14 @@ public:
     int getEffective_epochs() const;
 
     void setEffective_epochs(int effective_epochs);
+
+    double getResultant_minimum_cost() const;
+
+    void setResultant_minimum_cost(double resultant_minimum_cost);
+
+    double getResultant_cross_accuracy() const;
+
+    void setResultant_cross_accuracy(double resultant_cross_accuracy);
 };
 
 

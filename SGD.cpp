@@ -753,6 +753,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     initializer.initialWeights(features, w);
     w_init = w;
     double cost = 1.0;
+    double acc = 0;
     double error_threshold = this->getError_threshold();
     int i=1;
     double error = 100;
@@ -810,7 +811,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
         //cost = cost_sum / trainingSamples;
         //cost_sum = 0;
         cost =  (0.5 * alpha * fabs(matrix.dot(w,w))) + max(0.0, (1-yixiw));
-        double acc = predict.predict();
+        acc = predict.predict();
         cout  << "Block Size:  "<< block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << ", Count : " << count << endl;
 
         util.writeAccuracyPerEpoch(i, acc, epochlogfile);
@@ -833,6 +834,8 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
 
     this->setTotalPredictionTime(totalpredictiontime);
     this->setEffective_epochs(i);
+    this->setResultant_minimum_cost(cost);
+    this->setResultant_cross_accuracy(acc);
 
     delete [] xiyi;
     delete [] w1;
@@ -890,6 +893,22 @@ int SGD::getEffective_epochs() const {
 
 void SGD::setEffective_epochs(int effective_epochs) {
     SGD::effective_epochs = effective_epochs;
+}
+
+double SGD::getResultant_minimum_cost() const {
+    return resultant_minimum_cost;
+}
+
+void SGD::setResultant_minimum_cost(double resultant_minimum_cost) {
+    SGD::resultant_minimum_cost = resultant_minimum_cost;
+}
+
+double SGD::getResultant_cross_accuracy() const {
+    return resultant_cross_accuracy;
+}
+
+void SGD::setResultant_cross_accuracy(double resultant_cross_accuracy) {
+    SGD::resultant_cross_accuracy = resultant_cross_accuracy;
 }
 
 int seed() {

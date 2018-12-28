@@ -81,6 +81,7 @@ void summary(string logfile, int world_size, double acc, double time, string dat
 void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold);
 
 void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold, int effective_epochs);
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold, int effective_epochs, double resultant_final_acc, double resultant_final_cost);
 
 int main(int argc, char **argv) {
     //std::cout << "Hello, World!" << std::endl;
@@ -487,7 +488,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;
-            summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha(), sgd1.getError_threshold(), sgd1.getEffective_epochs());
+            summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha(), sgd1.getError_threshold(), sgd1.getEffective_epochs(), sgd1.getResultant_final_cross_accuracy(), sgd1.getResultant_minimum_cost());
             util.writeWeight(w, features, weightlogfile);
         }
 
@@ -3173,7 +3174,7 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         Predict predict(Xtest, ytest, w , testSet, features);
         double acc = predict.predict();
         cout << "Testing Accuracy : " << acc << "%" << endl;
-        util.summary(summarylogfile, comm_gap, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold(), sgd3.getEffective_epochs());
+        util.summary(summarylogfile, comm_gap, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold(), sgd3.getEffective_epochs(), sgd3.getResultant_cross_accuracy(), sgd3.getResultant_minimum_cost());
         for (int i = 0; i < trainSet; ++i) {
             delete[] Xtrain[i];
         }
@@ -3367,6 +3368,16 @@ void summary(string logfile, int world_size, double acc, double time, string dat
     string timestamp = getTimeStamp();
     if (myfile.is_open()) {
         myfile << datasource << "," << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "," << error_threshold << "," <<  effective_epochs <<  "\n";
+        myfile.close();
+    }
+}
+
+void summary(string logfile, int world_size, double acc, double time, string datasource, double alpha, double error_threshold, int effective_epochs, double resultant_final_acc, double resultant_final_cost) {
+
+    ofstream myfile(logfile, ios::out | ios::app);
+    string timestamp = getTimeStamp();
+    if (myfile.is_open()) {
+        myfile << datasource << "," << world_size << "," << time << "," << acc << "," << alpha << "," << timestamp << "," << error_threshold << "," <<  effective_epochs << ", " << resultant_final_acc << "," << resultant_final_cost << "\n";
         myfile.close();
     }
 }
