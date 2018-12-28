@@ -2368,7 +2368,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             comptimeV.push_back(perDataPerItrCompt);
         }
         training_time += communication_time + compute_time;
-        cost = 0.5 * alpha * fabs(matrix.dot(w,w)) + max(0.0, (1-yixiw));
+        cost =  (0.5 * alpha * fabs(matrix.dot(w,w))) + max(0.0, (1-yixiw));
         //double start_cost = MPI_Wtime();
         local_cost[0] = cost;
         MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
