@@ -796,7 +796,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
             //cout << "---------------------" << endl;
 
             for (int m = 0; m < features; ++m) {
-                w[m]= tempW[m]/block_size;
+                w[m]= tempW[m]/(double)block_size;
             }
 
             util.copyArray(w, w_init, features);
