@@ -3107,10 +3107,10 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
     string datasourceBase = resourceManager.getDataSourceBasePath();
     string datasource = optArgs.getDataset();
 
-    epochlogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("sequential_batch_pegasos_cross_validation_accuracy.csv");
+    epochlogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("comm_gap=").append(to_string(comm_gap)).append("_sequential_batch_pegasos_cross_validation_accuracy.csv");
 
     string summarylogfile = resourceManager.getLogSummaryBasePath();
-    summarylogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("_sequential__batch_pegasos_summary_log.csv");
+    summarylogfile.append("sequential_pegasos/").append(datasource).append("/").append(getTimeStamp()).append("_").append("comm_gap=").append(to_string(comm_gap)).append("_sequential__batch_pegasos_summary_log.csv");
 
     if (optArgs.isIsSplit()) {
         string trainFileName = "/training.csv";
