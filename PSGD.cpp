@@ -2424,7 +2424,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double io_time = 0;
     io_time -= MPI_Wtime();
     string file = "";
-    file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)));
+    file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)).append("_comm_gap=").append(to_string(comm_gap)));
     writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
     io_time += MPI_Wtime();
     prediction_time += io_time;
