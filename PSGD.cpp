@@ -2295,6 +2295,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
     double end_predict = 0;
     double prediction_time = 0;
     double training_time = 0;
+    double comm_time_calc = 0;
+    double comp_time_calc = 0;
     double eta = 0;
     vector<int> accuracies_set(0);
     //shuffeling stage
@@ -2360,12 +2362,18 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
                 end_compute = MPI_Wtime();
                 compute_time += (end_compute - start_compute);
                 perDataPerItrCompt += (end_compute - start_compute);
+                comm_time_calc -= MPI_Wtime();
                 commtimeV.push_back(end_communication - start_communication);
+                comm_time_calc += MPI_Wtime();
             } else {
                 commtimeV.push_back(0);
             }
-
+            comp_time_calc -= MPI_Wtime();
             comptimeV.push_back(perDataPerItrCompt);
+            comm_time_calc += MPI_Wtime();
+            prediction_time += comm_time_calc + comp_time_calc;
+            comm_time_calc = 0;
+            comp_time_calc = 0;
         }
         training_time += communication_time + compute_time;
         cost =  (0.5 * alpha * fabs(matrix.dot(w,w))) + max(0.0, (1-yixiw));
@@ -2407,28 +2415,26 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 //        }
 
         double bcast_time_end = MPI_Wtime();
-        prediction_time += (bcast_time_end-bcast_time_start);
+        //prediction_time += (bcast_time_end-bcast_time_start);
         i++;
     }
     prediction_time += (init_time_end-init_time_start);
+
+
+    double io_time = 0;
+    io_time -= MPI_Wtime();
+    string file = "";
+    file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)));
+    writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
+    io_time += MPI_Wtime();
+    prediction_time += io_time;
+
     this->setTotalPredictionTime(prediction_time);
     this->setError_threshold(error_threshold);
     this->setEffective_epochs(i);
     this->setResultant_final_cross_accuracy(acc);
     this->setResultant_minimum_cost(cost);
-    /*if(world_rank==0) {
-        cout << "============================================" << endl;
-        printf("Final Weight\n");
-        util.print1DMatrix(w, features);
 
-        cout << "============================================" << endl;
-    }*/
-    //cout << "Compute Time of Rank : " << world_rank << " is " << compute_time << endl;
-    //cout << "Communication Time of Rank : " << world_rank << " is " << communication_time << endl;
-    string file = "";
-    file.append(summarylogfile.append(util.getTimestamp()).append("_world_size=").append(to_string(world_size)).append("_").append("_process=").append(to_string(world_rank)).append("_alpha_").append(to_string(alpha)));
-    //cout << "Log FIle : " << file << endl;
-    writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
     delete[] w1;
     delete[] xiyi;
     delete[] wglobal;
