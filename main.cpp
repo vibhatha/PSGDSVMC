@@ -410,7 +410,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             .append("_").append("_alpha_").append(to_string(optArgs.getAlpha())).append("batch_weight_summary.csv");
     epochweightlogfile.append(resourceManager.getWeightSummaryBasePath()).append("/parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("alpha_").append(to_string(optArgs.getAlpha())).append("_comm_gap=").append(to_string(comm_gap)).append("_epoch_weightlog.csv");
     string epochlogfile = resourceManager.getEpochlogSummaryBasePath();
-    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_alpha_").append(to_string(optArgs.getAlpha())).append("_batch_cross_validation_accuracy.csv");
+    epochlogfile.append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/").append(getTimeStamp()).append("_world_size_").append(to_string(world_size)).append("_rank_").append(to_string(world_rank)).append("_alpha_").append(to_string(optArgs.getAlpha())).append("_comm_gap=").append(to_string(comm_gap)).append("_batch_cross_validation_accuracy.csv");
     string commcomplogfile = "";
     commcomplogfile.append(resourceManager.getCommcompSummaryBasePath()).append("parallel/pegasos/batch/").append(optArgs.getDataset()).append("/");
     if (optArgs.isIsSplit()) {
