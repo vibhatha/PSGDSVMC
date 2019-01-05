@@ -785,7 +785,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                 util.copyArray(w_init, w, features);
                 //w=w_init;
                 count++;
-                if(count>iterations-1) {
+                if(count>trainingSamples-1) {
                     break;
                 }
             }
