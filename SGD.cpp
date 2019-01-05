@@ -764,10 +764,9 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
         int j =0;
         double yixiw = 0;
         int count = 0;
-        for (int k = 0; k <= trainingSamples-block_size; k=k+block_size) {
+        for (int k = 0; k < trainingSamples; k=k+block_size) {
             //cout << "---------------------" << endl;
-
-            for (int l = 0; l <= block_size; ++l) {
+            for (int l = 0; l < block_size; ++l) {
                 j = indices.at(k+l);
                 yixiw = matrix.dot(X[j], w);
                 yixiw = yixiw * y[j];
@@ -780,21 +779,14 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                     matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
                 }
                 // util.print1DMatrix(w, features);
-
-
-
                 for (int m = 0; m < features; ++m) {
                     tempW[m] += w[m];
                 }
-
                 util.copyArray(w_init, w, features);
-
                 //w=w_init;
                 count++;
             }
-
             //cout << "---------------------" << endl;
-
             for (int m = 0; m < features; ++m) {
                 w[m]= tempW[m]/(double)block_size;
             }
