@@ -785,6 +785,9 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                 util.copyArray(w_init, w, features);
                 //w=w_init;
                 count++;
+                if(count>iterations-1) {
+                    break;
+                }
             }
             //cout << "---------------------" << endl;
             for (int m = 0; m < features; ++m) {
