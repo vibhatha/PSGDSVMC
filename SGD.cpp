@@ -767,7 +767,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
         for (int k = 0; k <= trainingSamples-block_size; k=k+block_size) {
             //cout << "---------------------" << endl;
 
-            for (int l = 0; l < block_size; ++l) {
+            for (int l = 0; l <= block_size; ++l) {
                 j = indices.at(k+l);
                 yixiw = matrix.dot(X[j], w);
                 yixiw = yixiw * y[j];
