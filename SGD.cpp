@@ -786,7 +786,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                 //w=w_init;
                 count++;
                 if(count>trainingSamples-1) {
-                    continue;
+                    break;
                 }
             }
             //cout << "---------------------" << endl;
