@@ -6,6 +6,10 @@ from numpy import genfromtxt
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/ijcnn1/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/results/group/"
 
+# When running the script, the world size has a set of possible communication gaps accustomed to it when
+# you are working with a dataset like ijcnn1 which is smaller. Be careful when running the script.
+
+
 def remove_redundancy(epoch=5000,dataset='ijcnn'):
     world_sizes=[32]
     list = os.listdir(base_path)
