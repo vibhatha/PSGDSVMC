@@ -8,8 +8,8 @@ def load_file_np(filename):
     print(filename)
 
 def comms_comp_average(parallelism=2):
-    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2019-01-01/ijcnn1_comms_comp_2019_01_01/refactored/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/summary/"
-    result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2019-01-01/ijcnn1_comms_comp_2019_01_01/results/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/result/"
+    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_09/ijcnn1_comms_m=16_2019_01_09/ijcnn1/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/summary/"
+    result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_09/ijcnn1_comms_m=16_2019_01_09/results/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/result/"
     all_files = os.listdir(base_path)
     #print(all_files)
     list = []
@@ -49,6 +49,6 @@ def comms_comp_average(parallelism=2):
     result_file_cm = result_path + "comm_comp_totaltime_m=" + str(parallelism) + "_all.csv"
     np.savetxt(result_file_cm, np.array(comms_comp_all_times), delimiter=',')
 
-pars = [4,8,16,32]
+pars = [2,4,8,16,32]
 for p in pars:
     comms_comp_average(parallelism=p)
