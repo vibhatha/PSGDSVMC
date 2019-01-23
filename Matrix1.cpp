@@ -5,8 +5,16 @@
 #include "Matrix1.h"
 #include <cmath>
 #include <iostream>
+#include "omp.h"
 
 void Matrix1::scalarMultiply(double *a, double c, double *res) {
+    for (int i = 0; i < features; ++i) {
+        res[i] = a[i] *c;
+    }
+}
+
+void Matrix1::parallelScalarMultiply(double *a, double c, double *res) {
+    #pragma omp for
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] *c;
     }

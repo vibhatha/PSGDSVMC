@@ -1,6 +1,8 @@
 import sys
 import os
 
+## NOTE ##
+# using 2 means acc and using 3 means the objective function value.
 
 def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, pars=[], comms=[]):
     s1 = "plot "
@@ -9,7 +11,7 @@ def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, pars=[], comms=[
     for par in pars:
         for comm_gap in comm_gaps:
             seq1 = "'"+dataset+"_m="+str(par)+"_c="+str(comm_gap)+"_i="+str(epoch)+suffix+"'"+" "
-            seq2 = "using 2 title"
+            seq2 = "using 3 title" # using 2 means acc and using 3 means the objective function value.
             seq3 = "'"+str(par)+"x "+str(comm_gap)+"c "+str(epoch)+"i"+"'" + " "
             seq4 = "with lines,"
             seq += (seq1 + seq2 + seq3 + seq4)
@@ -18,6 +20,9 @@ def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, pars=[], comms=[
     s = s1 + seq
     print(s)
 
-pars = [2,4]
-comm_gaps = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096]
-generate_epcoch_moving_average(dataset="ijcnn", epoch=5001, pars=pars, comms=comm_gaps)
+all_pars = [[2],[4],[8],[16],[32]]
+all_comm_gaps = [[128,2048,4096], [128,2048,4096], [128, 1024, 2048], [128,512,1024],[128,256,512]]
+pars = [32]
+comm_gaps = [1,128]
+for pars, comm_gaps in zip(all_pars, all_comm_gaps):
+    generate_epcoch_moving_average(dataset="ijcnn", epoch=5001, pars=pars, comms=comm_gaps)

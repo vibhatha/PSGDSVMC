@@ -3,8 +3,8 @@ import os
 import sys
 from numpy import genfromtxt
 
-base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/ijcnn1/"
-result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/results/group/"
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/group/6000/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/results/6000/"
 
 # When running the script, the world size has a set of possible communication gaps accustomed to it when
 # you are working with a dataset like ijcnn1 which is smaller. Be careful when running the script.
@@ -58,4 +58,5 @@ def remove_redundancy(epoch=5000,dataset='ijcnn'):
             counter = counter + 1
 
             print("-------------------------------")
+
 remove_redundancy(6001,'ijcnn')

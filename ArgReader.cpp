@@ -165,12 +165,25 @@ OptArgs ArgReader::getParams() {
             optArgs.setPegasosBatch(true);
         }
 
+        comp = "-pegasosbt";
+        if(comp.compare(argv[i])==0){
+            optArgs.setPegasosBatchThreaded(true);
+        }
+
         comp = "-error";
         if(comp.compare(argv[i])==0){
             stringstream geek(argv[i+1]);
             double x = 0;
             geek >> x;
             optArgs.setError_threshold(x);
+        }
+
+        comp = "-threads";
+        if(comp.compare(argv[i])==0){
+            stringstream geek(argv[i+1]);
+            int x = 0;
+            geek >> x;
+            optArgs.setThreads(x);
         }
 
         comp = "-pegasosbs";

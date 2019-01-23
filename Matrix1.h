@@ -20,6 +20,7 @@ public:
     void subtract(double* a, double* b, double* res);
     double dot(double* a, double* b);
     void scalarMultiply(double* a, double c, double* res);
+    void parallelScalarMultiply(double* a, double c, double* res);
     void scalarAddition(double* a, double c, double* res);
     void inner(double* a, double* b, double* res);
     void divide(double* a, double* b, double* res);

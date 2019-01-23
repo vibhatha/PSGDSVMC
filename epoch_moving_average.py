@@ -7,8 +7,14 @@ from numpy import genfromtxt
 # keep the different size epochs in different folders
 # this is done to minimize the programming overhead in searching and re-listing files
 # remedy : write a regex like pattern to sort the files by group
-base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/results/group/6000/"
-result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_11/results/moving_average/6000/"
+epochs = 6000
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/results/"+str(epochs)+"/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/results/moving_average/"+str(epochs)+"/"
+
+epochs = 5000
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp_result/"
+
 
 # Reference ; https://stackoverflow.com/questions/14313510/how-to-calculate-moving-average-using-numpy
 def moving_average(a, w=3):

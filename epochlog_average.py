@@ -10,6 +10,12 @@ def load_file_np(filename):
 def comms_comp_average(parallelism=2):
     base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_09/ijcnn1_comms_m=16_2019_01_09/ijcnn1/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/summary/"
     result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_09/ijcnn1_comms_m=16_2019_01_09/results/"#"/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-12-31/result/"
+    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/group_comms_comp/results/"
+    result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/group_comms_comp/summary/"
+    # temp location addition
+    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp/"
+    result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp_result/"
+
     all_files = os.listdir(base_path)
     #print(all_files)
     list = []
@@ -21,7 +27,8 @@ def comms_comp_average(parallelism=2):
 
     #list.sort()
     print(list)
-    comm_gaps = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048', '4096']
+    comm_gaps = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024']
+    comm_gaps = ['1', '2', '4', '8']
     sorted_list = []
     for comm_gap in comm_gaps:
         comm_gap = 'c=' + comm_gap + '_'
@@ -49,6 +56,6 @@ def comms_comp_average(parallelism=2):
     result_file_cm = result_path + "comm_comp_totaltime_m=" + str(parallelism) + "_all.csv"
     np.savetxt(result_file_cm, np.array(comms_comp_all_times), delimiter=',')
 
-pars = [2,4,8,16,32]
+pars = [8,16,32]
 for p in pars:
     comms_comp_average(parallelism=p)
