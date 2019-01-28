@@ -683,7 +683,6 @@ void SGD::pegasosSgdNoTiming(double *w, string summarylogfile, string epochlogfi
             } else {
                 matrix.scalarMultiply(w, (1 - (eta*alpha)), w);
             }
-
             //util.print1DMatrix(w, 5);
         }
         prediction_time = clock();
@@ -785,7 +784,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
                 util.copyArray(w_init, w, features);
                 //w=w_init;
                 count++;
-                if(count>trainingSamples-1) {
+                if(count>trainingSamples-1) { // idea is when there is the last block that size can be lesser than the block_size, so we have to stop when the final element is processed and move to next iteration
                     break;
                 }
             }

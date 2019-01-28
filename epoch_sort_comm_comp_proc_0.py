@@ -9,6 +9,10 @@ from numpy import genfromtxt
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/group_comms_comp/all/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/group_comms_comp/results/"
 
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon_processed/"
+
+
 def sort_proc_comm_comp_logs(dataset="ijcnn1",proc_id=0, world_size=2, comm_gap=1, epochs=5001):
     list = os.listdir(base_path)
     proc_sorted = []
@@ -34,14 +38,17 @@ def sort_proc_comm_comp_logs(dataset="ijcnn1",proc_id=0, world_size=2, comm_gap=
 # simple run
 #sort_proc_comm_comp_logs(dataset="webspam",proc_id=0, world_size=32, comm_gap=1, epochs=5001)
 
+# when running the script make sure the initial
+
 proc_id=0
-comm_gaps = [1,2,4,8,16,32,64,128,256,512,1024,2048]
-all_pars = [8]
+comm_gaps = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096]
+comm_gaps = [1,2,4,8,512,1024,2048,4096]
+all_pars = [32]
 all_comm_gaps = [comm_gaps, comm_gaps, comm_gaps]
 epochs=5001
 
 for par, comm_gaps in zip(all_pars, all_comm_gaps):
     for comm_gap in comm_gaps:
-        sort_proc_comm_comp_logs(dataset="webspam",proc_id=0, world_size=par, comm_gap=comm_gap, epochs=epochs)
+        sort_proc_comm_comp_logs(dataset="epsilon",proc_id=0, world_size=par, comm_gap=comm_gap, epochs=epochs)
 
 

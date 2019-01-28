@@ -20,6 +20,7 @@ def epoch_cost_2():
     base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2018_12_31/parallel/pegasos/ijcnn1/commscomp-2018-01-03/ijcnn1/"
     base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_09/ijcnn1_comms_m=16_2019_01_09/ijcnn1/"
     base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/2019_01_22_epsilon_epochlog/epsilon/"
+    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epsilon/"
     list = os.listdir(base_path)
     for file in list:
         parallelism = file.split('world_size_')[1].split('_')[0]

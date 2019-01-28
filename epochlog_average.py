@@ -15,6 +15,10 @@ def comms_comp_average(parallelism=2):
     # temp location addition
     base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp/"
     result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp_result/"
+    #
+    base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon_processed/"
+    result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon_processed_all/"
+
 
     all_files = os.listdir(base_path)
     #print(all_files)
@@ -28,7 +32,7 @@ def comms_comp_average(parallelism=2):
     #list.sort()
     print(list)
     comm_gaps = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024']
-    comm_gaps = ['1', '2', '4', '8']
+    comm_gaps = ['1', '2', '4', '8','512' , '1024', '2048', '4096']
     sorted_list = []
     for comm_gap in comm_gaps:
         comm_gap = 'c=' + comm_gap + '_'
@@ -56,6 +60,6 @@ def comms_comp_average(parallelism=2):
     result_file_cm = result_path + "comm_comp_totaltime_m=" + str(parallelism) + "_all.csv"
     np.savetxt(result_file_cm, np.array(comms_comp_all_times), delimiter=',')
 
-pars = [8,16,32]
+pars = [2,4,8,16,32]
 for p in pars:
     comms_comp_average(parallelism=p)
