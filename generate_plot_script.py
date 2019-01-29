@@ -5,6 +5,7 @@ import os
 # using 2 means acc and using 3 means the objective function value.
 
 def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, pars=[], comms=[]):
+    "set multiplot layout 2,1 rowsfirst"
     s1 = "plot "
     suffix = "_mv=10"
     seq = ""
@@ -23,6 +24,6 @@ def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, pars=[], comms=[
 all_pars = [[2],[4],[8],[16],[32]]
 all_comm_gaps = [[128,2048,4096], [128,2048,4096], [128, 1024, 2048], [128,512,1024],[128,256,512]]
 pars = [32]
-comm_gaps = [1,128]
+comm_gaps = [1,2,4,8]
 for pars, comm_gaps in zip(all_pars, all_comm_gaps):
     generate_epcoch_moving_average(dataset="ijcnn", epoch=5001, pars=pars, comms=comm_gaps)
