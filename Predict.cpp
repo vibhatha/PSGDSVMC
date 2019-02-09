@@ -40,6 +40,65 @@ double Predict::predict() {
     return accuracy;
 }
 
+double Predict::crossValidate() {
+    double accuracy = 0;
+    double totalCorrect = 0;
+    Matrix matrix(features);
+    //Util util;
+    //util.print2DMatrix(X, 10, features);
+    for (int i = 0; i < testingSamples/2; ++i) {
+        double pred = 0;
+        double d = matrix.dot(w, X[i]);
+        if(d>=0.0) {
+            pred = 1.0;
+        }
+        if(d<0.0) {
+            pred = -1.0;
+        }
+        if(y[i] == pred) {
+            totalCorrect++;
+        }
+
+
+
+        //cout << i << " : " << pred << "/" << y[i] << endl;
+
+    }
+    accuracy = (totalCorrect / testingSamples) * 100.0;
+    return accuracy;
+
+}
+
+double Predict::testPrediction() {
+    double accuracy = 0;
+    double totalCorrect = 0;
+    Matrix matrix(features);
+    //Util util;
+    //util.print2DMatrix(X, 10, features);
+    for (int i = 0; i < testingSamples; ++i) {
+        if(i>testingSamples/2) {
+            double pred = 0;
+            double d = matrix.dot(w, X[i]);
+            if(d>=0.0) {
+                pred = 1.0;
+            }
+            if(d<0.0) {
+                pred = -1.0;
+            }
+            if(y[i] == pred) {
+                totalCorrect++;
+            }
+        }
+
+        //cout << i << " : " << pred << "/" << y[i] << endl;
+
+    }
+    accuracy = (totalCorrect / testingSamples) * 100.0;
+
+    return accuracy;
+
+}
+
 Predict::Predict(double **X, double *y, double *w, int testingSamples, int features) : X(X), y(y), w(w),
                                                                                        testingSamples(testingSamples),
                                                                                        features(features) {}

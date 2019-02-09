@@ -20,6 +20,8 @@ public:
     Predict(double **X, double *y, double *w, int testingSamples, int features);
 
     double predict();
+    double crossValidate();
+    double testPrediction();
 
 
 };

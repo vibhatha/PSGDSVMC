@@ -2667,7 +2667,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
             double trainingTime = (endTime - startTime) - (sgd1.getTotalPredictionTime());
             cout << "Training Time : " << trainingTime << endl;
             Predict predict(Xtest, ytest, w, testSet, features);
-            double acc = predict.predict();
+            double acc = predict.testPrediction();
             cout << "Testing Accuracy : " << acc << "%" << endl;
             summary(summarylogfile, world_size, acc, trainingTime, datasource, optArgs.getAlpha(), sgd1.getError_threshold(), sgd1.getEffective_epochs(), sgd1.getResultant_final_cross_accuracy(), sgd1.getResultant_minimum_cost());
             util.writeWeight(w, features, weightlogfile);

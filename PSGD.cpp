@@ -2389,7 +2389,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
         matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
         if (world_rank == 0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
-            acc = predict.predict();
+            acc = predict.crossValidate();
             error = 100.0 - acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations
                  << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
