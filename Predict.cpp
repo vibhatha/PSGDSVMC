@@ -64,7 +64,7 @@ double Predict::crossValidate() {
         //cout << i << " : " << pred << "/" << y[i] << endl;
 
     }
-    accuracy = (totalCorrect / testingSamples) * 100.0;
+    accuracy = (totalCorrect / (testingSamples*0.5)) * 100.0;
     return accuracy;
 
 }
@@ -93,7 +93,7 @@ double Predict::testPrediction() {
         //cout << i << " : " << pred << "/" << y[i] << endl;
 
     }
-    accuracy = (totalCorrect / testingSamples) * 100.0;
+    accuracy = (totalCorrect / (testingSamples*0.5)) * 100.0;
 
     return accuracy;
 
