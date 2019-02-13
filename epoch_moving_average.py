@@ -15,10 +15,11 @@ epochs = 5000
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_18/all/acc_cost/temp_result/"
 
-base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epsilon_process/"
-result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/acc/"
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epsilon_process/" #available link
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/acc/" #available link
 
-
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_12/epsilon/5001/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_12/epsilon/5001_processed/"
 
 
 # Reference ; https://stackoverflow.com/questions/14313510/how-to-calculate-moving-average-using-numpy

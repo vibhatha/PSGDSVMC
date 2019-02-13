@@ -1,15 +1,21 @@
 import sys
 import os
+import generate_latex_acc_n_cost_figure_script
 
 ## NOTE ##
 # using 2 means acc and using 3 means the objective function value.
-base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/gnuplots/psgdsvmc/parallel_cost_cross_validation/epsilon/plot_cost_n_acc_all"
+# the variable naming is bad it must be refactored
+original_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/gnuplots/psgdsvmc/parallel_cost_cross_validation/epsilon/accuracy/fullpackage/"
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/gnuplots/psgdsvmc/parallel_cost_cross_validation/epsilon/accuracy/fullpackage/"
 
 def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, par=2, comms=[1,2,4,8]):
     file_suffix = "c="
+    all_str = "#!/usr/bin/gnuplot\n" + "#\n\n#\n#\n" + "# AUTHOR: Vibhatha Abeykoon\n"
+    all_str += "set terminal pngcairo size 1920,1080 enhanced color font 'Helvetica Bold,24'\n"
     for comm_gap in comms:
         file_suffix += str(comm_gap) +","
-    all_str = ""
+    png_name = "acc_n_cost_epoch_comp_"+dataset+"_"+file_suffix+"_x"+str(par)
+    all_str += "set output "+"'"+png_name+".png"+"'"+"\n"
     phrase = ""
     phrase = "set multiplot layout 2,1 rowsfirst" + "\n" + \
               "set datafile separator \",\"" + "\n" + \
@@ -57,9 +63,11 @@ def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, par=2, comms=[1,
 
     print(all_str)
     print("##############################################################")
-    text_file = open(base_path+"_"+file_suffix, "a")
+    file_name = "plot_all_acc_n_cost_all_combinations_"+"_"+file_suffix+"_x"+str(par)+".gnu"
+    text_file = open(original_path+file_name, "a")
     text_file.write(all_str)
     text_file.close()
+    return file_name, png_name
 
 
     #s =  "plot 'ijcnn_m=2_c=128_i=5001_mv=10' using 2 title '2x 128c 5000i' with lines, 'ijcnn_m=2_c=1024_i=6001_mv=10' using 2 title '2x 1024c 6000i' with lines"
@@ -67,7 +75,25 @@ def generate_epcoch_moving_average(dataset="ijcnn", epoch=5000, par=2, comms=[1,
 
 all_pars = [2,4,8,16,32]
 all_comm_gaps = [[128,2048,4096], [128,2048,4096], [128, 1024, 2048], [128,512,1024],[128,256,512]]
-all_comm_gaps = [[1,2,4,8], [1,2,4,4096]]
+all_comm_gaps = [[1,2,4,8], [1,2,4,8,16], [1,2,4,8,32], [1,2,4,8,128],[1,2,4,8,256], [1,2,4,8,512], [1,2,4,8,1024], [1,2,4,8,2048], [1,2,4,8,4096], [128,256,512,1024], [256,512,1024,2048,4096] ]
+
+all_scripts = []
+all_png_names = []
 
 for par in all_pars:
-    generate_epcoch_moving_average(dataset="ijcnn", epoch=5001, par=par, comms=all_comm_gaps[1])
+    for i in range(0,len(all_comm_gaps)):
+        tfile, pngname = generate_epcoch_moving_average(dataset="ijcnn", epoch=5001, par=par, comms=all_comm_gaps[i])
+        all_scripts.append(tfile)
+        all_png_names.append(pngname)
+
+all_script_name = original_path+"plot_all_scripts.sh"
+str1 = "#!/usr/bin/bash\n"
+for item in all_scripts:
+    str1 += "gnuplot "+ item + "\n"
+
+text_file = open(all_script_name, "a")
+text_file.write(str1)
+text_file.close()
+
+generate_latex_acc_n_cost_figure_script.gen_script(file_list=all_png_names)
+

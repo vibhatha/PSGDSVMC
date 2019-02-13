@@ -31,8 +31,8 @@ def comms_comp_average(parallelism=2):
 
     #list.sort()
     print(list)
-    comm_gaps = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024']
-    comm_gaps = ['1', '2', '4', '8','512' , '1024', '2048', '4096']
+    comm_gaps = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048', '4096']
+    #comm_gaps = ['1', '2', '4', '8', '512' , '1024', '2048', '4096']
     sorted_list = []
     for comm_gap in comm_gaps:
         comm_gap = 'c=' + comm_gap + '_'

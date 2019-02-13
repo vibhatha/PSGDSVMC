@@ -12,6 +12,9 @@ result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/parallel/epsilon/epochlog/comms_comp/epsilon_processed/"
 
+base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_12/epsilon/5001/"
+result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_12/epsilon/5001_processed/"
+
 
 def sort_proc_comm_comp_logs(dataset="ijcnn1",proc_id=0, world_size=2, comm_gap=1, epochs=5001):
     list = os.listdir(base_path)
