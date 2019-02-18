@@ -2432,7 +2432,8 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             "_comm_gap=").append(to_string(comm_gap)));
     writeVectorLog(file, iterations, trainingSamples, comptimeV, commtimeV);
     io_time += MPI_Wtime();
-    prediction_time += io_time;
+    prediction_time += io_time; // prediction captures all time taken to io + cross-validation accuracy calculation + initialization time
+    prediction_time = io_time; // overwrite with io_time to only see the effect from the cost-validation and initialization overhead
 
     this->setTotalPredictionTime(prediction_time);
     this->setError_threshold(error_threshold);
