@@ -746,7 +746,6 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
 
     //shuffle (indices.begin(), indices.end(), default_random_engine(seed));
 
-
     initializer.initialWeights(features, w);
     w_init = w;
     double cost = 1.0;
@@ -804,7 +803,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
         //cost = cost_sum / trainingSamples;
         //cost_sum = 0;
         cost = (0.5 * alpha * fabs(matrix.dot(w, w))) + max(0.0, (1 - yixiw));
-        acc = predict.testPrediction();
+        acc = predict.crossValidate();
         cout << "Block Size:  " << block_size << ", Pegasos Block SGD Epoch " << i << " Testing Accuracy : " << acc
              << "%" << ", Hinge Loss : " << cost << ", Count : " << count << "/" << trainingSamples << endl;
 
