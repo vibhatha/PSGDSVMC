@@ -3427,7 +3427,7 @@ void sequentialPegasosBatchV1(OptArgs optArgs, int comm_gap) {
 
 
         Predict predict(Xtest, ytest, w , testSet, features);
-        double acc = predict.testPrediction();
+        double acc = predict.crossValidate();
         cout << "Testing Accuracy : " << acc << "%" << endl;
         util.summary(summarylogfile, comm_gap, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold(), sgd3.getEffective_epochs(), sgd3.getResultant_cross_accuracy(), sgd3.getResultant_minimum_cost());
         for (int i = 0; i < trainSet; ++i) {
