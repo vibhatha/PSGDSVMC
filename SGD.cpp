@@ -744,7 +744,7 @@ void SGD::pegasosBlockSgd(double *w, string summarylogfile, string epochlogfile,
     std::iota(indices.begin(), indices.end(), 0);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 
-    //shuffle (indices.begin(), indices.end(), default_random_engine(seed));
+    shuffle (indices.begin(), indices.end(), default_random_engine(seed));
 
     initializer.initialWeights(features, w);
     w_init = w;
