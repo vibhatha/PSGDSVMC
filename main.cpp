@@ -3275,7 +3275,7 @@ void sequentialPegasos(OptArgs optArgs) {
 
 
         Predict predict(Xtest, ytest, w , testSet, features);
-        double acc = predict.predict();
+        double acc = predict.testPrediction();
         cout << "Testing Accuracy : " << acc << "%" << endl;
         util.summary(summarylogfile, 1, acc, elapsed_secs, optArgs.getAlpha(), optArgs.getError_threshold());
         for (int i = 0; i < trainSet; ++i) {
