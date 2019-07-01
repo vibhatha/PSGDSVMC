@@ -2276,11 +2276,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
     double epsilon = 0.00000001;
     Util util;
-    //cout << "Training Samples : " << trainingSamples << endl;
-    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
-    //util.print1DMatrix(wInit, features);
-    //util.print1DMatrix(v, features);
-    //util.print1DMatrix(r, features);
 
     Matrix1 matrix(features);
 
@@ -2393,7 +2388,7 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
             error = 100.0 - acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations
                  << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
-            util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
+            //util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
         end_predict = MPI_Wtime();
         prediction_time += (end_predict - start_predict);
