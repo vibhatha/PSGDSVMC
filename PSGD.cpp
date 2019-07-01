@@ -2518,7 +2518,7 @@ void PSGD::pegasosSGDBatchv3(double *w, int comm_gap, string summarylogfile, str
     double error_threshold = this->getError_threshold();
     double yixiw;
     double acc = 0;
-    while (breakFlag[0] != -1) {
+    for (i=0; i<iterations;i++) {
         eta = 1.0 / (alpha * i);
         for (int j = 0; j < trainingSamples; ++j) {
             double perDataPerItrCompt = 0;
@@ -2542,26 +2542,14 @@ void PSGD::pegasosSGDBatchv3(double *w, int comm_gap, string summarylogfile, str
         MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         cost = global_cost[0] / (double) world_size;
 
-        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
+
         if (world_rank == 0 && i % 100 == 0) {
-            Predict predict(Xtest, ytest, w_print, testingSamples, features);
+            Predict predict(Xtest, ytest, w, testingSamples, features);
             acc = predict.crossValidate();
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations
                  << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
             //util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
-
-        if (iterations == i) {
-            breakFlag[0] = -1;
-        }
-
-        MPI_Bcast(breakFlag, 1, MPI_INT, 0, MPI_COMM_WORLD);
-//        if(breakFlag[0]==-1){
-//            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
-//        }
-        //prediction_time += (bcast_time_end-bcast_time_start);
-        i++;
     }
 
 
