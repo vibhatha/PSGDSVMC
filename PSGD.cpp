@@ -2542,9 +2542,10 @@ void PSGD::pegasosSGDBatchv3(double *w, int comm_gap, string summarylogfile, str
         MPI_Allreduce(local_cost, global_cost, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         cost = global_cost[0] / (double) world_size;
 
-
+        MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
         if (world_rank == 0 && i % 100 == 0) {
-            Predict predict(Xtest, ytest, w, testingSamples, features);
+            Predict predict(Xtest, ytest, w_print, testingSamples, features);
             acc = predict.crossValidate();
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations
                  << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
