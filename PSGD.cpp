@@ -2276,6 +2276,11 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 
     double epsilon = 0.00000001;
     Util util;
+    //cout << "Training Samples : " << trainingSamples << endl;
+    //cout << "Beta 1 :" << beta1 << ", Beta 2 :" << beta2 << endl;
+    //util.print1DMatrix(wInit, features);
+    //util.print1DMatrix(v, features);
+    //util.print1DMatrix(r, features);
 
     Matrix1 matrix(features);
 
@@ -2511,9 +2516,13 @@ void PSGD::pegasosSGDBatchv3(double *w, int comm_gap, string summarylogfile, str
     int i = 1;
 
     double error_threshold = this->getError_threshold();
+    double error = 0;
+    int marker = 0;
+    double init_time_end = MPI_Wtime();
+    double cost_sum = 0;
     double yixiw;
     double acc = 0;
-    for (i=0; i<iterations;i++) {
+    while (breakFlag[0] != -1) {
         eta = 1.0 / (alpha * i);
         for (int j = 0; j < trainingSamples; ++j) {
             double perDataPerItrCompt = 0;
@@ -2542,10 +2551,30 @@ void PSGD::pegasosSGDBatchv3(double *w, int comm_gap, string summarylogfile, str
         if (world_rank == 0 && i % 100 == 0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             acc = predict.crossValidate();
+            error = 100.0 - acc;
             cout << "Pegasos Batch PSGD Epoch : Rank : " << world_rank << ", Epoch " << i << "/" << iterations
                  << " Testing Accuracy : " << acc << "%" << ", Hinge Loss : " << cost << endl;
             //util.writeTimeLossAccuracyPerEpoch(i, acc, cost, training_time, epochlogfile);
         }
+
+
+        if (cost < error_threshold and world_rank == 0) {
+            accuracies_set.push_back(marker);
+        } else {
+            marker = 0;
+            accuracies_set.clear();
+        }
+
+        if (iterations == i) {
+            breakFlag[0] = -1;
+        }
+
+        MPI_Bcast(breakFlag, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//        if(breakFlag[0]==-1){
+//            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
+//        }
+        //prediction_time += (bcast_time_end-bcast_time_start);
+        i++;
     }
 
 
