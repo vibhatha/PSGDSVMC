@@ -2602,7 +2602,9 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         string testFileName = "/testing.csv";
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
-        cout << "SourceFile : " << sourceFile << endl;
+        if(world_rank == 0) {
+            cout << "SourceFile : " << sourceFile << endl;
+        }
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();
@@ -2614,6 +2616,7 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         int totalVisibleSamples = dataPerMachine * world_size;
 
         if(world_rank==0) {
+            cout << "Training Starting ..." << endl;
             cout << "Comm Gap : " << comm_gap << endl;
         }
         double *w = new double[features];
@@ -2654,15 +2657,10 @@ void parallelPegasosBatchV1(OptArgs optArgs, int comm_gap) {
         sgd1.setError_threshold(optArgs.getError_threshold());
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {
-            sgd1.pegasosSGDBatchv2(w, comm_gap, commcomplogfile, epochlogfile, epochweightlogfile);
+            sgd1.pegasosSGDBatchv3(w, comm_gap, commcomplogfile, epochlogfile, epochweightlogfile);
         }
-
-        if (optArgs.isIsEpochTime()) {
-            //TODO this method must be written in PSGD end
-        }
-
-
         double endTime = MPI_Wtime();
+
         if (world_rank == 0) {
             double trainingTime = (endTime - startTime) - (sgd1.getTotalPredictionTime());
             cout << "Training Time : " << trainingTime << endl;
