@@ -11,12 +11,9 @@ epochs = 6000
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/results/"+str(epochs)+"/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_12/webspam/all/results/moving_average/"+str(epochs)+"/"
 
-epochs = 1000
+epochs = 5000
 base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/results/webspam/epochlog/data/"
 result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_01_25/results/webspam/epochlog/mva/"
-
-base_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_18/20/ijcnn1/ijcnn1_2019_02_20_seq_block_epochlog_5/ijcnn1/all/"
-result_path = "/home/vibhatha/Documents/Research/logs/psgsvmc/2019_02_18/20/ijcnn1/ijcnn1_2019_02_20_seq_block_epochlog_5/ijcnn1/mva/"
 
 
 # Reference ; https://stackoverflow.com/questions/14313510/how-to-calculate-moving-average-using-numpy
