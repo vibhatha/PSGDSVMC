@@ -237,7 +237,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         sgd1.setError_threshold(optArgs.getError_threshold());
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {//works with -nt flag
-            sgd1.pegasosSGDFullBatchv1(w, epochlogfile);
+            sgd1.pegasosSGDFullBatchv2(w, epochlogfile);
         }
 
         if (optArgs.isIsEpochTime()) {

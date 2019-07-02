@@ -82,6 +82,7 @@ public:
     void sgdFullBatchv1(double *w, string logfile, string epochlogfile);
     void sgdFullBatchv2(double *w, string epochlogfile);
     void pegasosSGDFullBatchv1(double *w, string epochlogfile);
+    void pegasosSGDFullBatchv2(double *w, string epochlogfile);
     void pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile, string weightfile);
     void pegasosSGDBatchv2t1(double *w, int comm_gap, int threads, string summarylogfile, string epochlogfile, string weightfile);
 
