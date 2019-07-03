@@ -2332,9 +2332,9 @@ void PSGD::pegasosSGDFullBatchv2(double *w, string epochlogfile) {
         }
         double bcast_time_start = MPI_Wtime();
         MPI_Bcast(breakFlag, 1, MPI_INT, 0, MPI_COMM_WORLD);
-        if (breakFlag[0] == -1) {
-            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
-        }
+//        if (breakFlag[0] == -1) {
+//            cout << "World Rank : " << world_rank << "Break Flag : " << breakFlag[0] << endl;
+//        }
         double bcast_time_end = MPI_Wtime();
         predict_time += (bcast_time_end - bcast_time_start);
         i++;
