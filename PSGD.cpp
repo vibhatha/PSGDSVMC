@@ -2213,7 +2213,7 @@ void PSGD::pegasosSGDFullBatchv1(double *w, string epochlogfile) {
         MPI_Allreduce(w, wglobal_print, features, MPI_DOUBLE, MPI_SUM,
                       MPI_COMM_WORLD);
         matrix.scalarMultiply(wglobal_print, 1.0 / (double) world_size, w_print);
-        if (world_rank == 0) {
+        if (world_rank == 0 and i % 100 == 0) {
             Predict predict(Xtest, ytest, w_print, testingSamples, features);
             double acc = predict.predict();
             error = 100.0 - acc;

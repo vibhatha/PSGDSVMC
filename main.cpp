@@ -187,7 +187,9 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         string testFileName = "/testing.csv";
         string sourceFile;
         sourceFile.append(datasourceBase).append(datasource).append(trainFileName);
-        cout << "SourceFile : " << sourceFile << endl;
+        if(world_rank == 0) {
+            cout << "SourceFile : " << sourceFile << endl;
+        }
         int features = optArgs.getFeatures();
         int trainingSamples = optArgs.getTrainingSamples();
         int testingSamples = optArgs.getTestingSamples();
