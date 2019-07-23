@@ -2359,6 +2359,9 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     Util util;
 
     Matrix1 matrix(features);
+    if(world_rank == 0) {
+        cout << "No of Iterations : " <<  iterations << endl;
+    }
 
     initializer.initialWeights(features, w);
     int i = 1;
@@ -2375,10 +2378,8 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
         //alpha = 1.0 / ((double)(i) + 1);
         //double coefficient = 1.0/(1.0 + (double)i);
         for (int j = 0; j < trainingSamples; ++j) {
-            double start_compute = MPI_Wtime();
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
-
             if (yixiw < 1) {
                 matrix.scalarMultiply(X[j], y[j] * eta, xiyi);
                 matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
@@ -2386,11 +2387,6 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
             } else {
                 matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
             }
-            //double end_compute = MPI_Wtime();
-            //compute_time += (end_compute - start_compute);
-            //util.print1DMatrix(w, 5);
-            //cost = 0.5 * alpha * fabs(matrix.dot(w, w)) + max(0.0, (1 - yixiw));
-
         }
 
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,

@@ -243,11 +243,6 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
             sgd1.pegasosSGDFullBatchv3(w, epochlogfile);
         }
 
-        if (optArgs.isIsEpochTime()) {
-            //TODO: this method must be written
-            //sgd1.pegasosSGDFullBatchv1(w, epochlogfile);
-        }
-
         double endTime = MPI_Wtime();
         MPI_Barrier(MPI_COMM_WORLD);
         if (world_rank == 0) {
