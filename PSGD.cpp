@@ -2365,6 +2365,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
 
     initializer.initialWeights(features, w);
     int i = 1;
+    int dsamples = 0;
     double predict_time = 0;
     double cost = 0;
     while (i < iterations) {
@@ -2377,6 +2378,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
 //        }
         //alpha = 1.0 / ((double)(i) + 1);
         //double coefficient = 1.0/(1.0 + (double)i);
+        dsamples = 0;
         for (int j = 0; j < trainingSamples; ++j) {
             double yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
@@ -2387,6 +2389,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
             } else {
                 matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
             }
+            dsamples++;
         }
 
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
@@ -2395,6 +2398,10 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
         matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
         i++;
     }
+    if(world_rank == 0) {
+        cout << "Data Samples Count : " << dsamples << endl;
+    }
+
 
     this->setTotalPredictionTime(predict_time);
 
