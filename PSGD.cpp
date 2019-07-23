@@ -2346,6 +2346,67 @@ void PSGD::pegasosSGDFullBatchv2(double *w, string epochlogfile) {
     delete[] w1;
 }
 
+void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
+    Initializer initializer;
+    double *w1 = new double[features];
+    initializer.initializeWeightsWithArray(features, w1);
+    double *xiyi = new double[features];
+    initializer.initializeWeightsWithArray(features, xiyi);
+    double *wglobal = new double[features];
+    initializer.initializeWeightsWithArray(features, wglobal);
+    double eta = 0;
+
+    Util util;
+
+    Matrix1 matrix(features);
+
+    initializer.initialWeights(features, w);
+    int i = 1;
+    double predict_time = 0;
+    double cost = 0;
+    while (i < iterations) {
+        eta = 1.0 / (alpha * i);
+//        if (i % 10 == 0) {
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            //util.print1DMatrix(w, features);
+//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
+//            cout << "Iteration " << i << "/" << iterations << endl;
+//        }
+        //alpha = 1.0 / ((double)(i) + 1);
+        //double coefficient = 1.0/(1.0 + (double)i);
+        for (int j = 0; j < trainingSamples; ++j) {
+            double start_compute = MPI_Wtime();
+            double yixiw = matrix.dot(X[j], w);
+            yixiw = yixiw * y[j];
+
+            if (yixiw < 1) {
+                matrix.scalarMultiply(X[j], y[j] * eta, xiyi);
+                matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
+                matrix.add(w1, xiyi, w);
+            } else {
+                matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
+            }
+            double end_compute = MPI_Wtime();
+            compute_time += (end_compute - start_compute);
+            //util.print1DMatrix(w, 5);
+            cost = 0.5 * alpha * fabs(matrix.dot(w, w)) + max(0.0, (1 - yixiw));
+
+        }
+
+        MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
+                      MPI_COMM_WORLD);
+
+        matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
+        i++;
+    }
+
+    this->setTotalPredictionTime(predict_time);
+
+    delete[] xiyi;
+    delete[] w1;
+    delete[] wglobal;
+}
+
 void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile, string weightFile) {
     Initializer initializer;
     //cout << "Start Training ..." << endl;
