@@ -225,6 +225,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         DataSet dataSet(features, trainingSamples, testingSamples, optArgs.isIsSplit(), optArgs.getRatio(), sourceFile,
                         world_size, world_rank);
         dataSet.distributedLoad(Xtrain, ytrain, Xtest, ytest);
+        MPI_Barrier(MPI_COMM_WORLD);
 //        dataPerMachine = dataSet.getDataPerMachine();
 //        if(world_rank==0) {
 //            cout << "From Main : " << "Data Per Machine : " << dataPerMachine << endl;
@@ -248,6 +249,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         }
 
         double endTime = MPI_Wtime();
+        MPI_Barrier(MPI_COMM_WORLD);
         if (world_rank == 0) {
             double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
             cout << "Training Time : " << totalTrainingTime << endl;

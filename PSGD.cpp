@@ -2386,10 +2386,10 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
             } else {
                 matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
             }
-            double end_compute = MPI_Wtime();
-            compute_time += (end_compute - start_compute);
+            //double end_compute = MPI_Wtime();
+            //compute_time += (end_compute - start_compute);
             //util.print1DMatrix(w, 5);
-            cost = 0.5 * alpha * fabs(matrix.dot(w, w)) + max(0.0, (1 - yixiw));
+            //cost = 0.5 * alpha * fabs(matrix.dot(w, w)) + max(0.0, (1 - yixiw));
 
         }
 
