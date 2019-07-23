@@ -242,11 +242,11 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         if (optArgs.isIsNormalTime()) {//works with -nt flag
             sgd1.pegasosSGDFullBatchv3(w, epochlogfile);
         }
-
-        double endTime = MPI_Wtime();
         MPI_Barrier(MPI_COMM_WORLD);
+        double endTime = MPI_Wtime();
+        double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
+        cout << "World Rank : " << world_rank << " Training Time : " << totalTrainingTime << endl;
         if (world_rank == 0) {
-            double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
             cout << "Training Time : " << totalTrainingTime << endl;
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
