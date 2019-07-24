@@ -2410,15 +2410,17 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     for (int k = 0; k < iterations; k++) {
         for (int j = 0; j < trainingSamples; ++j) {
 
-            yixiw = matrix.doti(X[j], w, yixiw) * y[j];
+            //yixiw = matrix.doti(X[j], w, yixiw) * y[j];
+            yixiw = cblas_ddot(features, X[j], 1, w, 1);
             if (yixiw < 1) {
-                matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
-                //cblas_daxpy(features, alpha * y[j], X[j], 1, xiyi, 1.0);
-                //cblas_daxpy(features, alpha , xiyi, 1, w, 1.0);
-                matrix.add(w1, xiyi, w);
+                //matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
+                //matrix.add(w1, xiyi, w);
+                cblas_daxpy(features, alpha * y[j], X[j], 1, xiyi, 1.0);
+                cblas_daxpy(features, alpha , xiyi, 1, w, 1.0);
+
             } else {
-                matrix.scalarMultiply(w, invAlpha, w);
-                //cblas_daxpy(features, alpha , w, 1, w, 1.0);
+                //matrix.scalarMultiply(w, invAlpha, w);
+                cblas_daxpy(features, alpha , w, 1, w, 1.0);
             }
 
 
