@@ -2348,6 +2348,9 @@ void PSGD::pegasosSGDFullBatchv2(double *w, string epochlogfile) {
 
 void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     Initializer initializer;
+    double initTime = 0;
+    double tempTime = 0;
+    tempTime = MPI_Wtime();
     double *w1 = new double[features];
     initializer.initializeWeightsWithArray(features, w1);
     double *xiyi = new double[features];
@@ -2366,12 +2369,15 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     }
 
     initializer.initialWeights(features, w);
+    initTime = MPI_Wtime() - tempTime;
     int i = 1;
     int dsamples = 0;
     double predict_time = 0;
     double temp1 = 0;
     double cost = 0;
-    while (i < iterations) {
+    double yixiw = 0;
+    double t1 = MPI_Wtime();
+    for (int k = 0; k < iterations; k++) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
 //            //cout << "+++++++++++++++++++++++++++++++++" << endl;
@@ -2383,16 +2389,16 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
         //double coefficient = 1.0/(1.0 + (double)i);
         dsamples = 0;
         for (int j = 0; j < trainingSamples; ++j) {
-            double yixiw = matrix.dot(X[j], w);
+            yixiw = matrix.dot(X[j], w);
             yixiw = yixiw * y[j];
             if (yixiw < 1) {
                 matrix.scalarMultiply(X[j], y[j] * eta, xiyi);
-                matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
+                //matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
                 matrix.add(w1, xiyi, w);
             } else {
                 matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
             }
-            dsamples++;
+            //dsamples++;
         }
         temp1 = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
@@ -2400,14 +2406,17 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
         communication_time += MPI_Wtime() - temp1;
 
         matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
-        i++;
+
     }
+    double t2 = MPI_Wtime();
     if(world_rank == 0) {
-        cout << "Data Samples Count : " << dsamples << endl;
+       // cout << "Data Samples Count : " << dsamples << endl;
+        cout << "Xtraining Time : " << t2 - t1 << " s" <<endl;
     }
 
 
     this->setTotalPredictionTime(communication_time);
+    this->setCompute_time(initTime);
 
     delete[] xiyi;
     delete[] w1;
