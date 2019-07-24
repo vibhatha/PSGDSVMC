@@ -34,6 +34,13 @@ double Matrix1::dot(double *a, double *b) {
     return res;
 }
 
+double Matrix1::doti(double *a, double *b, double res) {
+    for (int i = 0; i < features; ++i) {
+        res += (a[i]*b[i]) ;
+    }
+    return res;
+}
+
 void Matrix1::divide(double *a, double *b, double *res) {
     for (int i = 0; i < features; ++i) {
         res[i] = a[i] / b[i];

@@ -19,6 +19,7 @@ public:
     void add(double* a, double* b, double* res);
     void subtract(double* a, double* b, double* res);
     double dot(double* a, double* b);
+    double doti(double* a, double* b, double ans);
     void scalarMultiply(double* a, double c, double* res);
     void parallelScalarMultiply(double* a, double c, double* res);
     void scalarAddition(double* a, double c, double* res);

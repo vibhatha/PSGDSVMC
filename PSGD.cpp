@@ -16,9 +16,11 @@
 #include <chrono>
 #include <algorithm>
 #include "omp.h"
+#include "armadillo"
 
 
 using namespace std;
+using namespace arma;
 
 PSGD::PSGD(double **Xn, double *yn, double alphan, int itrN) {
     X = Xn;
@@ -2377,15 +2379,21 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     double cost = 0;
     double yixiw = 0;
     double t1 = MPI_Wtime();
+    double invAlpha = 1.0 - alpha;
     for (int k = 0; k < iterations; k++) {
         for (int j = 0; j < trainingSamples; ++j) {
-//            yixiw = matrix.dot(X[j], w) * y[j];
+//            yixiw = matrix.doti(X[j], w, yixiw) * y[j];
 //            if (yixiw < 1) {
 //                matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
 //                matrix.add(w1, xiyi, w);
 //            } else {
-//                matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
+//                matrix.scalarMultiply(w, invAlpha, w);
 //            }
+
+            vec a = {1, 3, -5};
+            vec b = {4, -2, -1};
+            auto c = a.t() * b;
+
         }
         temp1 = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,

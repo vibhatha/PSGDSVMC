@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include "armadillo"
 
 using namespace std;
 
