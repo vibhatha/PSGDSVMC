@@ -2282,6 +2282,7 @@ void PSGD::pegasosSGDFullBatchv2(double *w, string epochlogfile) {
     int i = 1;
     double predict_time = 0;
     double cost = 0;
+
     while (breakFlag[0] != -1) {
         eta = 1.0 / (alpha * i);
 //        if (i % 10 == 0) {
@@ -2342,6 +2343,7 @@ void PSGD::pegasosSGDFullBatchv2(double *w, string epochlogfile) {
 
     this->setTotalPredictionTime(predict_time);
 
+
     delete[] xiyi;
     delete[] w1;
 }
@@ -2364,8 +2366,8 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     Util util;
 
     Matrix1 matrix(features);
-    if(world_rank == 0) {
-        cout << "No of Iterations : " <<  iterations << endl;
+    if (world_rank == 0) {
+        cout << "No of Iterations : " << iterations << endl;
     }
 
     initializer.initialWeights(features, w);
@@ -2378,21 +2380,11 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     double yixiw = 0;
     double t1 = MPI_Wtime();
     for (int k = 0; k < iterations; k++) {
-        eta = 1.0 / (alpha * i);
-//        if (i % 10 == 0) {
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            //util.print1DMatrix(w, features);
-//            //cout << "+++++++++++++++++++++++++++++++++" << endl;
-//            cout << "Iteration " << i << "/" << iterations << endl;
-//        }
-        //alpha = 1.0 / ((double)(i) + 1);
-        //double coefficient = 1.0/(1.0 + (double)i);
-        dsamples = 0;
+        //eta = 1.0 / (alpha * i);
         for (int j = 0; j < trainingSamples; ++j) {
-            yixiw = matrix.dot(X[j], w);
-            yixiw = yixiw * y[j];
+            yixiw = matrix.dot(X[j], w) * y[j];
             if (yixiw < 1) {
-                matrix.scalarMultiply(X[j], y[j] * eta, xiyi);
+                matrix.scalarMultiply(X[j], y[j] * alpha, xiyi);
                 //matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
                 matrix.add(w1, xiyi, w);
             } else {
@@ -2409,9 +2401,12 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
 
     }
     double t2 = MPI_Wtime();
-    if(world_rank == 0) {
-       // cout << "Data Samples Count : " << dsamples << endl;
-        cout << "Xtraining Time : " << t2 - t1 << " s" <<endl;
+    if (world_rank == 0) {
+        // cout << "Data Samples Count : " << dsamples << endl;
+        cout << "Xtraining Time : " << t2 - t1 << " s" << endl;
+
+        cout << "XTraining Samples : " << trainingSamples << endl;
+
     }
 
 
@@ -2623,7 +2618,6 @@ void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, str
 }
 
 
-
 void PSGD::pegasosSGDBatchv2t1(double *w, int comm_gap, int threads, string summarylogfile, string epochlogfile,
                                string weightFile) {
     Initializer initializer;
@@ -2723,7 +2717,7 @@ void PSGD::pegasosSGDBatchv2t1(double *w, int comm_gap, int threads, string summ
 
 
                 //matrix.parallelScalarMultiply(X[j], y[j] * eta, xiyi);
-                #pragma omp parallel for
+#pragma omp parallel for
                 for (int i1 = 0; i1 < features; ++i1) {
                     xiyi[i1] = X[j][i1] * (y[j] * eta);
                 }
