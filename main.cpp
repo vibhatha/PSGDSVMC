@@ -244,12 +244,16 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         }
         MPI_Barrier(MPI_COMM_WORLD);
         double endTime = MPI_Wtime();
-        double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
+        double totalTrainingTime = ((endTime - startTime));
+        double communicationTime = sgd1.getTotalPredictionTime();
+        double computeTime = totalTrainingTime - communicationTime;
         cout << "World Rank : " << world_rank << " Training Time : " << totalTrainingTime << endl;
         if (world_rank == 0) {
+
             cout << "Training Samples Per Machine : " << dataPerMachine << ", Total TR Samples : " << trainSet << endl;
             cout << "Testing Sample : " << testSet << endl;
             cout << "Training Time : " << totalTrainingTime << endl;
+            cout << "Communication Time " << communicationTime << "s, Computation Time " << computeTime << " s" << endl;
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
             cout << "Testing Accuracy : " << acc << "%" << endl;

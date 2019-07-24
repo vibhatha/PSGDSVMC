@@ -2355,6 +2355,8 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     double *wglobal = new double[features];
     initializer.initializeWeightsWithArray(features, wglobal);
     double eta = 0;
+    double communication_time = 0;
+    double computation_time = 0;
 
     Util util;
 
@@ -2367,6 +2369,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     int i = 1;
     int dsamples = 0;
     double predict_time = 0;
+    double temp1 = 0;
     double cost = 0;
     while (i < iterations) {
         eta = 1.0 / (alpha * i);
@@ -2391,9 +2394,10 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
             }
             dsamples++;
         }
-
+        temp1 = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
                       MPI_COMM_WORLD);
+        communication_time += MPI_Wtime() - temp1;
 
         matrix.scalarMultiply(wglobal, 1.0 / (double) world_size, w);
         i++;
@@ -2403,7 +2407,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     }
 
 
-    this->setTotalPredictionTime(predict_time);
+    this->setTotalPredictionTime(communication_time);
 
     delete[] xiyi;
     delete[] w1;
