@@ -2373,24 +2373,19 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     initializer.initialWeights(features, w);
     initTime = MPI_Wtime() - tempTime;
     int i = 1;
-    int dsamples = 0;
-    double predict_time = 0;
     double temp1 = 0;
     double cost = 0;
     double yixiw = 0;
     double t1 = MPI_Wtime();
     for (int k = 0; k < iterations; k++) {
-        //eta = 1.0 / (alpha * i);
         for (int j = 0; j < trainingSamples; ++j) {
-            yixiw = matrix.dot(X[j], w) * y[j];
-            if (yixiw < 1) {
-                matrix.scalarMultiply(X[j], y[j] * alpha, xiyi);
-                //matrix.scalarMultiply(w, (1 - (eta * alpha)), w1);
-                matrix.add(w1, xiyi, w);
-            } else {
-                matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
-            }
-            //dsamples++;
+//            yixiw = matrix.dot(X[j], w) * y[j];
+//            if (yixiw < 1) {
+//                matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
+//                matrix.add(w1, xiyi, w);
+//            } else {
+//                matrix.scalarMultiply(w, (1 - (eta * alpha)), w);
+//            }
         }
         temp1 = MPI_Wtime();
         MPI_Allreduce(w, wglobal, features, MPI_DOUBLE, MPI_SUM,
@@ -2402,7 +2397,6 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     }
     double t2 = MPI_Wtime();
     if (world_rank == 0) {
-        // cout << "Data Samples Count : " << dsamples << endl;
         cout << "Xtraining Time : " << t2 - t1 << " s" << endl;
 
         cout << "XTraining Samples : " << trainingSamples << endl;
