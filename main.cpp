@@ -2828,7 +2828,7 @@ void parallelPegasosBatchV1T1(OptArgs optArgs, int comm_gap, int threads) {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     //optArgs.toString();
     cout << "Number of threads : " << threads << endl;
-    omp_set_num_threads(threads);
+    //omp_set_num_threads(threads);
     ResourceManager resourceManager;
     Initializer initializer;
     Util util;

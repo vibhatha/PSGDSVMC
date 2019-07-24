@@ -16,11 +16,13 @@
 #include <chrono>
 #include <algorithm>
 #include "omp.h"
-#include "armadillo"
+#include "cblas.h"
 
 
 using namespace std;
 using namespace arma;
+
+
 
 PSGD::PSGD(double **Xn, double *yn, double alphan, int itrN) {
     X = Xn;
@@ -2380,19 +2382,45 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     double yixiw = 0;
     double t1 = MPI_Wtime();
     double invAlpha = 1.0 - alpha;
+//    vec a = {1, 3, -5};
+//    vec b = {4, -2, -1};
+//    vec c = {};
+//    std::vector<int> a1 = {1, 3, -5};
+//    std::vector<int> b1 = {4, -2, -1};
+//    int result = 0;
+//
+//    mat A = mat(2,4);
+//    cout << A << endl;
+//    A.ones();
+//    cout << A << endl;
+//    A.randu();
+//    cout << A << endl;
+//
+//    mat aw = mat(7000,22);
+//    mat bw = mat(1,22);
+//
+//    aw.randu();
+//    bw.randu();
+
+
+
+    //vec d = vec()
+    //vec B = randu(1,features);
+    //vec W = randu(1,features);
     for (int k = 0; k < iterations; k++) {
         for (int j = 0; j < trainingSamples; ++j) {
-//            yixiw = matrix.doti(X[j], w, yixiw) * y[j];
-//            if (yixiw < 1) {
-//                matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
-//                matrix.add(w1, xiyi, w);
-//            } else {
-//                matrix.scalarMultiply(w, invAlpha, w);
-//            }
 
-            vec a = {1, 3, -5};
-            vec b = {4, -2, -1};
-            auto c = a.t() * b;
+            yixiw = matrix.doti(X[j], w, yixiw) * y[j];
+            if (yixiw < 1) {
+                matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
+                matrix.add(w1, xiyi, w);
+            } else {
+                matrix.scalarMultiply(w, invAlpha, w);
+            }
+
+
+
+            //result += a[i] * b[i];
 
         }
         temp1 = MPI_Wtime();
