@@ -2403,7 +2403,7 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
 //    bw.randu();
 
 
-
+    alpha = -alpha;
     //vec d = vec()
     //vec B = randu(1,features);
     //vec W = randu(1,features);
@@ -2413,9 +2413,12 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
             yixiw = matrix.doti(X[j], w, yixiw) * y[j];
             if (yixiw < 1) {
                 matrix.scalarMultiply(X[j], y[j] *  alpha, xiyi);
+                //cblas_daxpy(features, alpha * y[j], X[j], 1, xiyi, 1.0);
+                //cblas_daxpy(features, alpha , xiyi, 1, w, 1.0);
                 matrix.add(w1, xiyi, w);
             } else {
                 matrix.scalarMultiply(w, invAlpha, w);
+                //cblas_daxpy(features, alpha , w, 1, w, 1.0);
             }
 
 
@@ -2446,6 +2449,65 @@ void PSGD::pegasosSGDFullBatchv3(double *w, string epochlogfile) {
     delete[] xiyi;
     delete[] w1;
     delete[] wglobal;
+}
+
+void PSGD::blassTest() {
+    //Random numbers
+    std::mt19937_64 rnd;
+    std::uniform_real_distribution<double> doubleDist(0, 1);
+
+    //Create Arrays that represent the matrices A,B,C
+    const int n = 20;
+    double*  A = new double[n*n];
+    double*  B = new double[n*n];
+    double*  C = new double[n*n];
+
+    //Fill A and B with random numbers
+    for(uint i =0; i <n; i++){
+        for(uint j=0; j<n; j++){
+            A[i*n+j] = doubleDist(rnd);
+            B[i*n+j] = doubleDist(rnd);
+        }
+    }
+
+    //Calculate A*B=C
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, n, n, n, 1.0, A, n, B, n, 0.0, C, n);
+
+    //Clean up
+    delete[] A;
+    delete[] B;
+    delete[] C;
+}
+
+void PSGD::nonBlassTest() {
+    cout << "Non Blass Test " << endl;
+    std::mt19937_64 rnd;
+    std::uniform_real_distribution<double> doubleDist(0, 1);
+
+    //Create Arrays that represent the matrices A,B,C
+    const int n = 20;
+    double*  A = new double[n*n];
+    double*  B = new double[n*n];
+    double*  C = new double[n*n];
+
+    //Fill A and B with random numbers
+    for(uint i =0; i <n; i++){
+        for(uint j=0; j<n; j++){
+            A[i*n+j] = doubleDist(rnd);
+            B[i*n+j] = doubleDist(rnd);
+        }
+    }
+
+    //Calculate A*B=C
+    //cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, n, n, n, 1.0, A, n, B, n, 0.0, C, n);
+    for (int k = 0; k < n * n; ++k) {
+        C[k] = A[k] * B[k];
+    }
+
+    //Clean up
+    delete[] A;
+    delete[] B;
+    delete[] C;
 }
 
 void PSGD::pegasosSGDBatchv2(double *w, int comm_gap, string summarylogfile, string epochlogfile, string weightFile) {

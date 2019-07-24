@@ -241,6 +241,7 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         double startTime = MPI_Wtime();
         if (optArgs.isIsNormalTime()) {//works with -nt flag
             sgd1.pegasosSGDFullBatchv3(w, epochlogfile);
+            //sgd1.nonBlassTest();
         }
         //MPI_Barrier(MPI_COMM_WORLD);
         double endTime = MPI_Wtime();
