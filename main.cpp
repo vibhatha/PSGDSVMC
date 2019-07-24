@@ -247,6 +247,8 @@ void parallelPegasosFullBatchV1(OptArgs optArgs) {
         double totalTrainingTime = ((endTime - startTime)-sgd1.getTotalPredictionTime());
         cout << "World Rank : " << world_rank << " Training Time : " << totalTrainingTime << endl;
         if (world_rank == 0) {
+            cout << "Training Samples Per Machine : " << dataPerMachine << ", Total TR Samples : " << trainSet << endl;
+            cout << "Testing Sample : " << testSet << endl;
             cout << "Training Time : " << totalTrainingTime << endl;
             Predict predict(Xtest, ytest, w, testSet, features);
             double acc = predict.predict();
